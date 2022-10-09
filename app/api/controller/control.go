@@ -570,9 +570,9 @@ func (h *handler) ModifyBoxStatus() gin.HandlerFunc {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param ReqAddGoods body param.ReqAddGoods true "看文档下面结构说明"
-// @Success 200 {object} response.responseSucess{data=param.RespAddGoods}
+// @Success 200 {object} response.responseSucess{data=param.RespQueryGoodsForBox}
 // @Failure 400 {object} response.responseFailure
-// @Router /v1/box/goods/create [post]
+// @Router /v1/box/goods/goods/query [post]
 func (h *handler) QueryGoodsForBox() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var req param.ReqQueryGoodsForBox
@@ -589,15 +589,15 @@ func (h *handler) QueryGoodsForBox() gin.HandlerFunc {
 	}
 }
 
-// @Description AddGoods
-// @Tags AddGoods
+// @Description GoodsToBePrize
+// @Tags GoodsToBePrize
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param ReqAddGoods body param.ReqAddGoods true "看文档下面结构说明"
-// @Success 200 {object} response.responseSucess{data=param.RespAddGoods}
+// @Param ReqGoodsToBePrize body param.ReqGoodsToBePrize true "看文档下面结构说明"
+// @Success 200 {object} response.responseSucess{data=int}
 // @Failure 400 {object} response.responseFailure
-// @Router /v1/box/goods/create [post]
+// @Router /v1/box/goods/toBePrize [post]
 func (h *handler) GoodsToBePrize() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var req param.ReqGoodsToBePrize
