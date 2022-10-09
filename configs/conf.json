@@ -1,0 +1,35 @@
+{
+  "Server": {
+    "Port": 8899
+  },
+  "LogConfig": {
+    "Level": "Info",
+    "Name": "logs/ggo.log",
+    "FileSize": 10,
+    "MaxBackups": 30,
+    "MaxAge": 30
+  },
+  "DB": {
+    "Ip": "120.27.239.127",
+    "Port": 3306,
+    "User": "root",
+    "Password": "000000",
+    "Db": "yifan",
+    "LogMode": "",
+    "MaxOpenConn": 100,
+    "MaxIdleConn": 25,
+    "ConnMaxLifeTime": 60
+  },
+  "Cache": {
+    "Ip": "120.27.239.127:6379",
+    "Password": "G62m50oigInC30sf"
+  },
+  "WxApp": {
+    "AppId": "wxef6aeb784cec6658",
+    "AppSecret": "afa884f2d75123d0a722036ccdae89d3"
+  },
+  "Jwt": {
+    "JwtSecret": "iKHC9WZ89bxnzpePbkbY4e0Wbi7Rccz51",
+    "Exptime": 25920000
+  }
+}
