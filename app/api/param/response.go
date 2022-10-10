@@ -220,12 +220,13 @@ type FanInfo struct {
 }
 type Fan struct {
 	ID              uint      `json:"Id,omitempty"`
-	Name            string    `json:"name,omitempty"`
+	Title           string    `json:"title,omitempty"`
 	TotalBoxNum     int       `json:"totalBoxNum"`
 	LeftBoxNum      int       `json:"leftBoxNum"`
 	Status          int       `json:"status,omitempty"`
 	Price           float64   `json:"price,omitempty"`
-	Pic             string    `json:"pic,omitempty"`
+	SharePic        string    `json:"sharePic"`
+	DetailPic       string    `json:"detailPic"`
 	ActiveBeginTime int64     `json:"activeBeginTime,omitempty"`
 	ActiveEndTime   int64     `json:"activeEndTime,omitempty"`
 	CreateTime      time.Time `json:"createTime,omitempty"`
@@ -295,7 +296,7 @@ type RespQueryPrizePostion struct {
 }
 type QueryPrizePostion struct {
 	FanId          uint   `json:"fanId,omitempty"`
-	FanName        string `json:"fanName,omitempty"`
+	FanTitle       string `json:"fanTitle,omitempty"`
 	BoxId          uint   `json:"boxId,omitempty"`
 	BoxTitle       string `json:"boxTitle,omitempty"`
 	PrizeNum       int32  `json:"prizeNum,omitempty"`

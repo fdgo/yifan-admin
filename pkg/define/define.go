@@ -39,9 +39,10 @@ const (
 	YfConsignmentOrderNeedToGrounding = 7 //待上架：等待用户确认检验货物后，标记商品款式和价格后上架
 	YfConsignmentOrderFinished        = 8 //完成：寄售单完结
 
-	YfGoodsPkgStatus   = 0
-	YfGoodsUnPkgStatus = 1 //已经拆包
-	YfGoodsOnPkgStatus = 2 //未拆包
+	YfGoodsPkgStatus       = 0
+	YfGoodsPkgStatusNewOld = 1 //拆盒未拆袋
+	YfGoodsPkgStatusNewNew = 2 //全新（未拆盒未拆袋）
+	YfGoodsPkgStatusOldOld = 3 //拆盒拆袋
 
 	//YfSoldStatus        = 0
 	//YfSoldStatusPreSell = 1 //预售

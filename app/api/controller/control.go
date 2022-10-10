@@ -564,15 +564,15 @@ func (h *handler) ModifyBoxStatus() gin.HandlerFunc {
 	}
 }
 
-// @Description AddGoods
-// @Tags AddGoods
+// @Description QueryGoodsForBox
+// @Tags QueryGoodsForBox
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param ReqAddGoods body param.ReqAddGoods true "看文档下面结构说明"
+// @Param ReqQueryGoodsForBox body param.ReqQueryGoodsForBox true "看文档下面结构说明"
 // @Success 200 {object} response.responseSucess{data=param.RespQueryGoodsForBox}
 // @Failure 400 {object} response.responseFailure
-// @Router /v1/box/goods/goods/query [post]
+// @Router /v1/box/goods/query [post]
 func (h *handler) QueryGoodsForBox() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var req param.ReqQueryGoodsForBox
@@ -589,15 +589,6 @@ func (h *handler) QueryGoodsForBox() gin.HandlerFunc {
 	}
 }
 
-// @Description GoodsToBePrize
-// @Tags GoodsToBePrize
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param ReqGoodsToBePrize body param.ReqGoodsToBePrize true "看文档下面结构说明"
-// @Success 200 {object} response.responseSucess{data=int}
-// @Failure 400 {object} response.responseFailure
-// @Router /v1/box/goods/toBePrize [post]
 func (h *handler) GoodsToBePrize() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var req param.ReqGoodsToBePrize
@@ -614,12 +605,12 @@ func (h *handler) GoodsToBePrize() gin.HandlerFunc {
 	}
 }
 
-// @Description ModifyGoods
-// @Tags ModifyGoods
+// @Description ModifyBoxGoods
+// @Tags ModifyBoxGoods
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param ReqModifyGoods body param.ReqModifyGoods true "看文档下面结构说明"
+// @Param ReqModifyBoxGoods body param.ReqModifyBoxGoods true "看文档下面结构说明"
 // @Success 200 {object} response.responseSucess{data=int}
 // @Failure 400 {object} response.responseFailure
 // @Router /v1/box/goods/modify [post]
@@ -639,12 +630,12 @@ func (h *handler) ModifyBoxGoods() gin.HandlerFunc {
 	}
 }
 
-// @Description DeleteGoods
-// @Tags DeleteGoods
+// @Description DeleteBoxGoods
+// @Tags DeleteBoxGoods
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param ReqDeleteGoods body param.ReqDeleteGoods true "看文档下面结构说明"
+// @Param ReqDeleteBoxGoods body param.ReqDeleteBoxGoods true "看文档下面结构说明"
 // @Success 200 {object} response.responseSucess{data=int}
 // @Failure 400 {object} response.responseFailure
 // @Router /v1/box/goods/delete [post]

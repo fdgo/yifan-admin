@@ -7,11 +7,13 @@ import (
 
 type Fan struct {
 	ID              uint   `gorm:"primarykey" json:"id"`
-	Name            string `gorm:"unique;comment:蕃名" json:"name"`
+	Title           string `gorm:"unique;comment:蕃名" json:"title"`
 	Status          int    `gorm:"comment:是否上架1.手动上架 2.自动上架 3.未上架 4.手动下架 5.自动下架" json:"status"`
 	Boxs            []*Box
 	Price           float64        `gorm:"comment:蕃价格" json:"price"`
-	Pic             string         `gorm:"comment:图片;type:varchar(128);not null" json:"pic"`
+	SharePic        string         `gorm:"comment:共享图;type:varchar(128);not null" json:"sharePic"`
+	DetailPic       string         `gorm:"comment:详细图;type:varchar(128);not null" json:"detailPic"`
+	Rule            string         `gorm:"comment:规则;type:varchar(128);not null" json:"rule"`
 	ActiveBeginTime int64          `gorm:"comment:活动开始时间" json:"activeBeginTime"`
 	ActiveEndTime   int64          `gorm:"comment:活动结束时间" json:"activeEndTime"`
 	CreatedAt       time.Time      `json:"created_time"`
@@ -64,34 +66,14 @@ type Goods struct {
 	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
 }
 type Box struct {
-	ID              uint    `gorm:"primarykey" json:"id"`
-	Type            string  `gorm:"comment:箱子类型" json:"ty"`                //玩法类型
-	Rule            string  `gorm:"comment:规则" json:"rule"`                //活动规则
-	Title           string  `gorm:"comment:箱子标题" json:"title"`             //活动标题
-	Price           float64 `gorm:"comment:箱子价格" json:"price"`             //售卖价格
-	DetailPic       string  `gorm:"comment:详细图片" json:"detailPic"`         //详细图片
-	SharePic        string  `gorm:"comment:共享图片" json:"sharePic"`          //分享图片
-	ActiveBeginTime int64   `gorm:"comment:活动开始时间" json:"activeBeginTime"` //上架时间
-	ActiveEndTime   int64   `gorm:"comment:活动结束时间" json:"activeEndTime"`   //下架时间
-	FanId           uint    `gorm:"comment:该箱属于蕃id" json:"fanId"`
-	FanName         string  `gorm:"comment:该箱属于蕃名" json:"fanName"`
-	BoxIndex        int32   `gorm:"comment:箱子在番中的次序(第3/10箱)" json:"boxIndex"`
-	PriczeNum       int32   `gorm:"comment:箱子开始多少商品" json:"priczeNum"`
-	PriczeLeftNum   int32   `gorm:"comment:箱子还剩多少个商品(剩余300/400个)" json:"priczeLeftNum"`
-	Status          int     `gorm:"comment:箱子状态(1.上架有奖品.2未上架.3上架无商品)" json:"status"`
-
-	FirstDone     int32 `gorm:"comment:first赏是否已经发送1.未派奖; 2.已经发送" json:"firstDone"`
-	FirstDonePosB int   `gorm:"comment:first赏出现的开始位置" json:"firstDonePosB"`
-	FirstDonePosE int   `gorm:"comment:first赏出现的末尾位置" json:"firstDonePosE""`
-
-	LastDone     int32 `gorm:"comment:last赏是否已经发送1.未派奖; 2.已经发送" json:"lastDone"`
-	LastDonePosB int   `gorm:"comment:last赏出现的开始位置" json:"lastDonePosB"`
-	LastDonePosE int   `gorm:"comment:last赏出现的末尾位置" json:"lastDonePosE"`
-
-	GlobalDone  int32 `gorm:"comment:全局赏是否已经发送1.未派奖; 2.已经发送" json:"globalDone"`
-	GlobalDoneB int   `gorm:"comment:全局赏出现的开始位置" json:"globalDoneB"`
-	GlobalDoneE int   `gorm:"comment:全局赏出现的末尾位置" json:"globalDoneE"`
-
+	ID             uint    `gorm:"primarykey" json:"id"`
+	Price          float64 `gorm:"comment:箱子价格" json:"price"` //售卖价格
+	FanId          uint    `gorm:"comment:该箱属于蕃id" json:"fanId"`
+	FanName        string  `gorm:"comment:该箱属于蕃名" json:"fanName"`
+	BoxIndex       int32   `gorm:"comment:箱子在番中的次序(第3/10箱)" json:"boxIndex"`
+	PriczeNum      int32   `gorm:"comment:箱子开始多少商品" json:"priczeNum"`
+	PriczeLeftNum  int32   `gorm:"comment:箱子还剩多少个商品(剩余300/400个)" json:"priczeLeftNum"`
+	Status         int     `gorm:"comment:箱子状态(1.上架有奖品.2未上架.3上架无商品)" json:"status"`
 	FanID          *uint
 	Prizes         []*Prize
 	Records        []*RecordPrize
@@ -115,15 +97,16 @@ type TmpPrize struct {
 	PrizeIndexName string
 }
 type Prize struct {
-	ID             uint   `gorm:"primarykey" json:"id"`
-	GoodID         uint   `gorm:"comment:真实商品id;index" json:"goodID"`
-	GoodName       string `gorm:"comment:商品名字" json:"goodName"`
-	FanId          uint   `gorm:"comment:所属蕃的id;index" json:"fanId"`
-	FanName        string `gorm:"comment:所属蕃的名字" json:"fanName"`
-	IpID           uint   `gorm:"comment:所属ip的id" json:"ipId"`
-	IpName         string `gorm:"comment:所属ip的名字" json:"ipName"`
-	SeriesID       uint   `gorm:"comment:所属系列id" json:"seriesId"`
-	SeriesName     string `gorm:"comment:所属系列id"  json:"seriesName"`
+	ID             uint     `gorm:"primarykey" json:"id"`
+	GoodID         uint     `gorm:"comment:真实商品id;index" json:"goodId"`
+	GoodName       string   `gorm:"comment:商品名字" json:"goodName"`
+	FanId          uint     `gorm:"comment:所属蕃的id;index" json:"fanId"`
+	FanName        string   `gorm:"comment:所属蕃的名字" json:"fanName"`
+	IpID           uint     `gorm:"comment:所属ip的id" json:"ipId"`
+	IpName         string   `gorm:"comment:所属ip的名字" json:"ipName"`
+	SeriesID       uint     `gorm:"comment:所属系列id" json:"seriesId"`
+	SeriesName     string   `gorm:"comment:所属系列id"  json:"seriesName"`
+	PrizePositions GormList `gorm:"type:varchar(128);not null"`
 	BoxID          *uint
 	BoxTitle       string         `gorm:"comment:所属箱子名字" json:"boxTitle"`
 	Pic            string         `gorm:"comment:图片;type:varchar(128);not null" json:"pic"`
@@ -133,6 +116,7 @@ type Prize struct {
 	PrizeIndex     int32          `gorm:"comment:赏的次序" json:"prizeIndex"`
 	PrizeIndexName string         `gorm:"comment:A赏,B赏..." json:"prizeIndexName"`
 	PrizeRate      string         `gorm:"comment:中奖率" json:"prizeRate"`
+	Remark         string         `gorm:"comment:备注" json:"remark"`
 	SingleOrMuti   int            `json:"singleOrMuti"`
 	MultiIds       GormList       `gorm:"type:varchar(128);not null"`
 	SoldStatus     int            `gorm:"comment:是否售罄1.奖品售罄,2.奖品未售罄" json:"soldStatus"`
@@ -147,6 +131,7 @@ type PrizePosition struct {
 	FanId          uint
 	FanName        string
 	BoxID          *uint
+	PrizeID        *uint
 	BoxTitle       string
 	PrizeIndex     int32          `gorm:"comment:赏的次序" json:"prizeIndex"`
 	PrizeIndexName string         `gorm:"comment:A赏,B赏..." json:"prizeIndexName"`

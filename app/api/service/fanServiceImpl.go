@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shopspring/decimal"
-
-	//"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"math"
 	"strconv"
@@ -18,29 +16,29 @@ import (
 )
 
 func (s *FanServiceImpl) AddFan(req param.ReqAddFan) (uint, error) {
-	DB := s.db.GetDb()
-	fan := &db.Fan{}
-	result := DB.Where("name=?", req.FanName).First(&fan)
-	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-		return 0, errors.New("服务正忙...")
-	}
-	if result.RowsAffected != 0 {
-		return 0, errors.New("此蕃已经存在...")
-	}
-	fanId := define.GetRandFanId()
-	if err := DB.Create(&db.Fan{
-		ID:              fanId,
-		Name:            req.FanName,
-		Status:          req.Status,
-		Price:           req.FanPrice,
-		Pic:             req.Pic,
-		WhoUpdate:       req.WhoCreated,
-		ActiveBeginTime: req.OnActiveTime,
-		ActiveEndTime:   req.OffActiveTime,
-	}).Error; err != nil {
-		return 0, errors.New("服务正忙...")
-	}
-	return fanId, nil
+	//DB := s.db.GetDb()
+	//fan := &db.Fan{}
+	//result := DB.Where("name=?", req.FanName).First(&fan)
+	//if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+	//	return 0, errors.New("服务正忙...")
+	//}
+	//if result.RowsAffected != 0 {
+	//	return 0, errors.New("此蕃已经存在...")
+	//}
+	//fanId := define.GetRandFanId()
+	//if err := DB.Create(&db.Fan{
+	//	ID:              fanId,
+	//	Title:           req.FanName,
+	//	Status:          req.Status,
+	//	Price:           req.FanPrice,
+	//	WhoUpdate:       req.WhoCreated,
+	//	ActiveBeginTime: req.OnActiveTime,
+	//	ActiveEndTime:   req.OffActiveTime,
+	//}).Error; err != nil {
+	//	return 0, errors.New("服务正忙...")
+	//}
+	//return fanId, nil
+	return 0, nil
 }
 
 func (s *FanServiceImpl) ModifyFanStatus(req param.ReqModifyFanStatus) error {
@@ -176,12 +174,13 @@ func (s *FanServiceImpl) QueryFan(req param.ReqQueryFan) (param.RespQueryFan, er
 		}
 		ret.FanInfos.Fans = append(ret.FanInfos.Fans, param.Fan{
 			ID:              one.ID,
-			Name:            one.Name,
+			Title:           one.Title,
 			Status:          one.Status,
 			Price:           one.Price,
 			TotalBoxNum:     totalNum,
 			LeftBoxNum:      leftNum,
-			Pic:             one.Pic,
+			SharePic:        one.SharePic,
+			DetailPic:       one.DetailPic,
 			ActiveBeginTime: one.ActiveBeginTime,
 			ActiveEndTime:   one.ActiveEndTime,
 			CreateTime:      one.CreatedAt,
@@ -248,26 +247,165 @@ func (s *FanServiceImpl) ModifyFan(req param.ReqModifyFan) (param.RespModifyFan,
 		})
 	}
 	ret.EachBoxPrize = mf
-	ret.Type = box.Type
-	ret.Rule = box.Rule
-	ret.Title = box.Title
 	ret.FanId = box.FanId
 	ret.FanName = box.FanName
 	ret.FanPrice = box.Price
-	ret.ActiveBeginTime = box.ActiveBeginTime
-	ret.ActiveEndTime = box.ActiveEndTime
-	ret.DetailPic = box.DetailPic
-	ret.SharePic = box.SharePic
 	ret.BoxNum = int(totalBox)
 	ret.WhoUpdate = fan.WhoUpdate
 	return ret, nil
 }
+func (s *FanServiceImpl) GetNewBoxes(fanId uint, boxOld, boxNew *db.Box) (pz db.Prize, ps db.PrizePosition, err error) {
+	type GoodIdPrizeIndex struct {
+		GoodId     uint
+		PrizeIndex int32
+	}
+	toDeletes := []GoodIdPrizeIndex{}
+	for _, oPrize := range boxOld.Prizes {
+		isNeedToDelete := true
+		for _, nPrize := range boxNew.Prizes {
+			if nPrize.GoodID == oPrize.GoodID && nPrize.PrizeIndex == oPrize.PrizeIndex {
+				isNeedToDelete = false //更新
+				tx := s.db.GetDb().Begin()
+				err = tx.Table("yf_prize").Where("fan_id=? and good_id=? and prize_index=?",
+					fanId, nPrize.GoodID, nPrize.PrizeIndex).Updates(map[string]interface{}{
+					"good_id":          nPrize.GoodID,
+					"good_name":        nPrize.GoodName,
+					"ip_id":            nPrize.IpID,
+					"ip_name":          nPrize.IpName,
+					"series_id":        nPrize.SeriesID,
+					"series_name":      nPrize.SeriesName,
+					"box_title":        nPrize.BoxTitle,
+					"pic":              nPrize.Pic,
+					"price":            nPrize.Price,
+					"prize_num":        nPrize.PrizeNum,
+					"pricze_left_num":  nPrize.PriczeLeftNum,
+					"prize_index":      nPrize.PrizeIndex,
+					"prize_index_name": nPrize.PrizeIndexName,
+					"remark":           nPrize.Remark,
+					"single_or_muti":   nPrize.SingleOrMuti,
+					"multi_ids":        nPrize.MultiIds,
+					"pkg_status":       nPrize.PkgStatus,
+					"who_update":       nPrize.WhoUpdate,
+				}).Error
+				if err != nil {
+					tx.Rollback()
+					return db.Prize{}, db.PrizePosition{}, errors.New("服务正忙......")
+				}
+				err = tx.Table("yf_prize_position").Where("fan_id=? and good_id=? and prize_index=?",
+					fanId, nPrize.GoodID, nPrize.PrizeIndex).Updates(map[string]interface{}{
+					"good_id":          nPrize.GoodID,
+					"good_name":        nPrize.GoodName,
+					"box_title":        nPrize.BoxTitle,
+					"pricze_left_num":  nPrize.PriczeLeftNum,
+					"prize_index":      nPrize.PrizeIndex,
+					"prize_index_name": nPrize.PrizeIndexName,
+				}).Error
+				if err != nil {
+					tx.Rollback()
+					return db.Prize{}, db.PrizePosition{}, errors.New("服务正忙......")
+				}
+				tx.Commit()
+			}
+		}
+		if isNeedToDelete {
+			toDeletes = append(toDeletes, GoodIdPrizeIndex{
+				GoodId:     oPrize.GoodID,
+				PrizeIndex: oPrize.PrizeIndex,
+			})
+		}
+	}
+	tx := s.db.GetDb()
+	for _, delEle := range toDeletes {
+		err = tx.
+			Where("fan_id=? and good_id=? and prize_index=?",
+				fanId, delEle.GoodId, delEle.PrizeIndex).Delete(&db.Prize{}).Error
+		if err != nil {
+			tx.Rollback()
+			return db.Prize{}, db.PrizePosition{}, errors.New("服务正忙......")
+		}
+		err = tx.
+			Where("fan_id=? and good_id=? and prize_index=?",
+				fanId, delEle.GoodId, delEle.PrizeIndex).Delete(&db.PrizePosition{}).Error
+		if err != nil {
+			tx.Rollback()
+			return db.Prize{}, db.PrizePosition{}, errors.New("服务正忙......")
+		}
+	}
+	tx.Commit()
+	tx = s.db.GetDb().Begin()
+	for _, nPrize := range boxNew.Prizes {
+		isNeedToAdd := true
+		for _, oPrize := range boxOld.Prizes {
+			if nPrize.GoodID == oPrize.GoodID && nPrize.PrizeIndex == oPrize.PrizeIndex {
+				isNeedToAdd = false
+			}
+		}
+		if isNeedToAdd {
+			pz = db.Prize{
+				ID:             define.GetRandPrizeId(),
+				GoodID:         nPrize.GoodID,
+				GoodName:       nPrize.GoodName,
+				FanId:          fanId,
+				FanName:        nPrize.FanName,
+				IpID:           nPrize.IpID,
+				IpName:         nPrize.IpName,
+				SeriesID:       nPrize.SeriesID,
+				SeriesName:     nPrize.SeriesName,
+				BoxID:          nPrize.BoxID,
+				BoxTitle:       nPrize.BoxTitle,
+				Pic:            nPrize.Pic,
+				Price:          nPrize.Price,
+				PrizeNum:       nPrize.PrizeNum,
+				PriczeLeftNum:  nPrize.PriczeLeftNum,
+				PrizeIndex:     nPrize.PrizeIndex,
+				PrizeIndexName: nPrize.PrizeIndexName,
+				PrizeRate:      nPrize.PrizeRate,
+				Remark:         nPrize.Remark,
+				SingleOrMuti:   nPrize.SingleOrMuti,
+				MultiIds:       nPrize.MultiIds,
+				SoldStatus:     nPrize.SoldStatus,
+				PkgStatus:      nPrize.PkgStatus,
+				WhoUpdate:      nPrize.WhoUpdate,
+			}
+			err = tx.Create(&pz).Error
+			if err != nil {
+				tx.Rollback()
+				return db.Prize{}, db.PrizePosition{}, errors.New("服务正忙......")
+			}
+			var pos db.PrizePosition
+			err = tx.Where("fan_id=? and box_id=? and good_id=? and prize_index=?",
+				fanId, nPrize.BoxID, nPrize.GoodID, nPrize.PrizeIndex).First(&pos).Error
+			if err != nil {
+				tx.Rollback()
+				return db.Prize{}, db.PrizePosition{}, errors.New("服务正忙......")
+			}
+			ps = db.PrizePosition{
+				FanId:          fanId,
+				FanName:        nPrize.FanName,
+				BoxID:          nPrize.BoxID,
+				BoxTitle:       nPrize.BoxTitle,
+				PrizeIndex:     nPrize.PrizeIndex,
+				PrizeIndexName: nPrize.PrizeIndexName,
+				GoodId:         nPrize.GoodID,
+				GoodName:       nPrize.GoodName,
+				Position:       pos.Position,
+			}
+			err = tx.Create(&ps).Error
+			if err != nil {
+				tx.Rollback()
+				return db.Prize{}, db.PrizePosition{}, errors.New("服务正忙......")
+			}
+		}
+	}
+	tx.Commit()
+	return pz, ps, nil
+}
+
 func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespModifySaveFan, error) {
 	DB := s.db.GetDb()
 	var resp param.RespModifySaveFan
 	var fan db.Fan
-	ret := DB.Where("id=? and status IN ?", req.FanID, []int{define.YfFanStatusNotOnBoard,
-		define.YfFanStatusNotOffBoardByMan, define.YfFanStatusNotOffBoardAuto}).First(&fan)
+	ret := DB.Where("id=?", req.FanID).First(&fan)
 	if ret.Error != nil && ret.Error != gorm.ErrRecordNotFound {
 		return resp, errors.New("服务正忙...")
 	}
@@ -278,16 +416,98 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return resp, errors.New("服务正忙...")
 	}
-	if req.TotalBoxNum > len(fan.Boxs) {
-
-	} else {
-
+	if len(fan.Boxs) == 0 {
+		return resp, errors.New("该蕃没有箱...")
 	}
-	//for _, oneBox := range fan.Boxs {
-	//	err := DB.Model(&oneBox).Association("Prizes").Find(&fan.Boxs)
-	//	err := DB.Model(&oneBox).Association("PrizePositions").Find(&fan.Boxs)
-	//}
-	return param.RespModifySaveFan{}, nil
+	err = DB.Model(&fan.Boxs[0]).Association("Prizes").Find(&fan.Boxs[0].Prizes)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return resp, errors.New("服务正忙...")
+	}
+	if len(fan.Boxs[0].Prizes) == 0 {
+		return resp, errors.New("该箱没有奖品...")
+	}
+	OldBox := &db.Box{
+		Price:     fan.Price,
+		FanId:     fan.ID,
+		FanName:   fan.Boxs[0].FanName,
+		WhoUpdate: fan.Boxs[0].WhoUpdate,
+	}
+	for _, ePz := range fan.Boxs[0].Prizes {
+		var newPz db.Prize
+		newPz.ID = ePz.ID
+		newPz.GoodID = ePz.GoodID
+		newPz.GoodName = ePz.GoodName
+		newPz.Remark = ePz.Remark
+		newPz.IpID = ePz.IpID
+		newPz.PrizeIndexName = ePz.PrizeIndexName
+		newPz.PrizeIndex = ePz.PrizeIndex
+		newPz.PkgStatus = ePz.PkgStatus
+		newPz.MultiIds = ePz.MultiIds
+		newPz.SingleOrMuti = ePz.SingleOrMuti
+		newPz.IpName = ePz.IpName
+		newPz.SeriesName = ePz.SeriesName
+		newPz.SeriesID = ePz.SeriesID
+		newPz.Price = ePz.Price
+		newPz.Pic = ePz.Pic
+		for _, ePs := range ePz.PrizePositions {
+			newPz.PrizePositions = append(newPz.PrizePositions, ePs)
+		}
+		OldBox.Prizes = append(OldBox.Prizes, &newPz)
+	}
+	Box := &db.Box{
+		Price:     req.FanPrice,
+		FanId:     req.FanID,
+		FanName:   req.FanName,
+		WhoUpdate: req.WhoUpdate,
+	}
+	for _, ePz := range req.Prizes {
+		var newPz db.Prize
+		newPz.ID = ePz.PrizeId
+		newPz.GoodID = ePz.GoodId
+		newPz.GoodName = ePz.GoodName
+		newPz.Remark = ePz.Remark
+		newPz.IpID = ePz.IpId
+		newPz.PrizeIndexName = ePz.PrizeIndexName
+		newPz.PrizeIndex = ePz.PrizeIndex
+		newPz.PkgStatus = ePz.PkgStatus
+		newPz.MultiIds = ePz.MultiIds
+		newPz.SingleOrMuti = ePz.SingleOrMuti
+		newPz.IpName = ePz.IpName
+		newPz.SeriesName = ePz.SeriName
+		newPz.SeriesID = ePz.SeriId
+		newPz.Price = ePz.Price
+		newPz.Pic = ePz.Pic
+		for _, ePs := range ePz.PrizePosition {
+			newPz.PrizePositions = append(newPz.PrizePositions, ePs)
+		}
+		Box.Prizes = append(Box.Prizes, &newPz)
+	}
+	if req.TotalBoxNum == len(fan.Boxs) {
+		s.GetNewBoxes(req.FanID, OldBox, Box)
+		return param.RespModifySaveFan{}, nil
+	} else if req.TotalBoxNum > len(fan.Boxs) {
+		pz, ps, _ := s.GetNewBoxes(req.FanID, OldBox, Box)
+		newBox := Box
+		newBox.ID = define.GetRandBoxId()
+		tx := s.db.GetDb().Begin()
+		err = tx.Create(newBox).Error
+		if err != nil {
+			tx.Rollback()
+			return param.RespModifySaveFan{}, errors.New("服务正忙...")
+		}
+		if err = tx.Model(newBox).Association("Prizes").Append(&pz); err != nil {
+			tx.Rollback()
+			return param.RespModifySaveFan{}, errors.New("服务正忙...")
+		}
+		if err = tx.Model(newBox).Association("PrizePositions").Append(&ps); err != nil {
+			tx.Rollback()
+			return param.RespModifySaveFan{}, errors.New("服务正忙...")
+		}
+		tx.Commit()
+		return param.RespModifySaveFan{}, nil
+	} else {
+		return param.RespModifySaveFan{}, errors.New("参数错误，箱子只增不减")
+	}
 }
 
 func (s *FanServiceImpl) GetFanStatus(req param.ReqModifyFan) int {
@@ -355,9 +575,8 @@ func (s *FanServiceImpl) QueryPrizePostion(req param.ReqQueryPrizePostion) (para
 				if pEle.PrizeIndexName == pPEle.PrizeIndexName && pEle.GoodName == pPEle.GoodName {
 					ret.QueryPrizePostions = append(ret.QueryPrizePostions, param.QueryPrizePostion{
 						FanId:          req.FanId,
-						FanName:        fan.Name,
+						FanTitle:       fan.Title,
 						BoxId:          ele.ID,
-						BoxTitle:       ele.Title,
 						PrizeNum:       pEle.PrizeNum,
 						PrizeIndexName: pEle.PrizeIndexName,
 						PrizeName:      pEle.GoodName,

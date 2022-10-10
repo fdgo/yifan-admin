@@ -75,6 +75,7 @@ func (s *BoxServiceImpl) EachBox(box *param.Box, fanId uint, fanName string) ([]
 			GoodName:       prizeEle.PrizeName,
 			FanId:          fanId,
 			FanName:        fanName,
+			PrizePositions: prizeEle.PrizePosition,
 			IpID:           prizeEle.IpId,
 			IpName:         prizeEle.IpName,
 			SeriesID:       prizeEle.SeriId,
@@ -88,6 +89,7 @@ func (s *BoxServiceImpl) EachBox(box *param.Box, fanId uint, fanName string) ([]
 			Price:          prizeEle.Price,
 			MultiIds:       prizeEle.MultiIds,
 			PkgStatus:      prizeEle.PkgStatus,
+			Remark:         prizeEle.Remark,
 			SoldStatus:     define.YfPrizeStatusNotSoldOut,
 		})
 		prizePositions = append(prizePositions, db.PrizePosition{
@@ -281,23 +283,15 @@ func (s *BoxServiceImpl) SetLastPrizePosition(pipe redis.Pipeliner, ctx context.
 	return
 }
 
-func (s *BoxServiceImpl) PkgBoxes(tx *gorm.DB, req param.ReqAddBox, reqbox param.Box, boxIndex int32, prizeNum, prizeLeftNum int32) (*db.Box, error) {
+func (s *BoxServiceImpl) PkgBoxes(tx *gorm.DB, fanId uint, req param.ReqAddBox, reqbox param.Box, boxIndex int32, prizeNum, prizeLeftNum int32) (*db.Box, error) {
 	box := &db.Box{
-		ID:              define.GetRandBoxId(),
-		Type:            req.Type,
-		Rule:            reqbox.Rule,
-		Title:           reqbox.Title,
-		Price:           reqbox.Price,
-		DetailPic:       reqbox.DetailPic,
-		SharePic:        reqbox.SharePic,
-		ActiveBeginTime: reqbox.ActiveBeginTime,
-		ActiveEndTime:   reqbox.ActiveEndTime,
-		FanId:           req.FanId,
-		FanName:         req.FanName,
-		BoxIndex:        boxIndex,
-		PriczeNum:       prizeNum,
-		PriczeLeftNum:   prizeLeftNum,
-		Status:          define.YfBoxStatusNotOnBoard,
+		ID:            define.GetRandBoxId(),
+		FanId:         fanId,
+		FanName:       req.FanTitle,
+		BoxIndex:      boxIndex,
+		PriczeNum:     prizeNum,
+		PriczeLeftNum: prizeLeftNum,
+		Status:        define.YfBoxStatusNotOnBoard,
 	}
 	err := tx.Create(box).Error
 	if err != nil {
@@ -350,19 +344,32 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 			tx.Rollback()
 		}
 	}()
-	result := tx.Where("id=?", req.FanId).First(&fan)
+	result := tx.Where("title=?", req.FanTitle).First(&fan)
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
 		tx.Rollback()
 		return ret, errors.New("服务正忙...")
 	}
-	if result.RowsAffected == 0 {
+	if result.RowsAffected != 0 {
 		tx.Rollback()
-		return ret, errors.New("此蕃不存在...")
+		return ret, errors.New("此蕃已经存在...")
 	}
+	fanId := define.GetRandFanId()
+	tx.Create(&db.Fan{
+		ID:        fanId,
+		Title:     req.Title,
+		Status:    define.YfFanStatusNotOnBoard,
+		Price:     req.FanPrice,
+		SharePic:  req.SharePic,
+		DetailPic: req.DetailPic,
+		Rule:      req.Rule,
+	})
 	ctx := context.Background()
-	for index, boxEle := range req.Boxes { //fMix, lMix, gMix
-		prizes, prizePositions, fNum, lNum, gNum, nNum, firstEles, lastEles, globalEles, firstPos, lastPos, _, nMix := s.EachBox(&boxEle, req.FanId, req.FanName)
-		box, err := s.PkgBoxes(tx, req, boxEle, int32(index+1), fNum+lNum+gNum+nNum, fNum+lNum+gNum+nNum)
+	//for index, boxEle := range req.BoxNum { //fMix, lMix, gMix
+	for index := 0; index < req.BoxNum; index++ {
+		boxEle := req.Boxes
+		prizes, prizePositions, fNum, lNum, gNum, nNum, firstEles, lastEles, globalEles, firstPos, lastPos, _, nMix :=
+			s.EachBox(&boxEle, fanId, req.FanTitle)
+		box, err := s.PkgBoxes(tx, fanId, req, boxEle, int32(index+1), fNum+lNum+gNum+nNum, fNum+lNum+gNum+nNum)
 		if err != nil {
 			tx.Rollback()
 			return ret, err
@@ -373,18 +380,18 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 		var a, b, c, d, e, f, g, h, i, j []*redis.IntCmd
 		aTimes, bTimes, cTimes, dTimes, eTimes, fTimes, gTimes, hTimes, iTimes, jTimes := int64(0), int64(0), int64(0), int64(0), int64(0), int64(0), int64(0), int64(0), int64(0), int64(0)
 		_, err = s.cache.Cache.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
-			a, aTimes = s.SetFirstPrizePosition(pipe, ctx, firstPos, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-			b, bTimes = s.SetLastPrizePosition(pipe, ctx, lastPos, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
+			a, aTimes = s.SetFirstPrizePosition(pipe, ctx, firstPos, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
+			b, bTimes = s.SetLastPrizePosition(pipe, ctx, lastPos, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
 			//c, cTimes = s.SetGlobalPrizePosition(pipe, ctx, globalPos, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-			d, dTimes = s.SetFirstPrizeCache(pipe, ctx, firstEles, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-			e, eTimes = s.SetLastPrizeCache(pipe, ctx, lastEles, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-			f, fTimes = s.SetGlobalPrizeCache(pipe, ctx, globalEles, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
+			d, dTimes = s.SetFirstPrizeCache(pipe, ctx, firstEles, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
+			e, eTimes = s.SetLastPrizeCache(pipe, ctx, lastEles, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
+			f, fTimes = s.SetGlobalPrizeCache(pipe, ctx, globalEles, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
 			allPrizeNums, target, sures = s.SetSureTargetEles(nMix)
-			g, gTimes = s.SetTargetCache(pipe, ctx, target, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-			h, hTimes = s.SetSureCache(pipe, ctx, sures, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
+			g, gTimes = s.SetTargetCache(pipe, ctx, target, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
+			h, hTimes = s.SetSureCache(pipe, ctx, sures, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
 			lefts := s.SetLeftEles(nMix)
-			i, iTimes = s.SetLeftCache(pipe, ctx, lefts, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-			j, jTimes = s.SetUserCache(pipe, ctx, -1, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
+			i, iTimes = s.SetLeftCache(pipe, ctx, lefts, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
+			j, jTimes = s.SetUserCache(pipe, ctx, -1, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
 			return nil
 		})
 		if err != nil {
@@ -396,14 +403,12 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 			tx.Rollback()
 			return ret, errors.New("服务正忙...")
 		}
-		for nindex, e := range prizes {
-			prizes[nindex].BoxTitle = box.Title
+		for nindex, x := range prizes {
 			prizes[nindex].BoxID = &box.ID
-			rate, _ := decimal.NewFromFloat32(float32(e.PriczeLeftNum)).Div(decimal.NewFromFloat32(float32(allPrizeNums))).Float64()
+			rate, _ := decimal.NewFromFloat32(float32(x.PriczeLeftNum)).Div(decimal.NewFromFloat32(float32(allPrizeNums))).Float64()
 			prizes[nindex].PrizeRate = fmt.Sprintf("%.2f", 100*rate) + "%"
 		}
 		for nindex, _ := range prizePositions {
-			prizePositions[nindex].BoxTitle = box.Title
 			prizePositions[nindex].BoxID = &box.ID
 		}
 		if err = tx.Model(&box).Association("Prizes").Append(&prizes); err != nil {
@@ -673,8 +678,11 @@ func (s *BoxServiceImpl) ModifyBoxGoods(req param.ReqModifyBoxGoods) error {
 }
 func (s *BoxServiceImpl) DeleteBoxGoods(req param.ReqDeleteBoxGoods) error {
 	fmt.Println("delete prize", req.GoodId, req.FanId)
-	s.db.GetDb().Model(&db.Prize{}).
-		Where("fan_id=? and good_id=?", req.FanId, req.GoodId).Delete(&db.Prize{})
+	err := s.db.GetDb().Model(&db.Prize{}).
+		Where("fan_id=? and good_id=?", req.FanId, req.GoodId).Delete(&db.Prize{}).Error
+	if err != nil {
+		return errors.New("服务正忙...")
+	}
 	return nil
 
 }

@@ -7,7 +7,7 @@ import (
 func setApiRouter(r *resource) {
 	handler := controller.New(r.db, r.cache)
 	ip := r.mux.Group("/v1/ip").
-		Use(r.middles.Cors()).Use(r.middles.Jwt())
+		Use(r.middles.Cors())
 	{
 		ip.GET("/xyz", handler.XYZ())
 		ip.POST("/upload", handler.UpLoadIPs())
