@@ -196,6 +196,7 @@ type Boxex struct {
 type Prizex struct {
 	PrizeIndexName string `json:"prizeIndexName"`
 	PrizeIndex     int    `json:"prizeIndex"`
+	Num            int    `json:"num"`
 	Pos            []int  `json:"pos"`
 }
 

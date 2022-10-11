@@ -447,11 +447,11 @@ func (s *BoxServiceImpl) GetOneBoxAllNormalPrize(tx *gorm.DB, fanId, boxId uint)
 	return allNorPrizes, prizes, nil
 }
 
-func (s *BoxServiceImpl) OnePrizeNeedToSetPosition(tx *gorm.DB, onePrize param.Prizex, fanId, boxId uint, oneBoxAllNorPrizeNum int) (err error) {
+func (s *BoxServiceImpl) OnePrizeNeedToSetPosition(tx *gorm.DB, onePrize param.Prizex, fanId, boxId uint, oneBoxAllNorPrizeNum int) (num int64, err error) {
 	tmpPosition := "["
 	for _, onePos := range onePrize.Pos { //幾個位置 (3,7)
 		if onePos > oneBoxAllNorPrizeNum {
-			return errors.New("位置超出范围...")
+			return 0, errors.New("位置超出范围...")
 		}
 		tmpPosition += fmt.Sprintf("%d,", onePos)
 	}
@@ -462,9 +462,18 @@ func (s *BoxServiceImpl) OnePrizeNeedToSetPosition(tx *gorm.DB, onePrize param.P
 			fanId, boxId, onePrize.PrizeIndexName, onePrize.PrizeIndex).
 		Update("position", positon).Error
 	if err != nil {
-		return errors.New("服务正忙...")
+		return 0, errors.New("服务正忙...")
 	}
-	return nil
+	var prize db.Prize
+	result := tx.Model(&db.Prize{}).Where("fan_id=? and box_id=? and prize_index_name=? and prize_index=?",
+		fanId, boxId, onePrize.PrizeIndexName, onePrize.PrizeIndex).First(&prize)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return 0, errors.New("服务正忙...")
+	}
+	if result.RowsAffected == 0 {
+		return 0, errors.New("奖品不存在...")
+	}
+	return int64(prize.PriczeLeftNum), nil
 }
 func (s *BoxServiceImpl) SetNormalPrizePosition(req param.ReqSetNormalPrizePosition) error {
 	tx := s.db.GetDb().Begin()
@@ -475,41 +484,43 @@ func (s *BoxServiceImpl) SetNormalPrizePosition(req param.ReqSetNormalPrizePosit
 	}()
 	ctx := context.Background()
 	for _, oneFan := range req.Fanex {
-
 		for _, oneBox := range oneFan.Boxex {
 			allNorPrizes, prizes, err := s.GetOneBoxAllNormalPrize(tx, oneFan.FanId, oneBox.BoxId)
 			if err != nil {
 				tx.Rollback()
 				return err
 			}
-
 			target := make([]int32, allNorPrizes)
 			sureIndexs := make([]int32, 0)
 			leftIndexs := make([]int32, 0)
-			onePrizeSamePos := []int{}
 			oneBoxSamePos := []int{}
 			for _, onePrize := range oneBox.Prizex {
-				err = s.OnePrizeNeedToSetPosition(tx, onePrize, oneFan.FanId, oneBox.BoxId, allNorPrizes)
-				if err != nil {
+				num, errx := s.OnePrizeNeedToSetPosition(tx, onePrize, oneFan.FanId, oneBox.BoxId, allNorPrizes)
+				if errx != nil {
 					tx.Rollback()
-					return err
+					return errx
 				}
+				onePrizeSamePos := []int{}
 				for _, p := range onePrize.Pos {
 					onePrizeSamePos = append(onePrizeSamePos, p)
 					oneBoxSamePos = append(oneBoxSamePos, p)
 					target[p-1] = int32(onePrize.PrizeIndex)
 					sureIndexs = append(sureIndexs, int32(onePrize.PrizeIndex))
 				}
+				if len(onePrizeSamePos) > int(num) {
+					tx.Rollback()
+					return errors.New("奖品位置数量超过了奖品数量...")
+				}
 				isOnePrizePossame := define.IsHasSameEle(onePrizeSamePos)
 				if isOnePrizePossame {
 					tx.Rollback()
-					return errors.New("同一奖品位置不要重複")
+					return errors.New("同一奖品位置不要重复...")
 				}
 			}
 			isOneBoxPrizePossame := define.IsHasSameEle(oneBoxSamePos)
 			if isOneBoxPrizePossame {
 				tx.Rollback()
-				return errors.New("同一箱奖品位置不要重複")
+				return errors.New("同一箱奖品位置不要重复...")
 			}
 			for index, wOnePrize := range prizes {
 				for _, ele := range sureIndexs {
