@@ -33,3 +33,11 @@ func AbortWithBadRequestWithError(err error, context *gin.Context) {
 		nil,
 	})
 }
+
+func AbortWithBadRequestWithData(err error, msg interface{}, context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusOK, responseFailure{
+		errno.PostParamError,
+		err.Error(),
+		msg,
+	})
+}

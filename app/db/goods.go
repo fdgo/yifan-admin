@@ -66,22 +66,21 @@ type Goods struct {
 	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
 }
 type Box struct {
-	ID             uint    `gorm:"primarykey" json:"id"`
-	Price          float64 `gorm:"comment:箱子价格" json:"price"` //售卖价格
-	FanId          uint    `gorm:"comment:该箱属于蕃id" json:"fanId"`
-	FanName        string  `gorm:"comment:该箱属于蕃名" json:"fanName"`
-	BoxIndex       int32   `gorm:"comment:箱子在番中的次序(第3/10箱)" json:"boxIndex"`
-	PriczeNum      int32   `gorm:"comment:箱子开始多少商品" json:"priczeNum"`
-	PriczeLeftNum  int32   `gorm:"comment:箱子还剩多少个商品(剩余300/400个)" json:"priczeLeftNum"`
-	Status         int     `gorm:"comment:箱子状态(1.上架有奖品.2未上架.3上架无商品)" json:"status"`
-	FanID          *uint
-	Prizes         []*Prize
-	Records        []*RecordPrize
-	PrizePositions []*PrizePosition
-	CreatedAt      time.Time      `json:"created_time"`
-	UpdatedAt      time.Time      `json:"updated_time"`
-	WhoUpdate      string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
-	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
+	ID            uint    `gorm:"primarykey" json:"id"`
+	Price         float64 `gorm:"comment:箱子价格" json:"price"` //售卖价格
+	FanId         uint    `gorm:"comment:该箱属于蕃id" json:"fanId"`
+	FanName       string  `gorm:"comment:该箱属于蕃名" json:"fanName"`
+	BoxIndex      int32   `gorm:"comment:箱子在番中的次序(第3/10箱)" json:"boxIndex"`
+	PriczeNum     int32   `gorm:"comment:箱子开始多少商品" json:"priczeNum"`
+	PriczeLeftNum int32   `gorm:"comment:箱子还剩多少个商品(剩余300/400个)" json:"priczeLeftNum"`
+	Status        int     `gorm:"comment:箱子状态(1.上架有奖品.2未上架.3上架无商品)" json:"status"`
+	FanID         *uint
+	Prizes        []*Prize
+	Records       []*RecordPrize
+	CreatedAt     time.Time      `json:"created_time"`
+	UpdatedAt     time.Time      `json:"updated_time"`
+	WhoUpdate     string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
+	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 type TmpPrize struct {
@@ -106,9 +105,8 @@ type Prize struct {
 	IpName         string   `gorm:"comment:所属ip的名字" json:"ipName"`
 	SeriesID       uint     `gorm:"comment:所属系列id" json:"seriesId"`
 	SeriesName     string   `gorm:"comment:所属系列id"  json:"seriesName"`
-	PrizePositions GormList `gorm:"type:varchar(128);not null"`
+	Position       GormList `gorm:"type:varchar(128);not null"`
 	BoxID          *uint
-	BoxTitle       string         `gorm:"comment:所属箱子名字" json:"boxTitle"`
 	Pic            string         `gorm:"comment:图片;type:varchar(128);not null" json:"pic"`
 	Price          float64        `gorm:"comment:建议售价" json:"price"`
 	PrizeNum       int32          `gorm:"comment:该类奖品总数" json:"priczeNum"`
@@ -126,22 +124,23 @@ type Prize struct {
 	UpdatedAt      time.Time      `json:"updated_time"`
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
 }
-type PrizePosition struct {
-	ID             uint `gorm:"primarykey" json:"id"`
-	FanId          uint
-	FanName        string
-	BoxID          *uint
-	PrizeID        *uint
-	BoxTitle       string
-	PrizeIndex     int32          `gorm:"comment:赏的次序" json:"prizeIndex"`
-	PrizeIndexName string         `gorm:"comment:A赏,B赏..." json:"prizeIndexName"`
-	GoodId         uint           `gorm:"comment:商品id" json:"goodId"`
-	GoodName       string         `gorm:"comment:商品名字" json:"goodName"`
-	Position       GormList       `gorm:"type:varchar(128);not null"`
-	CreatedAt      time.Time      `json:"created_time"`
-	UpdatedAt      time.Time      `json:"updated_time"`
-	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
-}
+
+//type PrizePosition struct {
+//	ID             uint `gorm:"primarykey" json:"id"`
+//	FanId          uint
+//	FanName        string
+//	BoxID          *uint
+//	PrizeID        *uint
+//	BoxTitle       string
+//	PrizeIndex     int32          `gorm:"comment:赏的次序" json:"prizeIndex"`
+//	PrizeIndexName string         `gorm:"comment:A赏,B赏..." json:"prizeIndexName"`
+//	GoodId         uint           `gorm:"comment:商品id" json:"goodId"`
+//	GoodName       string         `gorm:"comment:商品名字" json:"goodName"`
+//	Position       GormList       `gorm:"type:varchar(128);not null"`
+//	CreatedAt      time.Time      `json:"created_time"`
+//	UpdatedAt      time.Time      `json:"updated_time"`
+//	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
+//}
 
 type RecordPrize struct {
 	ID         uint   `gorm:"primarykey" json:"id"`

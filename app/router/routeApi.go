@@ -4,10 +4,12 @@ import (
 	"yifan/app/api/controller"
 )
 
-func setApiRouter(r *resource) {
+func setApiRouter(r *resource) { //Use(cors.New(config))
 	handler := controller.New(r.db, r.cache)
-	ip := r.mux.Group("/v1/ip").
-		Use(r.middles.Cors())
+	//config := cors.DefaultConfig()
+	//config.AllowAllOrigins = true
+	//config.AllowHeaders = append(config.AllowHeaders, "token")
+	ip := r.mux.Group("/v1/ip")
 	{
 		ip.GET("/xyz", handler.XYZ())
 		ip.POST("/upload", handler.UpLoadIPs())

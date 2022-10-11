@@ -15,10 +15,6 @@ type FanService interface {
 
 	QueryPrizePostion(req param.ReqQueryPrizePostion) (param.RespQueryPrizePostion, error)
 	ModifyGoodsPosition(req param.ReqModifyGoodsPosition) (param.RespModifyGoodsPosition, error)
-
-	Buy(req param.ReqBuy) (param.RespBuy, error)
-	BuySure(req param.ReqBuySure) (param.RespBuySures, error)
-	BuyQuery(req param.ReqBuyQuery) (param.RespBuyQuerys, error)
 }
 
 type FanServiceImpl struct {

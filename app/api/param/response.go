@@ -168,18 +168,14 @@ type RespQueryBoxLeftPrize struct {
 	EachBoxPrize     []EachBoxPrize `json:"eachBoxPrize,omitempty"`
 }
 type RespAddBox struct {
-	AddBox []AddBox `json:"addBox,omitempty"`
+	Tips []Tips `json:"tips,omitempty"`
 }
-type AddBox struct {
-	IpId     uint   `json:"ipId,omitempty"`
-	IpName   string `json:"ipName,omitempty"`
-	SeriId   uint   `json:"seriId,omitempty"`
-	SeriName string `json:"seriName,omitempty"`
-	GoodId   uint   `json:"goodId,omitempty"`
-	GoodName string `json:"goodName,omitempty"`
-	Tag      string `json:"tag,omitempty"`
+type Tips struct {
+	PrizeName      string `json:"prizeName,omitempty"`
+	PrizeIndex     int32  `json:"prizeIndex,omitempty"`
+	PrizeIndexName string `json:"prizeIndexName,omitempty"`
+	Message        string `json:"message,omitempty"`
 }
-
 type RespQueryGoodsForBox struct {
 	AllPages float64 `json:"allPages,omitempty"`
 	GInfo    GInfo   `json:"goodsInfo,omitempty"`
@@ -306,8 +302,7 @@ type QueryPrizePostion struct {
 }
 
 type RespModifyGoodsPosition struct {
-	BoxId uint               `json:"boxId,omitempty"`
-	Poses []db.PrizePosition `json:"poses,omitempty"`
+	BoxId uint `json:"boxId,omitempty"`
 }
 
 type RespBuy struct {

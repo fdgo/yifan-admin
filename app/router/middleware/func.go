@@ -16,16 +16,6 @@ import (
 
 const _MaxBurstSize = 102400
 
-func (h *middleware) Local() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		fmt.Println("Local.................")
-		if context.ClientIP() != "127.0.0.1" {
-			context.AbortWithError(http.StatusUnauthorized, errors.New(errno.Text(errno.StatusUnauthorized)))
-		}
-		context.Next()
-	}
-}
-
 func (h *middleware) Recover() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		fmt.Println("Recover.................")
@@ -122,9 +112,9 @@ func (h *middleware) Cors() gin.HandlerFunc {
 		method := c.Request.Method
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
-		c.Header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, authorization,Authorization, Token, browserVersion")
+		c.Header("Access-Control-Allow-Headers", "Origin,token")
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type")
-		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Allow-Credentials", "false")
 		c.Set("content-type", "application/json")
 		if method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)

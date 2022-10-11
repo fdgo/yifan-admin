@@ -482,7 +482,7 @@ func (h *handler) AddBox() gin.HandlerFunc {
 		}
 		data, err := h.boxService.AddBox(req)
 		if err != nil {
-			response.AbortWithBadRequestWithError(err, context)
+			response.AbortWithBadRequestWithData(err, data, context)
 			return
 		}
 		response.ResposeSuccess(data, context)
@@ -822,81 +822,6 @@ func (h *handler) ModifyGoodsPosition() gin.HandlerFunc {
 			return
 		}
 		data, err := h.fanService.ModifyGoodsPosition(req)
-		if err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		response.ResposeSuccess(data, context)
-	}
-}
-
-// @Description Buy
-// @Tags Buy
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param ReqBuy body param.ReqBuy true "一次购买"
-// @Success 200 {object} response.responseSucess{data=param.RespBuy}
-// @Failure 400 {object} response.responseFailure
-// @Router /v1/fan/Buy [post]
-func (h *handler) Buy() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		var req param.ReqBuy
-		if err := context.ShouldBindJSON(&req); err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		data, err := h.fanService.Buy(req)
-		if err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		response.ResposeSuccess(data, context)
-	}
-}
-
-// @Description BuySure
-// @Tags BuySure
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param ReqBuySure body param.ReqBuySure true "666"
-// @Success 200 {object} response.responseSucess{data=param.RespBuySure}
-// @Failure 400 {object} response.responseFailure
-// @Router /v1/fan/buySure [post]
-func (h *handler) BuySure() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		var req param.ReqBuySure
-		if err := context.ShouldBindJSON(&req); err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		data, err := h.fanService.BuySure(req)
-		if err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		response.ResposeSuccess(data, context)
-	}
-}
-
-// @Description BuyQuery
-// @Tags BuyQuery
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param ReqBuyQuery body param.ReqBuyQuery true "666"
-// @Success 200 {object} response.responseSucess{data=param.RespBuyQuery}
-// @Failure 400 {object} response.responseFailure
-// @Router /v1/fan/buySure [post]
-func (h *handler) BuyQuery() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		var req param.ReqBuyQuery
-		if err := context.ShouldBindJSON(&req); err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		data, err := h.fanService.BuyQuery(req)
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return

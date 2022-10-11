@@ -7,14 +7,6 @@ import (
 )
 
 type Middleware interface {
-	// // Jwt 中间件
-	// Jwt(ctx core.Context) (userId int64, userName string, err errno.Error)
-
-	// // Resubmit 中间件
-	// Resubmit() core.HandlerFunc
-
-	// // DisableLog 不记录日志
-	// DisableLog() core.HandlerFunc
 	Jwt() gin.HandlerFunc
 
 	TimedHandler(duration time.Duration) gin.HandlerFunc
@@ -26,9 +18,6 @@ type Middleware interface {
 	Recover() gin.HandlerFunc
 
 	Cors() gin.HandlerFunc
-	// // RBAC 权限验证
-	// RBAC() core.HandlerFunc
-	Local() gin.HandlerFunc
 }
 type middleware struct {
 	db db.Repo
