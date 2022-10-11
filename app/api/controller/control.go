@@ -488,6 +488,21 @@ func (h *handler) AddBox() gin.HandlerFunc {
 		response.ResposeSuccess(data, context)
 	}
 }
+func (h *handler) SetNormalPrizePosition() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqSetNormalPrizePosition
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		err := h.boxService.SetNormalPrizePosition(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(nil, context)
+	}
+}
 
 // @Description DeleteBox
 // @Tags DeleteBox

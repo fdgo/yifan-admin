@@ -118,7 +118,7 @@ type ReqModifyIP struct {
 
 //
 type ReqUpLoadSeries struct {
-	ReqAddSeries []ReqAddSeries `json:"series"`
+	ReqAddSeries []ReqAddSeries `json:"reqAddSeries"`
 }
 type ReqAddSeries struct {
 	Name       string `json:"name" binding:"required,lte=32,gte=1"`
@@ -181,6 +181,24 @@ type Prize struct {
 	SingleOrMuti   int         `json:"singleOrMuti"` //单一商品填1, 有n个组合就写n
 	MultiIds       db.GormList `json:"multiIds"`     //商品id组合,单一商品[435], n个商品[34,456,234,...]
 }
+
+type ReqSetNormalPrizePosition struct {
+	Fanex []Fanex `json:"fanex"`
+}
+type Fanex struct {
+	FanId uint    `json:"fanId"`
+	Boxex []Boxex `json:"boxex"`
+}
+type Boxex struct {
+	BoxId  uint     `json:"boxId"`
+	Prizex []Prizex `json:"prizex"`
+}
+type Prizex struct {
+	PrizeIndexName string `json:"prizeIndexName"`
+	PrizeIndex     int    `json:"prizeIndex"`
+	Pos            []int  `json:"pos"`
+}
+
 type ReqDeleteBox struct {
 }
 type ReqQueryBoxAllPrize struct {

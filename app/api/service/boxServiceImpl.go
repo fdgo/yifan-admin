@@ -215,15 +215,9 @@ func (s *BoxServiceImpl) PkgBoxes(tx *gorm.DB, fanId uint, req param.ReqAddBox, 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-func (s *BoxServiceImpl) SetTargetCache(pipe redis.Pipeliner, ctx context.Context, target []int32, fanId, boxId uint, seconds int64) (rCmd []*redis.IntCmd, times int64) { //(req.ActiveEndTime-time.Now().Unix()))
-	for _, ele := range target {
-		rPush := pipe.RPush(ctx, define.RedisTarget(fanId, boxId), ele)
-		rCmd = append(rCmd, rPush)
-	}
-	times = int64(len(target))
-	return
-}
-func (s *BoxServiceImpl) SetSureCache(pipe redis.Pipeliner, ctx context.Context, sure []int32, fanId, boxId uint, seconds int64) (rCmd []*redis.IntCmd, times int64) { //(req.ActiveEndTime-time.Now().Unix()))
+
+func (s *BoxServiceImpl) SetSureCache(pipe redis.Pipeliner, ctx context.Context, sure []int32, fanId, boxId uint) (rCmd []*redis.IntCmd, times int64) { //(req.ActiveEndTime-time.Now().Unix()))
+	pipe.Del(ctx, define.RedisSure(fanId, boxId))
 	for _, ele := range sure {
 		rPush := pipe.RPush(ctx, define.RedisSure(fanId, boxId), ele)
 		rCmd = append(rCmd, rPush)
@@ -231,7 +225,8 @@ func (s *BoxServiceImpl) SetSureCache(pipe redis.Pipeliner, ctx context.Context,
 	times = int64(len(sure))
 	return
 }
-func (s *BoxServiceImpl) SetLeftCache(pipe redis.Pipeliner, ctx context.Context, left []int32, fanId, boxId uint, seconds int64) (rCmd []*redis.IntCmd, times int64) { //(req.ActiveEndTime-time.Now().Unix()))
+func (s *BoxServiceImpl) SetLeftCache(pipe redis.Pipeliner, ctx context.Context, left []int32, fanId, boxId uint) (rCmd []*redis.IntCmd, times int64) { //(req.ActiveEndTime-time.Now().Unix()))
+	pipe.Del(ctx, define.RedisLeft(fanId, boxId))
 	for _, ele := range left {
 		rPush := pipe.RPush(ctx, define.RedisLeft(fanId, boxId), ele)
 		rCmd = append(rCmd, rPush)
@@ -239,6 +234,16 @@ func (s *BoxServiceImpl) SetLeftCache(pipe redis.Pipeliner, ctx context.Context,
 	times = int64(len(left))
 	return
 }
+func (s *BoxServiceImpl) SetTargetCache(pipe redis.Pipeliner, ctx context.Context, target []int32, fanId, boxId uint) (rCmd []*redis.IntCmd, times int64) { //(req.ActiveEndTime-time.Now().Unix()))
+	pipe.Del(ctx, define.RedisTarget(fanId, boxId))
+	for _, ele := range target {
+		rPush := pipe.RPush(ctx, define.RedisTarget(fanId, boxId), ele)
+		rCmd = append(rCmd, rPush)
+	}
+	times = int64(len(target))
+	return
+}
+
 func (s *BoxServiceImpl) SetUserCache(pipe redis.Pipeliner, ctx context.Context, userId int, fanId, boxId uint, seconds int64) (rCmd []*redis.IntCmd, times int64) { //(req.ActiveEndTime-time.Now().Unix()))
 	rPush := pipe.RPush(ctx, define.RedisUser(fanId, boxId), userId)
 	rCmd = append(rCmd, rPush)
@@ -428,92 +433,150 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 	tx.Commit()
 	return param.RespAddBox{}, nil
 }
+func (s *BoxServiceImpl) GetOneBoxAllNormalPrize(tx *gorm.DB, fanId, boxId uint) (allNorPrizes int, prizes []db.Prize, err error) {
+	err = tx.Where("fan_id=? and box_id=? and prize_index_name not IN ?",
+		fanId, boxId, []string{define.PrizeIndexNameFirst,
+			define.PrizeIndexNameLast,
+			define.PrizeIndexNameGlobal}).Find(&prizes).Error
+	if err != nil {
+		return 0, prizes, err
+	}
+	for _, onePrize := range prizes {
+		allNorPrizes += int(onePrize.PrizeNum)
+	}
+	return allNorPrizes, prizes, nil
+}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//func (s *BoxServiceImpl) AddBoxex(req param.ReqAddBox) (param.RespAddBox, error) {
-//	var (
-//		fan = &db.Fan{}
-//		ret = param.RespAddBox{}
-//		tx  = s.db.GetDb().Begin()
-//	)
-//	defer func() {
-//		if r := recover(); r != nil {
-//			tx.Rollback()
-//		}
-//	}()
-//	result := tx.Model(&db.Fan{}).Where("title=?", req.Title).First(&fan)
-//	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-//		tx.Rollback()
-//		return ret, errors.New("服务正忙...")
-//	}
-//	if result.RowsAffected != 0 {
-//		tx.Rollback()
-//		return ret, errors.New("此蕃已经存在...")
-//	}
-//	fanId := define.GetRandFanId()
-//	tx.Create(&db.Fan{
-//		ID:              fanId,
-//		Title:           req.Title,
-//		Status:          define.YfFanStatusNotOnBoard,
-//		Price:           req.FanPrice,
-//		SharePic:        req.SharePic,
-//		DetailPic:       req.DetailPic,
-//		Rule:            req.Rule,
-//		ActiveBeginTime: req.ActiveBeginTime,
-//		ActiveEndTime:   req.ActiveEndTime,
-//	})
-//	ctx := context.Background()
-//	for index := 0; index < req.BoxNum; index++ { //fMix, lMix, gMix
-//		boxEle := req.Boxes
-//		prizes, fNum, lNum, gNum, nNum, firstEles, lastEles, globalEles, firstPos, lastPos, _, nMix :=
-//			s.EachBoxex(&boxEle, fanId, req.Title)
-//		box, err := s.PkgBoxes(tx, fanId, req, int32(index+1), fNum+lNum+gNum+nNum, fNum+lNum+gNum+nNum)
-//		if err != nil {
-//			tx.Rollback()
-//			return ret, err
-//		}
-//		allPrizeNums := int32(0)
-//		target := []int32{}
-//		sures := []int32{}
-//		var a, b, c, d, e, f, g, h, i, j []*redis.IntCmd
-//		aTimes, bTimes, cTimes, dTimes, eTimes, fTimes, gTimes, hTimes, iTimes, jTimes := int64(0), int64(0), int64(0), int64(0), int64(0), int64(0), int64(0), int64(0), int64(0), int64(0)
-//		_, err = s.cache.Cache.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
-//			a, aTimes = s.SetFirstPrizePosition(pipe, ctx, firstPos, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			b, bTimes = s.SetLastPrizePosition(pipe, ctx, lastPos, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			//c, cTimes = s.SetGlobalPrizePosition(pipe, ctx, globalPos, req.FanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			d, dTimes = s.SetFirstPrizeCache(pipe, ctx, firstEles, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			e, eTimes = s.SetLastPrizeCache(pipe, ctx, lastEles, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			f, fTimes = s.SetGlobalPrizeCache(pipe, ctx, globalEles, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			allPrizeNums, target, sures = s.SetSureTargetEles(nMix)
-//			g, gTimes = s.SetTargetCache(pipe, ctx, target, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			h, hTimes = s.SetSureCache(pipe, ctx, sures, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			lefts := s.SetLeftEles(nMix)
-//			i, iTimes = s.SetLeftCache(pipe, ctx, lefts, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			j, jTimes = s.SetUserCache(pipe, ctx, -1, fanId, box.ID, req.ActiveEndTime-time.Now().Unix())
-//			return nil
-//		})
-//		if err != nil {
-//			tx.Rollback()
-//			return ret, errors.New("服务正忙...")
-//		}
-//		err = isAllResultOk(a, b, c, d, e, f, g, h, i, j, aTimes, bTimes, cTimes, dTimes, eTimes, fTimes, gTimes, hTimes, iTimes, jTimes)
-//		if err != nil {
-//			tx.Rollback()
-//			return ret, errors.New("服务正忙...")
-//		}
-//		for nindex, x := range prizes {
-//			prizes[nindex].BoxID = &box.ID
-//			rate, _ := decimal.NewFromFloat32(float32(x.PriczeLeftNum)).Div(decimal.NewFromFloat32(float32(allPrizeNums))).Float64()
-//			prizes[nindex].PrizeRate = fmt.Sprintf("%.2f", 100*rate) + "%"
-//		}
-//		if err = tx.Model(&box).Association("Prizes").Append(&prizes); err != nil {
-//			tx.Rollback()
-//			return param.RespAddBox{}, errors.New("服务正忙...")
-//		}
-//	}
-//	tx.Commit()
-//	return ret, nil
-//}
+func (s *BoxServiceImpl) OnePrizeNeedToSetPosition(tx *gorm.DB, onePrize param.Prizex, fanId, boxId uint, oneBoxAllNorPrizeNum int) (err error) {
+	tmpPosition := "["
+	for _, onePos := range onePrize.Pos { //幾個位置 (3,7)
+		if onePos > oneBoxAllNorPrizeNum {
+			return errors.New("位置超出范围...")
+		}
+		tmpPosition += fmt.Sprintf("%d,", onePos)
+	}
+	positon := strings.TrimRight(tmpPosition, ",")
+	positon += "]"
+	err = tx.Table("yf_prize").
+		Where("fan_id=? and box_id=? and prize_index_name=? and prize_index=?",
+			fanId, boxId, onePrize.PrizeIndexName, onePrize.PrizeIndex).
+		Update("position", positon).Error
+	if err != nil {
+		return errors.New("服务正忙...")
+	}
+	return nil
+}
+func (s *BoxServiceImpl) SetNormalPrizePosition(req param.ReqSetNormalPrizePosition) error {
+	tx := s.db.GetDb().Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	ctx := context.Background()
+	for _, oneFan := range req.Fanex {
+
+		for _, oneBox := range oneFan.Boxex {
+			allNorPrizes, prizes, err := s.GetOneBoxAllNormalPrize(tx, oneFan.FanId, oneBox.BoxId)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			target := make([]int32, allNorPrizes)
+			sureIndexs := make([]int32, 0)
+			leftIndexs := make([]int32, 0)
+			onePrizeSamePos := []int{}
+			oneBoxSamePos := []int{}
+			for _, onePrize := range oneBox.Prizex {
+				err = s.OnePrizeNeedToSetPosition(tx, onePrize, oneFan.FanId, oneBox.BoxId, allNorPrizes)
+				if err != nil {
+					tx.Rollback()
+					return err
+				}
+				for _, p := range onePrize.Pos {
+					onePrizeSamePos = append(onePrizeSamePos, p)
+					oneBoxSamePos = append(oneBoxSamePos, p)
+					target[p-1] = int32(onePrize.PrizeIndex)
+					sureIndexs = append(sureIndexs, int32(onePrize.PrizeIndex))
+				}
+				isOnePrizePossame := define.IsHasSameEle(onePrizeSamePos)
+				if isOnePrizePossame {
+					tx.Rollback()
+					return errors.New("同一奖品位置不要重複")
+				}
+			}
+			isOneBoxPrizePossame := define.IsHasSameEle(oneBoxSamePos)
+			if isOneBoxPrizePossame {
+				tx.Rollback()
+				return errors.New("同一箱奖品位置不要重複")
+			}
+			for index, wOnePrize := range prizes {
+				for _, ele := range sureIndexs {
+					if wOnePrize.PrizeIndex == int32(ele) {
+						prizes[index].PriczeLeftNum = prizes[index].PriczeLeftNum - 1
+					}
+				}
+			}
+			for _, ele := range prizes {
+				for a := 0; a < int(ele.PriczeLeftNum); a++ {
+					leftIndexs = append(leftIndexs, ele.PrizeIndex)
+				}
+			}
+			var a, b, c []*redis.IntCmd
+			aTimes, bTimes, cTimes := int64(0), int64(0), int64(0)
+			_, err = s.cache.Cache.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+				a, aTimes = s.SetSureCache(pipe, ctx, sureIndexs, oneFan.FanId, oneBox.BoxId)
+				b, bTimes = s.SetLeftCache(pipe, ctx, leftIndexs, oneFan.FanId, oneBox.BoxId)
+				c, cTimes = s.SetTargetCache(pipe, ctx, target, oneFan.FanId, oneBox.BoxId)
+				return nil
+			})
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+			err = isAllResultOkEx(a, b, c, aTimes, bTimes, cTimes)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+func isAllResultOkEx(a, b, c []*redis.IntCmd, aTimes, bTimes, cTimes int64) error {
+	isAOk := false
+	for _, ele := range a {
+		if ele.Val() == aTimes {
+			isAOk = true
+		}
+	}
+	if !isAOk {
+		return errors.New("请不要重复设置...")
+	}
+
+	isBOk := false
+	for _, ele := range b {
+		if ele.Val() == bTimes {
+			isBOk = true
+		}
+	}
+	if !isBOk {
+		return errors.New("请不要重复设置...")
+	}
+
+	isCOk := false
+	for _, ele := range c {
+		if ele.Val() == cTimes {
+			isCOk = true
+		}
+	}
+	if !isCOk {
+		return errors.New("请不要重复设置...")
+	}
+	return nil
+}
 func isAllResultOk(a, b, c, d, e, f []*redis.IntCmd, aTimes, bTimes, cTimes, dTimes, eTimes, fTimes int64) error {
 	isAOk := false
 	for _, ele := range a {

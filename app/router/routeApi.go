@@ -43,11 +43,11 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		Use(r.middles.Cors())
 	{
 		box.POST("/create", handler.AddBox())
+		box.POST("/setnPosition", handler.SetNormalPrizePosition())
 		box.POST("/delete", handler.DeleteBox())
 		box.POST("/modify", handler.ModifyBox())
 		box.POST("/modify/status", handler.ModifyBoxStatus())
 		box.POST("/goods/query", handler.QueryGoodsForBox())
-
 		box.POST("/goods/toBePrize", handler.GoodsToBePrize())
 		box.POST("/goods/modify", handler.ModifyBoxGoods())
 		box.POST("/goods/delete", handler.DeleteBoxGoods())

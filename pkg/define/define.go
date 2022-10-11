@@ -140,7 +140,16 @@ func RedisLastPrizePosition(fanId, boxId uint) string {
 func RedisGlobalPrizePosition(fanId, boxId uint) string {
 	return fmt.Sprintf("fanId%d-boxId%d-global-position", fanId, boxId)
 }
-
+func IsHasSameEle(nums []int) bool {
+	m := map[int]int{}
+	for i := 0; i < len(nums); i++ {
+		m[nums[i]]++
+		if m[nums[i]] > 1 {
+			return true
+		}
+	}
+	return false
+}
 func DeleteSlice(a []db.Prize, elem uint) []db.Prize {
 	for i := 0; i < len(a); i++ {
 		if a[i].ID == elem {
@@ -169,6 +178,7 @@ type PrizeIdIndexName struct {
 	PrizeIndexName string
 	Pic            string
 	Price          float64
+	PrizeLeftNum   int
 }
 type AccessTokenErrorResponse struct {
 	ErrMsg  string `json:"err_msg"`
