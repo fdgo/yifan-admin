@@ -181,6 +181,16 @@ type Prize struct {
 	SingleOrMuti   int         `json:"singleOrMuti"` //单一商品填1, 有n个组合就写n
 	MultiIds       db.GormList `json:"multiIds"`     //商品id组合,单一商品[435], n个商品[34,456,234,...]
 }
+type ReqPageOfPosition struct {
+}
+type ReqPageOfPositionCondition struct {
+	FanId          uint    `json:"fanId"`
+	BoxIndex       int     `json:"boxIndex"`
+	PrizeIndexName string  `json:"prizeIndexName"`
+	PrizeName      string  `json:"prizeName"`
+	TimeRange      []int64 `json:"timeRange"`
+	Status         int     `json:"status"`
+}
 
 type ReqSetNormalPrizePosition struct {
 	Fanex []Fanex `json:"fanex"`

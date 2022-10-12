@@ -488,6 +488,66 @@ func (h *handler) AddBox() gin.HandlerFunc {
 		response.ResposeSuccess(data, context)
 	}
 }
+
+// @Description PageOfPosition
+// @Tags PageOfPosition
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqPageOfPosition body param.ReqPageOfPosition true "看文档下面结构说明"
+// @Success 200 {object} response.responseSucess{data=param.RespPageOfPosition}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/box/pagePosition [post]
+func (h *handler) PageOfPosition() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqPageOfPosition
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.boxService.PageOfPosition(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description PageOfPositionCondition
+// @Tags PageOfPositionCondition
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqPageOfPositionCondition body param.ReqPageOfPositionCondition true "看文档下面结构说明"
+// @Success 200 {object} response.responseSucess{data=param.RespPageOfPositionCondition}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/box/pagePosition/condition [post]
+func (h *handler) PageOfPositionCondition() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqPageOfPositionCondition
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.boxService.PageOfPositionCondition(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description SetNormalPrizePosition
+// @Tags SetNormalPrizePosition
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqSetNormalPrizePosition body param.ReqSetNormalPrizePosition true "看文档下面结构说明"
+// @Success 200 {object} response.responseSucess{data=int}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/box/setnPosition [post]
 func (h *handler) SetNormalPrizePosition() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var req param.ReqSetNormalPrizePosition

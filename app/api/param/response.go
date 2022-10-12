@@ -202,6 +202,30 @@ type Good struct {
 	SoldStatus   string  `json:"soldStatus"`
 }
 
+type RespPageOfPosition struct {
+	FanId  uint    `json:"fanId,omitempty"`
+	BoxNum int     `json:"boxNum"`
+	Boxes  []Boxes `json:"boxes,omitempty"`
+}
+type RespPageOfPositionCondition struct {
+	FanId  uint    `json:"fanId,omitempty"`
+	BoxNum int     `json:"boxNum"`
+	Boxes  []Boxes `json:"boxes,omitempty"`
+}
+
+type Boxes struct {
+	PrizeNum int      `json:"prizeNum"`
+	PrizeA   []PrizeA `json:"prizes"`
+}
+type PrizeA struct {
+	BoxId          uint   `json:"boxId,omitempty"`
+	PrizeIndexName string `json:"prizeIndexName,omitempty"`
+	Num            int32  `json:"num"`
+	PrizeName      string `json:"prizeName"`
+	PrizeIndex     int32  `json:"prizeIndex,omitempty"`
+	Position       []int  `json:"position,omitempty"`
+}
+
 //////////////////////////////////////////////////////////////
 type RespAddFan struct {
 }

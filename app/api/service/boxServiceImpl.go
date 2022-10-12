@@ -305,6 +305,8 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 		boxIds = append(boxIds, box.ID)
 		for nindex, ele := range prizes {
 			prizes[nindex].BoxID = &box.ID
+			prizes[nindex].BoxIndex = int(box.BoxIndex)
+			prizes[nindex].Status = box.Status
 			if ele.PrizeIndexName != define.PrizeIndexNameFirst &&
 				ele.PrizeIndexName != define.PrizeIndexNameLast &&
 				ele.PrizeIndexName != define.PrizeIndexNameGlobal {
@@ -474,6 +476,130 @@ func (s *BoxServiceImpl) OnePrizeNeedToSetPosition(tx *gorm.DB, onePrize param.P
 		return 0, errors.New("奖品不存在...")
 	}
 	return int64(prize.PriczeLeftNum), nil
+}
+func (s *BoxServiceImpl) PageOfPosition(req param.ReqPageOfPosition) (param.RespPageOfPosition, error) {
+	var fan db.Fan
+	result := s.db.GetDb().Order("created_at desc").First(&fan)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return param.RespPageOfPosition{}, errors.New("服务正忙...")
+	}
+	if result.RowsAffected == 0 {
+		return param.RespPageOfPosition{}, errors.New("沒有任何蕃...")
+	}
+	var boxes []db.Box
+	err := s.db.GetDb().Model(&fan).Association("Boxs").Find(&boxes)
+	if err != nil {
+		return param.RespPageOfPosition{}, errors.New("服务正忙...")
+	}
+	if boxes == nil {
+		return param.RespPageOfPosition{}, errors.New("沒有任何箱子...")
+	}
+	res := param.RespPageOfPosition{}
+	res.FanId = fan.ID
+	res.BoxNum = len(boxes)
+	for _, oneBox := range boxes {
+		var prizes []db.Prize
+		s.db.GetDb().Model(&oneBox).Association("Prizes").Find(&prizes)
+		parazs := []param.PrizeA{}
+		for _, onePrize := range prizes {
+			parazs = append(parazs, param.PrizeA{
+				BoxId:          oneBox.ID,
+				Num:            onePrize.PrizeNum,
+				PrizeName:      onePrize.GoodName,
+				PrizeIndexName: onePrize.PrizeIndexName,
+				PrizeIndex:     onePrize.PrizeIndex,
+				Position:       onePrize.Position,
+			})
+		}
+		res.Boxes = append(res.Boxes, param.Boxes{
+			PrizeNum: len(prizes),
+			PrizeA:   parazs,
+		})
+	}
+	return res, nil
+}
+
+func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCondition) (param.RespPageOfPositionCondition, error) {
+	if req.BoxIndex == -1 {
+		var fan db.Fan
+		result := s.db.GetDb().Where("id=?", req.FanId).First(&fan)
+		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
+		}
+		if result.RowsAffected == 0 {
+			return param.RespPageOfPositionCondition{}, errors.New("沒有任何蕃...")
+		}
+		var boxes []db.Box
+		err := s.db.GetDb().Model(&fan).Association("Boxs").Find(&boxes)
+		if err != nil {
+			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
+		}
+		if boxes == nil {
+			return param.RespPageOfPositionCondition{}, errors.New("沒有任何箱子...")
+		}
+		res := param.RespPageOfPositionCondition{}
+		res.FanId = fan.ID
+		res.BoxNum = len(boxes)
+		for _, oneBox := range boxes {
+			var prizes []db.Prize
+			s.db.GetDb().Model(&oneBox).Where("prize_index_name=? and good_name=? and status=? and created_at Between ? and ?",
+				req.PrizeIndexName, req.PrizeName, req.Status, time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
+				time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05")).Association("Prizes").Find(&prizes)
+			parazs := []param.PrizeA{}
+			for _, onePrize := range prizes {
+				parazs = append(parazs, param.PrizeA{
+					BoxId:          oneBox.ID,
+					Num:            onePrize.PrizeNum,
+					PrizeName:      onePrize.GoodName,
+					PrizeIndexName: onePrize.PrizeIndexName,
+					PrizeIndex:     onePrize.PrizeIndex,
+					Position:       onePrize.Position,
+				})
+			}
+			res.Boxes = append(res.Boxes, param.Boxes{
+				PrizeNum: len(prizes),
+				PrizeA:   parazs,
+			})
+		}
+		return res, nil
+	} else {
+		var fan db.Fan
+		result := s.db.GetDb().Where("id=?", req.FanId).First(&fan)
+		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
+		}
+		if result.RowsAffected == 0 {
+			return param.RespPageOfPositionCondition{}, errors.New("沒有任何蕃...")
+		}
+		var box db.Box
+		err := s.db.GetDb().Model(&fan).Where("box_index=?", req.BoxIndex).Association("Boxs").Find(&box)
+		if err != nil {
+			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
+		}
+		res := param.RespPageOfPositionCondition{}
+		res.FanId = fan.ID
+		res.BoxNum = 1
+		var prizes []db.Prize
+		s.db.GetDb().Model(&box).Where("prize_index_name=? and good_name=? and status=? and created_at Between ? and ?",
+			req.PrizeIndexName, req.PrizeName, req.Status, time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
+			time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05")).Association("Prizes").Find(&prizes)
+		parazs := []param.PrizeA{}
+		for _, onePrize := range prizes {
+			parazs = append(parazs, param.PrizeA{
+				BoxId:          box.ID,
+				Num:            onePrize.PrizeNum,
+				PrizeName:      onePrize.GoodName,
+				PrizeIndexName: onePrize.PrizeIndexName,
+				PrizeIndex:     onePrize.PrizeIndex,
+				Position:       onePrize.Position,
+			})
+		}
+		res.Boxes = append(res.Boxes, param.Boxes{
+			PrizeNum: len(prizes),
+			PrizeA:   parazs,
+		})
+		return res, nil
+	}
 }
 func (s *BoxServiceImpl) SetNormalPrizePosition(req param.ReqSetNormalPrizePosition) error {
 	tx := s.db.GetDb().Begin()

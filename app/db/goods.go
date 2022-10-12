@@ -107,6 +107,7 @@ type Prize struct {
 	SeriesName     string   `gorm:"comment:所属系列id"  json:"seriesName"`
 	Position       GormList `gorm:"type:varchar(128);not null"`
 	BoxID          *uint
+	BoxIndex       int
 	Pic            string         `gorm:"comment:图片;type:varchar(128);not null" json:"pic"`
 	Price          float64        `gorm:"comment:建议售价" json:"price"`
 	PrizeNum       int32          `gorm:"comment:该类奖品总数" json:"priczeNum"`
@@ -117,6 +118,7 @@ type Prize struct {
 	Remark         string         `gorm:"comment:备注" json:"remark"`
 	SingleOrMuti   int            `json:"singleOrMuti"`
 	MultiIds       GormList       `gorm:"type:varchar(128);not null"`
+	Status         int            `gorm:"comment:上下架" json:"status"`
 	SoldStatus     int            `gorm:"comment:是否售罄1.奖品售罄,2.奖品未售罄" json:"soldStatus"`
 	PkgStatus      int            `gorm:"comment:打包状态" json:"pkgStatus"`
 	WhoUpdate      string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`

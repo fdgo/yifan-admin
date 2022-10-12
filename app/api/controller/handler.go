@@ -31,6 +31,8 @@ type Handler interface {
 	ModifyGoods() gin.HandlerFunc
 
 	AddBox() gin.HandlerFunc
+	PageOfPosition() gin.HandlerFunc
+	PageOfPositionCondition() gin.HandlerFunc
 	SetNormalPrizePosition() gin.HandlerFunc
 	DeleteBox() gin.HandlerFunc
 	ModifyBox() gin.HandlerFunc

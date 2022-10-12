@@ -43,6 +43,8 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		Use(r.middles.Cors())
 	{
 		box.POST("/create", handler.AddBox())
+		box.POST("/pagePosition", handler.PageOfPosition())
+		box.POST("/pagePosition/condition", handler.PageOfPositionCondition())
 		box.POST("/setnPosition", handler.SetNormalPrizePosition())
 		box.POST("/delete", handler.DeleteBox())
 		box.POST("/modify", handler.ModifyBox())

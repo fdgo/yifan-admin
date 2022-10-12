@@ -8,6 +8,8 @@ import (
 
 type BoxService interface {
 	AddBox(req param.ReqAddBox) (param.RespAddBox, error)
+	PageOfPosition(req param.ReqPageOfPosition) (param.RespPageOfPosition, error)
+	PageOfPositionCondition(req param.ReqPageOfPositionCondition) (param.RespPageOfPositionCondition, error)
 	SetNormalPrizePosition(req param.ReqSetNormalPrizePosition) error
 	DeleteBox(req param.ReqDeleteBox) error
 	ModifyBox(req param.ReqModifyBox) error
