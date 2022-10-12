@@ -202,15 +202,23 @@ type Good struct {
 	SoldStatus   string  `json:"soldStatus"`
 }
 
+//type X struct {
+//	Ret []Ret
+//}
+type Ele struct {
+	FanId          uint
+	BoxId          uint
+	Num            int32
+	PrizeIndexName string
+	PrizeName      string
+	Status         int
+	Postion        string
+}
 type RespPageOfPosition struct {
-	FanId  uint    `json:"fanId,omitempty"`
-	BoxNum int     `json:"boxNum"`
-	Boxes  []Boxes `json:"boxes,omitempty"`
+	Ele []Ele `json:"eles"`
 }
 type RespPageOfPositionCondition struct {
-	FanId  uint    `json:"fanId,omitempty"`
-	BoxNum int     `json:"boxNum"`
-	Boxes  []Boxes `json:"boxes,omitempty"`
+	Ele []Ele `json:"eles"`
 }
 
 type Boxes struct {
@@ -271,7 +279,7 @@ type EachBoxPrize struct {
 	PrizeId        uint        `json:"prizeId,omitempty"`   //奖品id
 	GoodId         uint        `json:"goodId,omitempty"`    //形成奖品的商品id
 	PrizeName      string      `json:"prizeName,omitempty"` //奖品名
-	PrizeNum       int32       `json:"prizeNum,omitempty"`  //某一个种类奖品数量
+	PrizeNum       int32       `json:"prizeNum"`            //某一个种类奖品数量
 	PrizeLeftNum   int32       `json:"prizeLeftNum"`
 	PrizeIndex     int32       `json:"prizeIndex,omitempty"` //某一个种类奖品在箱子中的序号
 	PrizeIndexName string      `json:"prizeIndexName,omitempty"`
@@ -279,6 +287,7 @@ type EachBoxPrize struct {
 	PrizeRate      string      `json:"prizeRate,omitempty"`
 	PrizeStatus    int         `json:"prizeStatus"`
 	Rate           string      `json:"rate"`
+	Remark         string      `json:"remark"`
 	Position       []int       `json:"position"`
 	IpId           uint        `json:"ipId,omitempty"`         //该奖品所属IP
 	IpName         string      `json:"ipName,omitempty"`       //该奖品所属IP的名字

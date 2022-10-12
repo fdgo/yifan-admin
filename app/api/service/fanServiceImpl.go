@@ -9,32 +9,6 @@ import (
 	"yifan/pkg/define"
 )
 
-func (s *FanServiceImpl) AddFan(req param.ReqAddFan) (uint, error) {
-	//DB := s.db.GetDb()
-	//fan := &db.Fan{}
-	//result := DB.Where("name=?", req.FanName).First(&fan)
-	//if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-	//	return 0, errors.New("服务正忙...")
-	//}
-	//if result.RowsAffected != 0 {
-	//	return 0, errors.New("此蕃已经存在...")
-	//}
-	//fanId := define.GetRandFanId()
-	//if err := DB.Create(&db.Fan{
-	//	ID:              fanId,
-	//	Title:           req.FanName,
-	//	Status:          req.Status,
-	//	Price:           req.FanPrice,
-	//	WhoUpdate:       req.WhoCreated,
-	//	ActiveBeginTime: req.OnActiveTime,
-	//	ActiveEndTime:   req.OffActiveTime,
-	//}).Error; err != nil {
-	//	return 0, errors.New("服务正忙...")
-	//}
-	//return fanId, nil
-	return 0, nil
-}
-
 func (s *FanServiceImpl) ModifyFanStatus(req param.ReqModifyFanStatus) error {
 	tx := s.db.GetDb().Begin()
 	defer func() {
@@ -80,6 +54,31 @@ func (s *FanServiceImpl) ModifyFanStatus(req param.ReqModifyFanStatus) error {
 				if result.RowsAffected == 0 {
 					tx.Rollback()
 					return errors.New("箱子删除失败...")
+				}
+				err = tx.Model(&oneBox).Association("Prizes").Find(&oneBox.Prizes)
+				if err != nil {
+					tx.Rollback()
+					return errors.New("服务正忙...")
+				}
+				for _, onePrize := range oneBox.Prizes {
+					result = tx.Model(&onePrize).Update("status", define.YfPrizeStatusDelete)
+					if result.Error != nil {
+						tx.Rollback()
+						return errors.New("服务正忙...")
+					}
+					if result.RowsAffected == 0 {
+						tx.Rollback()
+						return errors.New("服务正忙...")
+					}
+					result = tx.Model(&onePrize).Where("id=?", onePrize.ID).Delete(&db.Prize{})
+					if result.Error != nil {
+						tx.Rollback()
+						return errors.New("服务正忙...")
+					}
+					if result.RowsAffected == 0 {
+						tx.Rollback()
+						return errors.New("箱子删除失败...")
+					}
 				}
 				result = tx.Model(&fan.Boxs).Where("id=?", oneBox.ID).Delete(&db.Box{})
 				if result.Error != nil {
@@ -131,6 +130,22 @@ func (s *FanServiceImpl) ModifyFanStatus(req param.ReqModifyFanStatus) error {
 				tx.Rollback()
 				return errors.New("服务正忙...")
 			}
+			err = tx.Model(&oneBox).Association("Prizes").Find(&oneBox.Prizes)
+			if err != nil {
+				tx.Rollback()
+				return errors.New("服务正忙...")
+			}
+			for _, onePrize := range oneBox.Prizes {
+				result = tx.Model(&onePrize).Update("status", req.Status)
+				if result.Error != nil {
+					tx.Rollback()
+					return errors.New("服务正忙...")
+				}
+				if result.RowsAffected == 0 {
+					tx.Rollback()
+					return errors.New("服务正忙...")
+				}
+			}
 		}
 		tx.Commit()
 		return nil
@@ -170,7 +185,7 @@ func (s *FanServiceImpl) QueryFan(req param.ReqQueryFan) (param.RespQueryFan, er
 			ID:              one.ID,
 			Title:           one.Title,
 			Status:          one.Status,
-			Price:           one.Price,
+			Price:           float64(one.Price),
 			TotalBoxNum:     totalNum,
 			LeftBoxNum:      leftNum,
 			SharePic:        one.SharePic,
@@ -227,6 +242,7 @@ func (s *FanServiceImpl) ModifyFan(req param.ReqModifyFan) (param.RespModifyFan,
 			PrizeRate:      ele.PrizeRate,
 			PrizeIndexName: ele.PrizeIndexName,
 			Position:       ele.Position,
+			Remark:         ele.Remark,
 			IpId:           ele.IpID,
 			IpName:         ele.IpName,
 			SeriId:         ele.SeriesID,
@@ -243,6 +259,11 @@ func (s *FanServiceImpl) ModifyFan(req param.ReqModifyFan) (param.RespModifyFan,
 	ret.FanPrice = box.Price
 	ret.BoxNum = int(totalBox)
 	ret.WhoUpdate = fan.WhoUpdate
+	ret.ActiveBeginTime = fan.ActiveBeginTime
+	ret.ActiveEndTime = fan.ActiveEndTime
+	ret.Rule = fan.Rule
+	ret.Title = fan.Title
+	ret.FanPrice = float64(fan.Price)
 	return ret, nil
 }
 func (s *FanServiceImpl) GetNewBoxes(fanId uint, boxOld, boxNew *db.Box) (pz db.Prize, err error) {
@@ -373,7 +394,7 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 		return resp, errors.New("该箱没有奖品...")
 	}
 	OldBox := &db.Box{
-		Price:     fan.Price,
+		Price:     float64(fan.Price),
 		FanId:     fan.ID,
 		FanName:   fan.Boxs[0].FanName,
 		WhoUpdate: fan.Boxs[0].WhoUpdate,

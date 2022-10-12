@@ -12,7 +12,6 @@ type BoxService interface {
 	PageOfPositionCondition(req param.ReqPageOfPositionCondition) (param.RespPageOfPositionCondition, error)
 	SetNormalPrizePosition(req param.ReqSetNormalPrizePosition) error
 	DeleteBox(req param.ReqDeleteBox) error
-	ModifyBox(req param.ReqModifyBox) error
 	ModifyBoxStatus(req param.ReqModifyBoxStatus) error
 
 	QueryGoodsForBox(req param.ReqQueryGoodsForBox) (param.RespQueryGoodsForBox, error)

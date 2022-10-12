@@ -10,7 +10,7 @@ type Fan struct {
 	Title           string `gorm:"unique;comment:蕃名" json:"title"`
 	Status          int    `gorm:"comment:是否上架1.手动上架 2.自动上架 3.未上架 4.手动下架 5.自动下架" json:"status"`
 	Boxs            []*Box
-	Price           float64        `gorm:"comment:蕃价格" json:"price"`
+	Price           float32        `gorm:"comment:蕃价格" json:"price"`
 	SharePic        string         `gorm:"comment:共享图;type:varchar(128);not null" json:"sharePic"`
 	DetailPic       string         `gorm:"comment:详细图;type:varchar(128);not null" json:"detailPic"`
 	Rule            string         `gorm:"comment:规则;type:varchar(128);not null" json:"rule"`
@@ -169,6 +169,7 @@ type Order struct {
 	PrizeIndexName  string         `gorm:"comment:A赏,B赏..." json:"prizeIndexName"`
 	UserId          uint           `gorm:"comment:用户id" json:"userId"`
 	UserName        string         `gorm:"comment:用户名" json:"userName"`
+	Avatar          string         `gorm:"comment:头像" json:"avatar"`
 	Position        string         `gorm:"comment:特殊赏的位置" json:"position"`
 	Pic             string         `gorm:"comment:图片" json:"pic"`
 	Price           float64        `gorm:"comment:价格" json:"price"`

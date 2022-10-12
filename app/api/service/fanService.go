@@ -7,7 +7,6 @@ import (
 )
 
 type FanService interface {
-	AddFan(req param.ReqAddFan) (uint, error)
 	ModifyFanStatus(req param.ReqModifyFanStatus) error
 	QueryFan(req param.ReqQueryFan) (param.RespQueryFan, error)
 	ModifyFan(req param.ReqModifyFan) (param.RespModifyFan, error)

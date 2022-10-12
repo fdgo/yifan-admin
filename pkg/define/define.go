@@ -51,6 +51,7 @@ const (
 	//奖品状态
 	YfPrizeStatusSoldOut    = 1 //奖品售罄
 	YfPrizeStatusNotSoldOut = 2 //奖品未售罄
+	YfPrizeStatusDelete     = 6
 
 	//箱子状态
 	YfBoxStatusPrizeLeft    = 1 //箱子上架有奖品 (展示)

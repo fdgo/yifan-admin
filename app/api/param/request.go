@@ -250,6 +250,7 @@ type ReqModifyBoxGoods struct {
 	FanId             uint   `json:"fanId"`
 	OldGoodId         uint   `json:"oldGoodId"`
 	OldPrizeIndex     int    `json:"oldPrizeIndex"`
+	NewRemark         string `json:"newRemark"`
 	NewGoodId         uint   `json:"newGoodId"`         //商品id
 	NewGoodName       string `json:"newGoodName"`       //商品名
 	NewPrizeNum       int32  `json:"newPrizeNum"`       //某一个种类奖品数量

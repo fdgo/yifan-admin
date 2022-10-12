@@ -8,7 +8,6 @@ import (
 )
 
 type Handler interface {
-	XYZ() gin.HandlerFunc
 	UpLoadIPs() gin.HandlerFunc
 	SearchIP() gin.HandlerFunc
 	AddIP() gin.HandlerFunc
@@ -35,7 +34,6 @@ type Handler interface {
 	PageOfPositionCondition() gin.HandlerFunc
 	SetNormalPrizePosition() gin.HandlerFunc
 	DeleteBox() gin.HandlerFunc
-	ModifyBox() gin.HandlerFunc
 	ModifyBoxStatus() gin.HandlerFunc
 
 	//
@@ -45,8 +43,6 @@ type Handler interface {
 	DeleteBoxGoods() gin.HandlerFunc
 
 	//
-
-	AddFan() gin.HandlerFunc
 	ModifyFanStatus() gin.HandlerFunc
 	QueryFan() gin.HandlerFunc
 	ModifyFan() gin.HandlerFunc

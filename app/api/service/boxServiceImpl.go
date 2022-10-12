@@ -276,7 +276,7 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 		ID:              fanId,
 		Title:           req.Title,
 		Status:          define.YfFanStatusNotOnBoard,
-		Price:           req.FanPrice,
+		Price:           float32(req.FanPrice),
 		SharePic:        req.SharePic,
 		DetailPic:       req.DetailPic,
 		Rule:            req.Rule,
@@ -495,26 +495,29 @@ func (s *BoxServiceImpl) PageOfPosition(req param.ReqPageOfPosition) (param.Resp
 		return param.RespPageOfPosition{}, errors.New("沒有任何箱子...")
 	}
 	res := param.RespPageOfPosition{}
-	res.FanId = fan.ID
-	res.BoxNum = len(boxes)
+
 	for _, oneBox := range boxes {
 		var prizes []db.Prize
 		s.db.GetDb().Model(&oneBox).Association("Prizes").Find(&prizes)
-		parazs := []param.PrizeA{}
 		for _, onePrize := range prizes {
-			parazs = append(parazs, param.PrizeA{
+			tmpPosition := "["
+			for _, p := range onePrize.Position {
+				tmpPosition += fmt.Sprintf("%d,", p)
+			}
+			positon := strings.TrimRight(tmpPosition, ",")
+			positon += "]"
+
+			ele := param.Ele{
+				FanId:          fan.ID,
 				BoxId:          oneBox.ID,
 				Num:            onePrize.PrizeNum,
-				PrizeName:      onePrize.GoodName,
 				PrizeIndexName: onePrize.PrizeIndexName,
-				PrizeIndex:     onePrize.PrizeIndex,
-				Position:       onePrize.Position,
-			})
+				PrizeName:      onePrize.GoodName,
+				Status:         onePrize.Status,
+				Postion:        positon,
+			}
+			res.Ele = append(res.Ele, ele)
 		}
-		res.Boxes = append(res.Boxes, param.Boxes{
-			PrizeNum: len(prizes),
-			PrizeA:   parazs,
-		})
 	}
 	return res, nil
 }
@@ -538,28 +541,29 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 			return param.RespPageOfPositionCondition{}, errors.New("沒有任何箱子...")
 		}
 		res := param.RespPageOfPositionCondition{}
-		res.FanId = fan.ID
-		res.BoxNum = len(boxes)
 		for _, oneBox := range boxes {
 			var prizes []db.Prize
 			s.db.GetDb().Model(&oneBox).Where("prize_index_name=? and good_name=? and status=? and created_at Between ? and ?",
 				req.PrizeIndexName, req.PrizeName, req.Status, time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
 				time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05")).Association("Prizes").Find(&prizes)
-			parazs := []param.PrizeA{}
 			for _, onePrize := range prizes {
-				parazs = append(parazs, param.PrizeA{
+				tmpPosition := "["
+				for _, p := range onePrize.Position {
+					tmpPosition += fmt.Sprintf("%d,", p)
+				}
+				positon := strings.TrimRight(tmpPosition, ",")
+				positon += "]"
+				ele := param.Ele{
+					FanId:          fan.ID,
 					BoxId:          oneBox.ID,
 					Num:            onePrize.PrizeNum,
-					PrizeName:      onePrize.GoodName,
 					PrizeIndexName: onePrize.PrizeIndexName,
-					PrizeIndex:     onePrize.PrizeIndex,
-					Position:       onePrize.Position,
-				})
+					PrizeName:      onePrize.GoodName,
+					Status:         onePrize.Status,
+					Postion:        positon,
+				}
+				res.Ele = append(res.Ele, ele)
 			}
-			res.Boxes = append(res.Boxes, param.Boxes{
-				PrizeNum: len(prizes),
-				PrizeA:   parazs,
-			})
 		}
 		return res, nil
 	} else {
@@ -577,27 +581,29 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
 		}
 		res := param.RespPageOfPositionCondition{}
-		res.FanId = fan.ID
-		res.BoxNum = 1
 		var prizes []db.Prize
 		s.db.GetDb().Model(&box).Where("prize_index_name=? and good_name=? and status=? and created_at Between ? and ?",
 			req.PrizeIndexName, req.PrizeName, req.Status, time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
 			time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05")).Association("Prizes").Find(&prizes)
-		parazs := []param.PrizeA{}
 		for _, onePrize := range prizes {
-			parazs = append(parazs, param.PrizeA{
+			tmpPosition := "["
+			for _, p := range onePrize.Position {
+				tmpPosition += fmt.Sprintf("%d,", p)
+			}
+			positon := strings.TrimRight(tmpPosition, ",")
+			positon += "]"
+
+			ele := param.Ele{
+				FanId:          fan.ID,
 				BoxId:          box.ID,
 				Num:            onePrize.PrizeNum,
-				PrizeName:      onePrize.GoodName,
 				PrizeIndexName: onePrize.PrizeIndexName,
-				PrizeIndex:     onePrize.PrizeIndex,
-				Position:       onePrize.Position,
-			})
+				PrizeName:      onePrize.GoodName,
+				Status:         onePrize.Status,
+				Postion:        positon,
+			}
+			res.Ele = append(res.Ele, ele)
 		}
-		res.Boxes = append(res.Boxes, param.Boxes{
-			PrizeNum: len(prizes),
-			PrizeA:   parazs,
-		})
 		return res, nil
 	}
 }
@@ -807,11 +813,6 @@ func (s *BoxServiceImpl) EachBoxInfoByStatus(fanId uint, status ...int) (boxes [
 	result = s.db.GetDb().Where("fan_id=? and status IN ?", fanId, tmpStatus).Find(&boxes)
 	return
 }
-
-func (s *BoxServiceImpl) ModifyBox(req param.ReqModifyBox) error {
-
-	return nil
-}
 func (s *BoxServiceImpl) ModifyBoxStatus(req param.ReqModifyBoxStatus) error {
 	if req.Status != define.YfBoxStatusPrizeLeft && req.Status != define.YfBoxStatusNotOnBoard {
 		return errors.New("状态输入有误...")
@@ -879,31 +880,20 @@ func (s *BoxServiceImpl) ModifyBoxGoods(req param.ReqModifyBoxGoods) error {
 	m["pkg_status"] = req.NewPkgStatus
 	m["single_or_muti"] = req.NewSingleOrMuti
 	m["multi_ids"] = req.NewMultiIds
-	tx := s.db.GetDb()
-	err := tx.Table("yf_prize").Where("fan_id=? and good_id=? and prize_index=?", req.FanId, req.OldGoodId, req.OldPrizeIndex).
+	m["remark"] = req.NewRemark
+	m["position"] = req.NewPrizePosition
+	err := s.db.GetDb().Table("yf_prize").Where("fan_id=? and good_id=? and prize_index=?", req.FanId, req.OldGoodId, req.OldPrizeIndex).
 		Updates(&m).Error
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
-	err = tx.Table("yf_prize_position").Where("fan_id=? and good_id=?", req.FanId, req.OldGoodId).
-		Update("position", req.NewPrizePosition).
-		Update("good_name", req.NewGoodName).
-		Update("good_id", req.NewGoodId).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Commit()
 	return nil
 }
 func (s *BoxServiceImpl) DeleteBoxGoods(req param.ReqDeleteBoxGoods) error {
-	fmt.Println("delete prize", req.GoodId, req.FanId)
 	err := s.db.GetDb().Model(&db.Prize{}).
 		Where("fan_id=? and good_id=?", req.FanId, req.GoodId).Delete(&db.Prize{}).Error
 	if err != nil {
 		return errors.New("服务正忙...")
 	}
 	return nil
-
 }

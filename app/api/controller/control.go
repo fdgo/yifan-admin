@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"yifan/app/api/param"
 	"yifan/pkg/response"
@@ -104,11 +103,6 @@ func (h *handler) DeleteIP() gin.HandlerFunc {
 			return
 		}
 		response.ResposeSuccess(nil, context)
-	}
-}
-func (h *handler) XYZ() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		fmt.Println("1111111111111")
 	}
 }
 
@@ -589,31 +583,6 @@ func (h *handler) DeleteBox() gin.HandlerFunc {
 	}
 }
 
-// @Description ModifyBox
-// @Tags ModifyBox
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param ReqModifyBox body param.ReqModifyBox true "看文档下面结构说明"
-// @Success 200 {object} response.responseSucess{data=int}
-// @Failure 400 {object} response.responseFailure
-// @Router /v1/box/modify [post]
-func (h *handler) ModifyBox() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		var req param.ReqModifyBox
-		if err := context.ShouldBindJSON(&req); err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		err := h.boxService.ModifyBox(req)
-		if err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		response.ResposeSuccess(nil, context)
-	}
-}
-
 // @Description ModifyBoxStatus
 // @Tags ModifyBoxStatus
 // @Accept json
@@ -727,31 +696,6 @@ func (h *handler) DeleteBoxGoods() gin.HandlerFunc {
 			return
 		}
 		response.ResposeSuccess(nil, context)
-	}
-}
-
-// @Description AddFan
-// @Tags AddFan
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param ReqAddFan body param.ReqAddFan true "555"
-// @Success 200 {object} response.responseSucess{data=int}
-// @Failure 400 {object} response.responseFailure
-// @Router /v1/fan/create [post]
-func (h *handler) AddFan() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		var req param.ReqAddFan
-		if err := context.ShouldBindJSON(&req); err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		data, err := h.fanService.AddFan(req)
-		if err != nil {
-			response.AbortWithBadRequestWithError(err, context)
-			return
-		}
-		response.ResposeSuccess(data, context)
 	}
 }
 
