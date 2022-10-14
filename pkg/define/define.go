@@ -45,8 +45,8 @@ const (
 	YfGoodsPkgStatusOldOld = 3 //拆盒拆袋
 
 	//YfSoldStatus        = 0
-	//YfSoldStatusPreSell = 1 //预售
-	//YfSoldStatusExist   = 2 //库存
+	YfSoldStatusPreSell = 1 //预售
+	YfSoldStatusExist   = 2 //库存
 
 	//奖品状态
 	YfPrizeStatusSoldOut    = 1 //奖品售罄
@@ -173,13 +173,24 @@ type User struct {
 	Position       int    `json:"position,omitempty"`
 }
 type PrizeIdIndexName struct {
-	PrizeId        uint
-	PrizeIndex     int32
-	PrizeName      string
-	PrizeIndexName string
-	Pic            string
-	Price          float64
-	PrizeLeftNum   int
+	PrizeId           uint
+	PrizeName         string
+	PrizeIndex        int32
+	FanId             uint
+	FanName           string
+	GoodID            uint
+	GoodName          string
+	PrizeIndexName    string
+	Remark            string
+	Price             float64
+	SoldStatus        int
+	TimeForSoldStatus string
+	PkgStatus         int
+	Pic               string
+	IpID              uint
+	IpName            string
+	SeriesID          uint
+	SeriesName        string
 }
 type AccessTokenErrorResponse struct {
 	ErrMsg  string `json:"err_msg"`

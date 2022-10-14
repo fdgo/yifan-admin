@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"math"
 	"yifan/app/api/param"
@@ -181,11 +182,12 @@ func (s *FanServiceImpl) QueryFan(req param.ReqQueryFan) (param.RespQueryFan, er
 				leftNum++
 			}
 		}
+		price, _ := decimal.NewFromFloat32(float32(one.Price)).Float64()
 		ret.FanInfos.Fans = append(ret.FanInfos.Fans, param.Fan{
 			ID:              one.ID,
 			Title:           one.Title,
 			Status:          one.Status,
-			Price:           float64(one.Price),
+			Price:           price,
 			TotalBoxNum:     totalNum,
 			LeftBoxNum:      leftNum,
 			SharePic:        one.SharePic,
@@ -253,17 +255,17 @@ func (s *FanServiceImpl) ModifyFan(req param.ReqModifyFan) (param.RespModifyFan,
 			MultiIds:       ele.MultiIds,
 		})
 	}
+	price, _ := decimal.NewFromFloat32(float32(fan.Price)).Float64()
 	ret.EachBoxPrize = mf
 	ret.FanId = box.FanId
 	ret.FanName = box.FanName
-	ret.FanPrice = box.Price
+	ret.FanPrice = price
 	ret.BoxNum = int(totalBox)
 	ret.WhoUpdate = fan.WhoUpdate
 	ret.ActiveBeginTime = fan.ActiveBeginTime
 	ret.ActiveEndTime = fan.ActiveEndTime
 	ret.Rule = fan.Rule
 	ret.Title = fan.Title
-	ret.FanPrice = float64(fan.Price)
 	return ret, nil
 }
 func (s *FanServiceImpl) GetNewBoxes(fanId uint, boxOld, boxNew *db.Box) (pz db.Prize, err error) {
@@ -386,6 +388,9 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 	if len(fan.Boxs) == 0 {
 		return resp, errors.New("该蕃没有箱...")
 	}
+	if req.TotalBoxNum < len(fan.Boxs) {
+		return resp, errors.New("必须大于已有箱数...")
+	}
 	err = DB.Model(&fan.Boxs[0]).Association("Prizes").Find(&fan.Boxs[0].Prizes)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return resp, errors.New("服务正忙...")
@@ -420,14 +425,12 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 		OldBox.Prizes = append(OldBox.Prizes, &newPz)
 	}
 	Box := &db.Box{
-		Price:     req.FanPrice,
-		FanId:     req.FanID,
-		FanName:   req.FanName,
-		WhoUpdate: req.WhoUpdate,
+		Price:   req.FanPrice,
+		FanId:   req.FanID,
+		FanName: req.FanName,
 	}
 	for _, ePz := range req.Prizes {
 		var newPz db.Prize
-		newPz.ID = ePz.PrizeId
 		newPz.GoodID = ePz.GoodId
 		newPz.GoodName = ePz.GoodName
 		newPz.Remark = ePz.Remark
@@ -440,7 +443,6 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 		newPz.IpName = ePz.IpName
 		newPz.SeriesName = ePz.SeriName
 		newPz.SeriesID = ePz.SeriId
-		newPz.Price = ePz.Price
 		newPz.Pic = ePz.Pic
 		newPz.Position = ePz.Position
 		Box.Prizes = append(Box.Prizes, &newPz)
@@ -448,7 +450,7 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 	if req.TotalBoxNum == len(fan.Boxs) {
 		s.GetNewBoxes(req.FanID, OldBox, Box)
 		return param.RespModifySaveFan{}, nil
-	} else if req.TotalBoxNum > len(fan.Boxs) {
+	} else {
 		pz, _ := s.GetNewBoxes(req.FanID, OldBox, Box)
 		for i := 0; i < req.TotalBoxNum-len(fan.Boxs); i++ {
 			newBox := Box
@@ -466,8 +468,6 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 			tx.Commit()
 		}
 		return param.RespModifySaveFan{}, nil
-	} else {
-		return param.RespModifySaveFan{}, errors.New("参数错误，箱子只增不减")
 	}
 }
 

@@ -35,27 +35,28 @@ func (s *BoxServiceImpl) EachBox(box *param.Box, fanId uint, fanName string) ([]
 			prizeNum += prizeEle.PrizeNum
 		}
 		prizes = append(prizes, &db.Prize{
-			ID:             define.GetRandPrizeId(),
-			GoodID:         prizeEle.GoodId,
-			GoodName:       prizeEle.GoodName,
-			FanId:          fanId,
-			FanName:        fanName,
-			Position:       prizeEle.Position,
-			IpID:           prizeEle.IpId,
-			IpName:         prizeEle.IpName,
-			SeriesID:       prizeEle.SeriId,
-			SeriesName:     prizeEle.SeriName,
-			Pic:            prizeEle.Pic,
-			PrizeNum:       prizeEle.PrizeNum,
-			PriczeLeftNum:  prizeEle.PrizeNum,
-			PrizeIndex:     prizeEle.PrizeIndex,
-			PrizeIndexName: prizeEle.PrizeIndexName,
-			SingleOrMuti:   prizeEle.SingleOrMuti,
-			Price:          prizeEle.Price,
-			MultiIds:       prizeEle.MultiIds,
-			PkgStatus:      prizeEle.PkgStatus,
-			Remark:         prizeEle.Remark,
-			SoldStatus:     define.YfPrizeStatusNotSoldOut,
+			ID:                define.GetRandPrizeId(),
+			GoodID:            prizeEle.GoodId,
+			GoodName:          prizeEle.GoodName,
+			FanId:             fanId,
+			FanName:           fanName,
+			Position:          prizeEle.Position,
+			IpID:              prizeEle.IpId,
+			IpName:            prizeEle.IpName,
+			SeriesID:          prizeEle.SeriId,
+			SeriesName:        prizeEle.SeriName,
+			Pic:               prizeEle.Pic,
+			PrizeNum:          prizeEle.PrizeNum,
+			PriczeLeftNum:     prizeEle.PrizeNum,
+			PrizeIndex:        prizeEle.PrizeIndex,
+			PrizeIndexName:    prizeEle.PrizeIndexName,
+			SingleOrMuti:      prizeEle.SingleOrMuti,
+			Price:             prizeEle.Price,
+			MultiIds:          prizeEle.MultiIds,
+			PkgStatus:         prizeEle.PkgStatus,
+			Remark:            prizeEle.Remark,
+			TimeForSoldStatus: prizeEle.TimeForSoldStatus,
+			SoldStatus:        define.YfPrizeStatusNotSoldOut,
 		})
 	}
 	return prizes, prizeNum
@@ -85,24 +86,6 @@ func (s *BoxServiceImpl) EachBox(box *param.Box, fanId uint, fanName string) ([]
 //	prizeIndexIdName.PrizeNum = prize.PrizeNum
 //	return
 //}
-func EachGlobalPrize(prize *param.Prize) (prizeNum int32, prizeIndexIdName PrizeIndexIdName, eles []define.PrizeIdIndexName) {
-	for i := 0; i < int(prize.PrizeNum); i++ {
-		eles = append(eles, define.PrizeIdIndexName{
-			PrizeId:        prize.GoodId,
-			PrizeIndex:     prize.PrizeIndex,
-			PrizeName:      prize.GoodName,
-			PrizeIndexName: prize.PrizeIndexName,
-			Price:          prize.Price,
-			Pic:            prize.Pic,
-		})
-	}
-	prizeNum = prize.PrizeNum
-	prizeIndexIdName.PrizeIndex = prize.PrizeIndex
-	prizeIndexIdName.PrizeName = prize.GoodName
-	prizeIndexIdName.PrizeId = prize.GoodId
-	prizeIndexIdName.PrizeNum = prize.PrizeNum
-	return
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 func (s *BoxServiceImpl) SetSureTargetEles(sures []PrizeIndexIdName) (int32, []int32, []int32) { //所有商品总数
@@ -253,9 +236,10 @@ func (s *BoxServiceImpl) SetUserCache(pipe redis.Pipeliner, ctx context.Context,
 
 func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 	var (
-		fan = &db.Fan{}
-		ret = param.RespAddBox{}
-		tx  = s.db.GetDb().Begin()
+		fanIndex = 0
+		fan      = &db.Fan{}
+		ret      = param.RespAddBox{}
+		tx       = s.db.GetDb().Begin()
 	)
 	defer func() {
 		if r := recover(); r != nil {
@@ -271,10 +255,19 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 		tx.Rollback()
 		return ret, errors.New("此蕃已经存在...")
 	}
+	result = tx.Table("yf_fan").Select("fan_index").Order("fan_index desc").First(&fan)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		tx.Rollback()
+		return ret, errors.New("服务正忙...")
+	}
+	if result.RowsAffected != 0 {
+		fanIndex = fan.FanIndex
+	}
 	fanId := define.GetRandFanId()
-	err := tx.Create(&db.Fan{
+	fan = &db.Fan{
 		ID:              fanId,
 		Title:           req.Title,
+		FanIndex:        fanIndex + 1,
 		Status:          define.YfFanStatusNotOnBoard,
 		Price:           float32(req.FanPrice),
 		SharePic:        req.SharePic,
@@ -282,7 +275,8 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 		Rule:            req.Rule,
 		ActiveBeginTime: req.ActiveBeginTime,
 		ActiveEndTime:   req.ActiveEndTime,
-	}).Error
+	}
+	err := tx.Create(fan).Error
 	if err != nil {
 		tx.Rollback()
 		return ret, errors.New("服务正忙...")
@@ -377,11 +371,24 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 			}
 			for i := 0; i < int(onePrize.PrizeNum); i++ {
 				firstEles = append(firstEles, define.PrizeIdIndexName{
-					PrizeId:        onePrize.GoodId,
-					PrizeIndex:     onePrize.PrizeIndex,
-					PrizeName:      onePrize.GoodName,
-					PrizeIndexName: onePrize.PrizeIndexName,
-					Price:          onePrize.Price,
+					PrizeId:           onePrize.GoodId,
+					PrizeIndex:        onePrize.PrizeIndex,
+					PrizeName:         onePrize.GoodName,
+					PrizeIndexName:    onePrize.PrizeIndexName,
+					Price:             onePrize.Price,
+					FanId:             fanId,
+					FanName:           fan.Title,
+					GoodID:            onePrize.GoodId,
+					GoodName:          onePrize.GoodName,
+					Remark:            onePrize.Remark,
+					SoldStatus:        onePrize.SoldStatus,
+					TimeForSoldStatus: onePrize.TimeForSoldStatus,
+					PkgStatus:         onePrize.PkgStatus,
+					Pic:               onePrize.Pic,
+					IpID:              onePrize.IpId,
+					IpName:            onePrize.IpName,
+					SeriesID:          onePrize.SeriId,
+					SeriesName:        onePrize.SeriName,
 				})
 			}
 		} else if onePrize.PrizeIndexName == "Last" {
@@ -390,47 +397,73 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 			}
 			for i := 0; i < int(onePrize.PrizeNum); i++ {
 				lastEles = append(lastEles, define.PrizeIdIndexName{
-					PrizeId:        onePrize.GoodId,
-					PrizeIndex:     onePrize.PrizeIndex,
-					PrizeName:      onePrize.GoodName,
-					PrizeIndexName: onePrize.PrizeIndexName,
-					Price:          onePrize.Price,
+					PrizeId:           onePrize.GoodId,
+					PrizeIndex:        onePrize.PrizeIndex,
+					PrizeName:         onePrize.GoodName,
+					PrizeIndexName:    onePrize.PrizeIndexName,
+					Price:             onePrize.Price,
+					FanId:             fanId,
+					FanName:           fan.Title,
+					GoodID:            onePrize.GoodId,
+					GoodName:          onePrize.GoodName,
+					Remark:            onePrize.Remark,
+					SoldStatus:        onePrize.SoldStatus,
+					TimeForSoldStatus: onePrize.TimeForSoldStatus,
+					PkgStatus:         onePrize.PkgStatus,
+					Pic:               onePrize.Pic,
+					IpID:              onePrize.IpId,
+					IpName:            onePrize.IpName,
+					SeriesID:          onePrize.SeriId,
+					SeriesName:        onePrize.SeriName,
 				})
 			}
 		} else if onePrize.PrizeIndexName == "全局" {
 			for i := 0; i < int(onePrize.PrizeNum); i++ {
 				globalEles = append(globalEles, define.PrizeIdIndexName{
-					PrizeId:        onePrize.GoodId,
-					PrizeIndex:     onePrize.PrizeIndex,
-					PrizeName:      onePrize.GoodName,
-					PrizeIndexName: onePrize.PrizeIndexName,
-					Price:          onePrize.Price,
+					PrizeId:           onePrize.GoodId,
+					PrizeIndex:        onePrize.PrizeIndex,
+					PrizeName:         onePrize.GoodName,
+					PrizeIndexName:    onePrize.PrizeIndexName,
+					Price:             onePrize.Price,
+					FanId:             fanId,
+					FanName:           fan.Title,
+					GoodID:            onePrize.GoodId,
+					GoodName:          onePrize.GoodName,
+					Remark:            onePrize.Remark,
+					SoldStatus:        onePrize.SoldStatus,
+					TimeForSoldStatus: onePrize.TimeForSoldStatus,
+					PkgStatus:         onePrize.PkgStatus,
+					Pic:               onePrize.Pic,
+					IpID:              onePrize.IpId,
+					IpName:            onePrize.IpName,
+					SeriesID:          onePrize.SeriId,
+					SeriesName:        onePrize.SeriName,
 				})
 			}
 		}
 	}
 	ctx := context.Background()
 	for _, boxid := range boxIds {
-		var a, b, c, d, e, f []*redis.IntCmd
-		aTimes, bTimes, cTimes, dTimes, eTimes, fTimes := int64(0), int64(0), int64(0), int64(0), int64(0), int64(0)
+		//var a, b, c, d, e, f []*redis.IntCmd
+		//aTimes, bTimes, cTimes, dTimes, eTimes, fTimes := int64(0), int64(0), int64(0), int64(0), int64(0), int64(0)
 		_, err = s.cache.Cache.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
-			a, aTimes = s.SetFirstPrizePosition(pipe, ctx, firstPos, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
-			b, bTimes = s.SetLastPrizePosition(pipe, ctx, lastPos, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
-			c, cTimes = s.SetFirstPrizeCache(pipe, ctx, firstEles, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
-			d, dTimes = s.SetLastPrizeCache(pipe, ctx, lastEles, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
-			e, eTimes = s.SetGlobalPrizeCache(pipe, ctx, globalEles, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
-			f, fTimes = s.SetUserCache(pipe, ctx, -1, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
+			s.SetFirstPrizePosition(pipe, ctx, firstPos, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
+			s.SetLastPrizePosition(pipe, ctx, lastPos, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
+			s.SetFirstPrizeCache(pipe, ctx, firstEles, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
+			s.SetLastPrizeCache(pipe, ctx, lastEles, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
+			s.SetGlobalPrizeCache(pipe, ctx, globalEles, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
+			s.SetUserCache(pipe, ctx, -1, fanId, boxid, req.ActiveEndTime-time.Now().Unix())
 			return nil
 		})
 		if err != nil {
 			tx.Rollback()
 			return ret, errors.New("服务正忙...")
 		}
-		err = isAllResultOk(a, b, c, d, e, f, aTimes, bTimes, cTimes, dTimes, eTimes, fTimes)
-		if err != nil {
-			tx.Rollback()
-			return ret, errors.New("服务正忙...")
-		}
+		//err = isAllResultOk(a, b, c, d, e, f, aTimes, bTimes, cTimes, dTimes, eTimes, fTimes)
+		//if err != nil {
+		//	tx.Rollback()
+		//	return ret, errors.New("服务正忙...")
+		//}
 	}
 	tx.Commit()
 	return param.RespAddBox{}, nil
@@ -479,7 +512,7 @@ func (s *BoxServiceImpl) OnePrizeNeedToSetPosition(tx *gorm.DB, onePrize param.P
 }
 func (s *BoxServiceImpl) PageOfPosition(req param.ReqPageOfPosition) (param.RespPageOfPosition, error) {
 	var fan db.Fan
-	result := s.db.GetDb().Order("created_at desc").First(&fan)
+	result := s.db.GetDb().Where("fan_index=?", req.FanIndex).First(&fan)
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
 		return param.RespPageOfPosition{}, errors.New("服务正忙...")
 	}
@@ -487,7 +520,8 @@ func (s *BoxServiceImpl) PageOfPosition(req param.ReqPageOfPosition) (param.Resp
 		return param.RespPageOfPosition{}, errors.New("沒有任何蕃...")
 	}
 	var boxes []db.Box
-	err := s.db.GetDb().Model(&fan).Association("Boxs").Find(&boxes)
+	err := s.db.GetDb().Model(&fan).Where("status=? and created_at Between ? and ?",
+		req.Status, time.Unix(req.TimeRange[0], 0), time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05")).Association("Boxs").Find(&boxes)
 	if err != nil {
 		return param.RespPageOfPosition{}, errors.New("服务正忙...")
 	}
@@ -525,7 +559,7 @@ func (s *BoxServiceImpl) PageOfPosition(req param.ReqPageOfPosition) (param.Resp
 func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCondition) (param.RespPageOfPositionCondition, error) {
 	if req.BoxIndex == -1 {
 		var fan db.Fan
-		result := s.db.GetDb().Where("id=?", req.FanId).First(&fan)
+		result := s.db.GetDb().Where("fan_index=?", req.FanIndex).First(&fan)
 		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
 			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
 		}
@@ -533,7 +567,8 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 			return param.RespPageOfPositionCondition{}, errors.New("沒有任何蕃...")
 		}
 		var boxes []db.Box
-		err := s.db.GetDb().Model(&fan).Association("Boxs").Find(&boxes)
+		err := s.db.GetDb().Model(&fan).Where("status=? and created_at Between ? and ? ", req.Status, time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
+			time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05")).Association("Boxs").Find(&boxes)
 		if err != nil {
 			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
 		}
@@ -543,9 +578,28 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 		res := param.RespPageOfPositionCondition{}
 		for _, oneBox := range boxes {
 			var prizes []db.Prize
-			s.db.GetDb().Model(&oneBox).Where("prize_index_name=? and good_name=? and status=? and created_at Between ? and ?",
-				req.PrizeIndexName, req.PrizeName, req.Status, time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
-				time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05")).Association("Prizes").Find(&prizes)
+			sql := ""
+			value := []interface{}{}
+			if req.PrizeIndexName != "All" {
+				sql += "prize_index_name=? "
+				value = append(value, req.PrizeIndexName)
+				if req.PrizeName != "All" {
+					sql += " and good_name=? "
+					value = append(value, req.PrizeName)
+				}
+				err = s.db.GetDb().Model(&oneBox).Where(sql, value).Association("Prizes").Find(&prizes)
+			} else {
+				if req.PrizeName != "All" {
+					sql += "good_name=?"
+					value = append(value, req.PrizeName)
+					err = s.db.GetDb().Model(&oneBox).Where(sql, value).Association("Prizes").Find(&prizes)
+				} else {
+					err = s.db.GetDb().Model(&oneBox).Association("Prizes").Find(&prizes)
+				}
+			}
+			if err != nil {
+				return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
+			}
 			for _, onePrize := range prizes {
 				tmpPosition := "["
 				for _, p := range onePrize.Position {
@@ -568,7 +622,7 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 		return res, nil
 	} else {
 		var fan db.Fan
-		result := s.db.GetDb().Where("id=?", req.FanId).First(&fan)
+		result := s.db.GetDb().Where("fan_index=?", req.FanIndex).First(&fan)
 		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
 			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
 		}
@@ -576,15 +630,35 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 			return param.RespPageOfPositionCondition{}, errors.New("沒有任何蕃...")
 		}
 		var box db.Box
-		err := s.db.GetDb().Model(&fan).Where("box_index=?", req.BoxIndex).Association("Boxs").Find(&box)
+		err := s.db.GetDb().Model(&fan).Where("box_index=? and status=? and created_at Between ? and ?", req.BoxIndex, req.Status, time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
+			time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05")).Association("Boxs").Find(&box)
 		if err != nil {
 			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
 		}
 		res := param.RespPageOfPositionCondition{}
+		sql := ""
+		value := []interface{}{}
 		var prizes []db.Prize
-		s.db.GetDb().Model(&box).Where("prize_index_name=? and good_name=? and status=? and created_at Between ? and ?",
-			req.PrizeIndexName, req.PrizeName, req.Status, time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
-			time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05")).Association("Prizes").Find(&prizes)
+		if req.PrizeIndexName != "All" {
+			sql += "prize_index_name=? "
+			value = append(value, req.PrizeIndexName)
+			if req.PrizeName != "All" {
+				sql += " and good_name=? "
+				value = append(value, req.PrizeName)
+			}
+			err = s.db.GetDb().Model(&box).Where(sql, value).Association("Prizes").Find(&prizes)
+		} else {
+			if req.PrizeName != "All" {
+				sql += "good_name=?"
+				value = append(value, req.PrizeName)
+				err = s.db.GetDb().Model(&box).Where(sql, value).Association("Prizes").Find(&prizes)
+			} else {
+				err = s.db.GetDb().Model(&box).Association("Prizes").Find(&prizes)
+			}
+		}
+		if err != nil {
+			return param.RespPageOfPositionCondition{}, errors.New("服务正忙...")
+		}
 		for _, onePrize := range prizes {
 			tmpPosition := "["
 			for _, p := range onePrize.Position {
@@ -784,7 +858,6 @@ func isAllResultOk(a, b, c, d, e, f []*redis.IntCmd, aTimes, bTimes, cTimes, dTi
 	return nil
 }
 func (s *BoxServiceImpl) DeleteBox(req param.ReqDeleteBox) error {
-
 	return nil
 }
 
@@ -871,22 +944,28 @@ func (s *BoxServiceImpl) GoodsToBePrize(req param.ReqGoodsToBePrize) error {
 	return nil
 }
 func (s *BoxServiceImpl) ModifyBoxGoods(req param.ReqModifyBoxGoods) error {
-	m := make(map[string]interface{})
-	m["good_id"] = req.NewGoodId
-	m["good_name"] = req.NewGoodName
-	m["prize_num"] = req.NewPrizeNum
-	m["prize_index"] = req.NewPrizeIndex
-	m["prize_index_name"] = req.NewPrizeIndexName
-	m["pkg_status"] = req.NewPkgStatus
-	m["single_or_muti"] = req.NewSingleOrMuti
-	m["multi_ids"] = req.NewMultiIds
-	m["remark"] = req.NewRemark
-	m["position"] = req.NewPrizePosition
-	err := s.db.GetDb().Table("yf_prize").Where("fan_id=? and good_id=? and prize_index=?", req.FanId, req.OldGoodId, req.OldPrizeIndex).
-		Updates(&m).Error
-	if err != nil {
-		return err
-	}
+	//var prize db.Prize
+	//result := s.db.GetDb().Where("fan_id=? and good_id=?", req.FanId, req.OldGoodId).First(&prize)
+	//if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+	//	return errors.New("服务正忙...")
+	//}
+	//if result.RowsAffected == 0 {
+	//	return errors.New("不存在该奖品...")
+	//}
+	//m := make(map[string]interface{})
+	//m["good_id"] = req.NewGoodId
+	//m["good_name"] = req.NewGoodName
+	//m["prize_num"] = req.NewPrizeNum
+	//m["prize_index"] = req.NewPrizeIndex
+	//m["prize_index_name"] = req.NewPrizeIndexName
+	//m["pkg_status"] = req.NewPkgStatus
+	//m["remark"] = req.NewRemark
+	//m["position"] = req.NewPrizePosition
+	//err := s.db.GetDb().Table("yf_prize").Where("fan_id=? and good_id=?", req.FanId, req.OldGoodId).
+	//	Updates(&m).Error
+	//if err != nil {
+	//	return err
+	//}
 	return nil
 }
 func (s *BoxServiceImpl) DeleteBoxGoods(req param.ReqDeleteBoxGoods) error {

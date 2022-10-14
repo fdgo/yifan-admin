@@ -163,28 +163,34 @@ type Box struct {
 }
 
 type Prize struct {
-	GoodId         uint        `json:"goodId"`         //奖品id
-	GoodName       string      `json:"goodName"`       //奖品名
-	PrizeNum       int32       `json:"prizeNum"`       //某一个种类奖品数量
-	PrizeIndex     int32       `json:"prizeIndex"`     //某一个种类奖品在箱子中的序号
-	PrizeIndexName string      `json:"prizeIndexName"` //A赏,B赏
-	Position       []int       `json:"position"`       //A赏,B赏 位置
-	PrizeStyle     string      `json:"prizeStyle"`     //抽取方式
-	Price          float64     `json:"price"`          //某种商品价格
-	IpId           uint        `json:"ipId"`           //该奖品所属IP
-	IpName         string      `json:"ipName"`         //该奖品所属IP的名字
-	Remark         string      `json:"remark"`
-	SeriId         uint        `json:"seriesId"`     //该奖品所属系列
-	SeriName       string      `json:"seriesName"`   //该奖品所属系列名字
-	Pic            string      `json:"pic"`          //奖品图片
-	PkgStatus      int         `json:"pkgStatus"`    //品相状态
-	SingleOrMuti   int         `json:"singleOrMuti"` //单一商品填1, 有n个组合就写n
-	MultiIds       db.GormList `json:"multiIds"`     //商品id组合,单一商品[435], n个商品[34,456,234,...]
+	GoodId            uint        `json:"goodId"`         //奖品id
+	GoodName          string      `json:"goodName"`       //奖品名
+	PrizeNum          int32       `json:"prizeNum"`       //某一个种类奖品数量
+	PrizeIndex        int32       `json:"prizeIndex"`     //某一个种类奖品在箱子中的序号
+	PrizeIndexName    string      `json:"prizeIndexName"` //A赏,B赏
+	Position          []int       `json:"position"`       //A赏,B赏 位置
+	PrizeStyle        string      `json:"prizeStyle"`     //抽取方式
+	Price             float64     `json:"price"`          //某种商品价格
+	IpId              uint        `json:"ipId"`           //该奖品所属IP
+	IpName            string      `json:"ipName"`         //该奖品所属IP的名字
+	Remark            string      `json:"remark"`
+	SeriId            uint        `json:"seriesId"`          //该奖品所属系列
+	SeriName          string      `json:"seriesName"`        //该奖品所属系列名字
+	Pic               string      `json:"pic"`               //奖品图片
+	PkgStatus         int         `json:"pkgStatus"`         //品相状态
+	Status            int         `json:"status"`            //上下架
+	SoldStatus        int         `json:"soldStatus"`        //是否售罄1.奖品售罄,2.奖品未售罄
+	TimeForSoldStatus string      `json:"timeForSoldStatus"` //预售时间
+	SingleOrMuti      int         `json:"singleOrMuti"`      //单一商品填1, 有n个组合就写n
+	MultiIds          db.GormList `json:"multiIds"`          //商品id组合,单一商品[435], n个商品[34,456,234,...]
 }
 type ReqPageOfPosition struct {
+	FanIndex  int     `json:"fanIndex"`
+	TimeRange []int64 `json:"timeRange"`
+	Status    int     `json:"status"`
 }
 type ReqPageOfPositionCondition struct {
-	FanId          uint    `json:"fanId"`
+	FanIndex       uint    `json:"fanIndex"`
 	BoxIndex       int     `json:"boxIndex"`
 	PrizeIndexName string  `json:"prizeIndexName"`
 	PrizeName      string  `json:"prizeName"`
@@ -249,7 +255,6 @@ type ReqGoodsToBePrize struct {
 type ReqModifyBoxGoods struct {
 	FanId             uint   `json:"fanId"`
 	OldGoodId         uint   `json:"oldGoodId"`
-	OldPrizeIndex     int    `json:"oldPrizeIndex"`
 	NewRemark         string `json:"newRemark"`
 	NewGoodId         uint   `json:"newGoodId"`         //商品id
 	NewGoodName       string `json:"newGoodName"`       //商品名
@@ -257,10 +262,7 @@ type ReqModifyBoxGoods struct {
 	NewPrizeIndex     int32  `json:"newPrizeIndex"`     //某一个种类奖品在箱子中的序号
 	NewPrizeIndexName string `json:"newPrizeIndexName"` //A赏,B赏
 	NewPrizePosition  string `json:"newPrizePosition"`  //A赏,B赏 位置
-	NewPrizeStyle     string `json:"newPrizeStyle"`     //抽取方式
 	NewPkgStatus      int    `json:"newPkgStatus"`      //品相状态
-	NewSingleOrMuti   int    `json:"newSingleOrMuti"`   //单一商品填1, 有n个组合就写n
-	NewMultiIds       string `json:"newMultiIds"`       //商品id组合,单一商品[435], n个商品[34,456,234,...]
 }
 type ReqDeleteBoxGoods struct {
 	FanId  uint `json:"fanId"`
@@ -290,31 +292,23 @@ type ReqModifyFan struct {
 type ReqModifySaveFan struct {
 	FanID           uint     `json:"fanId"`
 	FanName         string   `json:"fanName"`
-	FanType         string   `json:"fanType"`
 	Rule            string   `json:"rule"`
 	Title           string   `json:"title"`
 	FanPrice        float64  `json:"fanPrice"`
-	Status          int      `json:"status"`
 	ActiveBeginTime int64    `json:"activeBeginTime"`
 	ActiveEndTime   int64    `json:"activeEndTime"`
 	DetailPic       string   `json:"detailPic"`
 	SharePic        string   `json:"sharePic"`
-	WhoUpdate       string   `json:"whoUpdate"`
 	TotalBoxNum     int      `json:"totalBoxNum"`
-	Price           float64  `json:"price"`  //售卖价格
 	Prizes          []PrizeX `json:"prizes"` //每个箱的所有奖品
 }
 type PrizeX struct {
-	PrizeId        uint        `json:"prizeId"`   //奖品id
-	PrizeName      string      `json:"prizeName"` //奖品名
 	GoodId         uint        `json:"goodId"`
 	GoodName       string      `json:"goodName"`
 	PrizeNum       int32       `json:"prizeNum"`       //某一个种类奖品数量
 	PrizeIndex     int32       `json:"prizeIndex"`     //某一个种类奖品在箱子中的序号
 	PrizeIndexName string      `json:"prizeIndexName"` //A赏,B赏
 	Position       []int       `json:"position"`       //A赏,B赏 位置
-	PrizeStyle     string      `json:"prizeStyle"`     //抽取方式
-	Price          float64     `json:"price"`          //某种商品价格
 	IpId           uint        `json:"ipId"`           //该奖品所属IP
 	IpName         string      `json:"ipName"`         //该奖品所属IP的名字
 	Remark         string      `json:"remark"`

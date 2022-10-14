@@ -92,4 +92,6 @@ func RegisterTables(db *gorm.DB) {
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='箱表'").AutoMigrate(&Box{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='订单表'").AutoMigrate(&Order{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='用户表'").AutoMigrate(&User{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='提货柜'").AutoMigrate(&Luggage{})
+
 }

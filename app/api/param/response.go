@@ -206,13 +206,13 @@ type Good struct {
 //	Ret []Ret
 //}
 type Ele struct {
-	FanId          uint
-	BoxId          uint
-	Num            int32
-	PrizeIndexName string
-	PrizeName      string
-	Status         int
-	Postion        string
+	FanId          uint   `json:"fanId"`
+	BoxId          uint   `json:"boxId"`
+	Num            int32  `json:"num"`
+	PrizeIndexName string `json:"prizeIndexName"`
+	PrizeName      string `json:"prizeName"`
+	Status         int    `json:"status"`
+	Postion        string `json:"postion"`
 }
 type RespPageOfPosition struct {
 	Ele []Ele `json:"eles"`
