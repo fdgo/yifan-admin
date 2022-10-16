@@ -268,15 +268,16 @@ type ReqDeleteBoxGoods struct {
 	FanId  uint `json:"fanId"`
 	GoodId int  `json:"goodId"`
 }
-type ReqAddFan struct {
-	FanName       string  `json:"fanName"`       //蕃的名字
-	FanPrice      float64 `json:"fanPrice"`      //蕃的价格
-	Status        int     `json:"status"`        //蕃的状态  1.上架  2.下架
-	OnActiveTime  int64   `json:"onActiveTime"`  //活动开始时间
-	OffActiveTime int64   `json:"offActiveTime"` //活动结束时间
-	WhoCreated    string  `json:"whoCreated"`
-	Pic           string  `json:"pic"` //蕃的图片
-}
+
+//type ReqAddFan struct {
+//	FanName       string  `json:"fanName"`       //蕃的名字
+//	FanPrice      float64 `json:"fanPrice"`      //蕃的价格
+//	Status        int     `json:"status"`        //蕃的状态  1.上架  2.下架
+//	OnActiveTime  int64   `json:"onActiveTime"`  //活动开始时间
+//	OffActiveTime int64   `json:"offActiveTime"` //活动结束时间
+//	WhoCreated    string  `json:"whoCreated"`
+//	Pic           string  `json:"pic"` //蕃的图片
+//}
 type ReqQueryFan struct {
 	PageSize  int32 `json:"pageSize" binding:"required"`
 	PageIndex int32 `json:"pageIndex" binding:"required"`

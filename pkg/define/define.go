@@ -142,6 +142,11 @@ func RedisGlobalPrizePosition(fanId, boxId uint) string {
 	return fmt.Sprintf("fanId%d-boxId%d-global-position", fanId, boxId)
 }
 func IsHasSameEle(nums []int) bool {
+	if len(nums) >= 1 {
+		if nums[0] == -1 {
+			return false
+		}
+	}
 	m := map[int]int{}
 	for i := 0; i < len(nums); i++ {
 		m[nums[i]]++

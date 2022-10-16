@@ -28,7 +28,7 @@ func New() (Repo, error) {
 	if err != nil {
 		return nil, err
 	}
-	RegisterTables(db)
+	//RegisterTables(db)
 	return &dbRepo{
 		Db: db,
 	}, nil
@@ -76,6 +76,7 @@ func GormMysql() (*gorm.DB, error) {
 	}); err != nil {
 		return nil, err
 	} else {
+		RegisterTables(db)
 		sqlDB, _ := db.DB()
 		sqlDB.SetMaxIdleConns(100)
 		sqlDB.SetMaxOpenConns(100)
@@ -83,15 +84,21 @@ func GormMysql() (*gorm.DB, error) {
 	}
 }
 func RegisterTables(db *gorm.DB) {
-	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='奖品表'").AutoMigrate(&Prize{})
-	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='IP表'").AutoMigrate(&Ip{})
-	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='系列表'").AutoMigrate(&Series{})
-	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='蕃表'").AutoMigrate(&Fan{})
-	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='商品表'").AutoMigrate(&Goods{})
-	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='抽奖记录表'").AutoMigrate(&RecordPrize{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='箱表'").AutoMigrate(&Box{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='蕃表'").AutoMigrate(&Fan{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='First奖品表'").AutoMigrate(&FirstPrize{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='全局奖品表'").AutoMigrate(&GlobalPrize{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='商品表'").AutoMigrate(&Goods{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='IP表'").AutoMigrate(&Ip{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='Last奖品表'").AutoMigrate(&LastPrize{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='剩余奖品表'").AutoMigrate(&Left{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='提货柜表'").AutoMigrate(&Luggage{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='订单表'").AutoMigrate(&Order{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='奖品表'").AutoMigrate(&Prize{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='抽奖记录表'").AutoMigrate(&RecordPrize{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='系列表'").AutoMigrate(&Series{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='确定奖品表'").AutoMigrate(&Sure{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='目标奖品表'").AutoMigrate(&Target{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='用户表'").AutoMigrate(&User{})
-	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='提货柜'").AutoMigrate(&Luggage{})
 
 }

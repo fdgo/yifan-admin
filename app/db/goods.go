@@ -218,3 +218,73 @@ type Luggage struct {
 	UpdatedAt         time.Time      `json:"updated_time"`
 	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
 }
+
+type Sure struct {
+	ID         uint           `gorm:"primarykey" json:"id"`
+	FanId      uint           `gorm:"comment:番的id;uniqueIndex:udx_name" json:"fanId"`
+	FanTitle   string         `gorm:"comment:番的标题;"  json:"fanTitle"`
+	BoxId      uint           `gorm:"comment:箱子的id;uniqueIndex:udx_name" json:"boxId"`
+	PrizeIndex GormList       `gorm:"type:varchar(1024);not null"`
+	CreatedAt  time.Time      `json:"created_time"`
+	UpdatedAt  time.Time      `json:"updated_time"`
+	WhoUpdate  string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
+	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
+}
+type Left struct {
+	ID         uint           `gorm:"primarykey" json:"id"`
+	FanId      uint           `gorm:"comment:番的id;uniqueIndex:udx_name" json:"fanId"`
+	FanTitle   string         `gorm:"comment:番的标题;"  json:"fanTitle"`
+	BoxId      uint           `gorm:"comment:箱子的id;uniqueIndex:udx_name" json:"boxId"`
+	PrizeIndex GormList       `gorm:"type:varchar(10240);not null"`
+	CreatedAt  time.Time      `json:"created_time"`
+	UpdatedAt  time.Time      `json:"updated_time"`
+	WhoUpdate  string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
+	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
+}
+type Target struct {
+	ID         uint           `gorm:"primarykey" json:"id"`
+	FanId      uint           `gorm:"comment:番的id;uniqueIndex:udx_name" json:"fanId"`
+	FanTitle   string         `gorm:"comment:番的标题;"  json:"fanTitle"`
+	BoxId      uint           `gorm:"comment:箱子的id;uniqueIndex:udx_name" json:"boxId"`
+	PrizeIndex GormList       `gorm:"type:varchar(10240);not null"`
+	CreatedAt  time.Time      `json:"created_time"`
+	UpdatedAt  time.Time      `json:"updated_time"`
+	WhoUpdate  string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
+	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
+}
+type FirstPrize struct {
+	ID          uint           `gorm:"primarykey" json:"id"`
+	FanId       uint           `gorm:"comment:番的id;uniqueIndex:udx_name" json:"fanId"`
+	FanTitle    string         `gorm:"comment:番的标题;"  json:"fanTitle"`
+	BoxId       uint           `gorm:"comment:箱子的id;uniqueIndex:udx_name" json:"boxId"`
+	Pos         GormList       `gorm:"comment:位置;type:varchar(64)" json:"pos"`
+	PrizeIndexs GormList       `gorm:"comment:商品顺序;type:varchar(64);" json:"prizeIndexs"`
+	CreatedAt   time.Time      `json:"created_time"`
+	UpdatedAt   time.Time      `json:"updated_time"`
+	WhoUpdate   string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+}
+type LastPrize struct {
+	ID          uint           `gorm:"primarykey" json:"id"`
+	FanId       uint           `gorm:"comment:番的id;uniqueIndex:udx_name" json:"fanId"`
+	FanTitle    string         `gorm:"comment:番的标题;"  json:"fanTitle"`
+	BoxId       uint           `gorm:"comment:箱子的id;uniqueIndex:udx_name" json:"boxId"`
+	Pos         GormList       `gorm:"comment:位置;type:varchar(64)" json:"pos"`
+	PrizeIndexs GormList       `gorm:"comment:商品顺序;type:varchar(64);" json:"prizeIndexs"`
+	CreatedAt   time.Time      `json:"created_time"`
+	UpdatedAt   time.Time      `json:"updated_time"`
+	WhoUpdate   string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+}
+type GlobalPrize struct {
+	ID          uint           `gorm:"primarykey" json:"id"`
+	FanId       uint           `gorm:"comment:番的id;uniqueIndex:udx_name" json:"fanId"`
+	FanTitle    string         `gorm:"comment:番的标题;"  json:"fanTitle"`
+	BoxId       uint           `gorm:"comment:箱子的id;uniqueIndex:udx_name" json:"boxId"`
+	Pos         GormList       `gorm:"comment:位置;type:varchar(64)" json:"pos"`
+	PrizeIndexs GormList       `gorm:"comment:商品顺序;type:varchar(64);" json:"prizeIndexs"`
+	CreatedAt   time.Time      `json:"created_time"`
+	UpdatedAt   time.Time      `json:"updated_time"`
+	WhoUpdate   string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+}
