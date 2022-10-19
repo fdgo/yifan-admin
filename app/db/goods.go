@@ -270,7 +270,6 @@ type GlobalPrize struct {
 	WhoUpdate   string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 }
-
 type SpecialPrizeRecord struct {
 	ID                uint           `gorm:"primarykey" json:"id"`
 	FanId             uint           `gorm:"comment:番的id;uniqueIndex:udx_name" json:"fanId"`
