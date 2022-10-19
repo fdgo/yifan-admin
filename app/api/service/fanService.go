@@ -8,6 +8,8 @@ import (
 
 type FanService interface {
 	ModifyFanStatus(req param.ReqModifyFanStatus) error
+	QueryFanStatus(req param.ReqQueryFanStatus) (param.RespQueryFanStatus, error)
+	QueryFanStatusCondition(req param.ReqQueryFanStatusCondition) (param.RespQueryFanStatusCondition, error)
 	QueryFan(req param.ReqQueryFan) (param.RespQueryFan, error)
 	ModifyFan(req param.ReqModifyFan) (param.RespModifyFan, error)
 	ModifySaveFan(req param.ReqModifySaveFan) (param.RespModifySaveFan, error)

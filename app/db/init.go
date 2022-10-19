@@ -95,10 +95,10 @@ func RegisterTables(db *gorm.DB) {
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='提货柜表'").AutoMigrate(&Luggage{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='订单表'").AutoMigrate(&Order{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='奖品表'").AutoMigrate(&Prize{})
-	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='抽奖记录表'").AutoMigrate(&RecordPrize{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='系列表'").AutoMigrate(&Series{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='确定奖品表'").AutoMigrate(&Sure{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='目标奖品表'").AutoMigrate(&Target{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='用户表'").AutoMigrate(&User{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='抽奖记录表'").AutoMigrate(&SpecialPrizeRecord{})
 
 }

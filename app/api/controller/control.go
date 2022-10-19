@@ -724,6 +724,57 @@ func (h *handler) ModifyFanStatus() gin.HandlerFunc {
 	}
 }
 
+// @Description QueryFanStatus
+// @Tags QueryFanStatus
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqQueryFanStatus body param.ReqQueryFanStatus true "pageSize每页大小,pageIndex第几页"
+// @Success 200 {object} response.responseSucess{data=param.RespQueryFanStatus}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/fan/query/status [post]
+func (h *handler) QueryFanStatus() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqQueryFanStatus
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.fanService.QueryFanStatus(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+
+}
+
+// @Description QueryFanStatusCondition
+// @Tags QueryFanStatusCondition
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqQueryFanStatusCondition body param.ReqQueryFanStatusCondition true "pageSize每页大小,pageIndex第几页"
+// @Success 200 {object} response.responseSucess{data=param.RespQueryFanStatusCondition}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/fan/query/status/condition [post]
+func (h *handler) QueryFanStatusCondition() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqQueryFanStatusCondition
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.fanService.QueryFanStatusCondition(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
 // @Description QueryFan
 // @Tags QueryFan
 // @Accept json
@@ -891,6 +942,56 @@ func (h *handler) GetOpenId() gin.HandlerFunc {
 			return
 		}
 		data, err := h.userService.GetOpenId(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description PageOfOrder
+// @Tags PageOfOrder
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqPageOfOrder body param.ReqPageOfOrder true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespPageOfOrder}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/order/pageOrder [post]
+func (h *handler) PageOfOrder() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqPageOfOrder
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.orderService.PageOfOrder(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description PageOfOrderCondition
+// @Tags PageOfOrderCondition
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqPageOfOrderCondition body param.ReqPageOfOrderCondition true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespPageOfOrderCondition}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/order/pageOrder/condition [post]
+func (h *handler) PageOfOrderCondition() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqPageOfOrderCondition
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.orderService.PageOfOrderCondition(req)
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return

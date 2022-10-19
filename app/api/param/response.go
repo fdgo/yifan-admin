@@ -207,6 +207,7 @@ type Good struct {
 //}
 type Ele struct {
 	FanId          uint   `json:"fanId"`
+	FanTitle       string `json:"fanTitle"`
 	BoxId          uint   `json:"boxId"`
 	Num            int32  `json:"num"`
 	PrizeIndexName string `json:"prizeIndexName"`
@@ -237,7 +238,30 @@ type PrizeA struct {
 //////////////////////////////////////////////////////////////
 type RespAddFan struct {
 }
-
+type RespQueryFanStatus struct {
+	FanId     uint        `json:"fanId"`
+	FanTitle  string      `json:"fanTitle"`
+	BoxStatus []BoxStatus `json:"boxStatus"`
+}
+type RespQueryFanStatusCondition struct {
+	FanId           uint      `json:"fanId,omitempty"`
+	FanTitle        string    `json:"fanTitle"`
+	TotalBoxNum     int       `json:"totalBoxNum"`
+	TotalPrizeNum   int32     `json:"totalPrizeNum"`
+	LeftPrizeNum    int32     `json:"leftPrizeNum"`
+	Status          int       `json:"status,omitempty"`
+	Price           float64   `json:"price,omitempty"`
+	SharePic        string    `json:"sharePic"`
+	DetailPic       string    `json:"detailPic"`
+	ActiveBeginTime int64     `json:"activeBeginTime,omitempty"`
+	ActiveEndTime   int64     `json:"activeEndTime,omitempty"`
+	CreateTime      time.Time `json:"createTime,omitempty"`
+	WhoUpdate       string    `json:"whoUpdate,omitempty"`
+}
+type BoxStatus struct {
+	BoxId  uint `json:"boxId"`
+	Status int  `json:"status"`
+}
 type RespQueryFan struct {
 	AllPages float64 `json:"allPages,omitempty"`
 	FanInfos FanInfo `json:"fanInfos,omitempty"`
@@ -250,7 +274,8 @@ type Fan struct {
 	ID              uint      `json:"Id,omitempty"`
 	Title           string    `json:"title,omitempty"`
 	TotalBoxNum     int       `json:"totalBoxNum"`
-	LeftBoxNum      int       `json:"leftBoxNum"`
+	TotalPrizeNum   int32     `json:"totalPrizeNum"`
+	LeftPrizeNum    int32     `json:"leftPrizeNum"`
 	Status          int       `json:"status,omitempty"`
 	Price           float64   `json:"price,omitempty"`
 	SharePic        string    `json:"sharePic"`
@@ -299,6 +324,7 @@ type EachBoxPrize struct {
 	MultiIds       db.GormList `json:"multiIds,omitempty"`     //商品id组合,单一商品[435],
 }
 type RespModifySaveFan struct {
+	Tips []Tips `json:"tips,omitempty"`
 }
 type RespEnterFan struct {
 	FanId            uint           `json:"fanId,omitempty"`           //蕃的Id
@@ -376,4 +402,39 @@ type RespGetOpenId struct {
 	UserId   uint   `json:"user_id"`
 	NickName string `json:"nick_name"`
 	Avatar   string `json:"avatar"`
+}
+
+type RespPageOfOrder struct {
+	AllPages float64 `json:"allPages,omitempty"`
+	Num      int     `json:"num"`
+	Orders   []Order `json:"orders"`
+}
+type Order struct {
+	OutTradeNo string  `json:"orderId"`
+	PrizeTimes int     `json:"prizeNum"`
+	Payments   float64 `json:"price"`
+	UserName   string  `json:"userName"`
+	FanId      uint    `json:"fanId"`
+	FanName    string  `json:"fanName"`
+	BoxId      uint    `json:"boxId"`
+	BoxIndex   int     `json:"boxIndex"`
+	OpenId     string  `json:"openId"`
+	UserId     uint    `json:"userId"`
+	Avatar     string  `json:"avatar"`
+	FanPic     string  `json:"fanPic"`
+	UserMobile string  `json:"userMobile"`
+	PrepayId   string  `json:"prepayId"`
+	Appid      string  `json:"appid"`
+	TimeStamp  string  `json:"timeStamp"`
+	NonceStr   string  `json:"nonceStr"`
+	Package    string  `json:"package"`
+	SignType   string  `json:"signType"`
+	PaySign    string  `json:"paySign"`
+	OrderType  string  `json:"orderType"`
+	PayStyle   string  `json:"payStyle"`
+	Status     string  `json:"Status"`
+	Remark     string  `json:"remark"`
+	Detail     string  `json:"detail"`
+}
+type RespPageOfOrderCondition struct {
 }

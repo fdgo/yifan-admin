@@ -278,6 +278,11 @@ type ReqDeleteBoxGoods struct {
 //	WhoCreated    string  `json:"whoCreated"`
 //	Pic           string  `json:"pic"` //蕃的图片
 //}
+type ReqQueryFanStatus struct {
+}
+type ReqQueryFanStatusCondition struct {
+	FanId uint `json:"fanId"`
+}
 type ReqQueryFan struct {
 	PageSize  int32 `json:"pageSize" binding:"required"`
 	PageIndex int32 `json:"pageIndex" binding:"required"`
@@ -287,21 +292,23 @@ type ReqModifyFanStatus struct {
 	FanId  uint `json:"fanId" binding:"required"`
 	Status int  `json:"status" binding:"required"`
 }
+
 type ReqModifyFan struct {
 	FanId uint `json:"fanId" binding:"required"`
 }
+
 type ReqModifySaveFan struct {
-	FanID           uint     `json:"fanId"`
-	FanName         string   `json:"fanName"`
-	Rule            string   `json:"rule"`
-	Title           string   `json:"title"`
-	FanPrice        float64  `json:"fanPrice"`
-	ActiveBeginTime int64    `json:"activeBeginTime"`
-	ActiveEndTime   int64    `json:"activeEndTime"`
-	DetailPic       string   `json:"detailPic"`
-	SharePic        string   `json:"sharePic"`
-	TotalBoxNum     int      `json:"totalBoxNum"`
-	Prizes          []PrizeX `json:"prizes"` //每个箱的所有奖品
+	FanID           uint    `json:"fanId"`
+	Type            string  `json:"type"`            //蕃的类型
+	FanPrice        float64 `json:"fanPrice"`        //蕃的价格
+	ActiveBeginTime int64   `json:"activeBeginTime"` //上架时间
+	ActiveEndTime   int64   `json:"activeEndTime"`   //下架时间
+	BoxNum          int     `json:"boxNum"`          //一个蕃的箱数
+	Rule            string  `json:"rule"`            //活动规则
+	Title           string  `json:"title"`           //活动标题
+	DetailPic       string  `json:"detailPic"`       //详细图片
+	SharePic        string  `json:"sharePic"`        //分享图片
+	Boxes           Box     `json:"box"`             //所有箱数的数组
 }
 type PrizeX struct {
 	GoodId         uint        `json:"goodId"`
@@ -363,4 +370,14 @@ type ReqGetOpenId struct {
 	EncryptedData string `json:"encryptedData"`
 	Code          string `json:"code"`
 	Iv            string `json:"iv"`
+}
+
+type ReqPageOfOrder struct {
+	PageSize  int32 `uri:"pageSize"`
+	PageIndex int32 `uri:"pageIndex"`
+}
+
+type ReqPageOfOrderCondition struct {
+	PageSize  int32 `uri:"pageSize"`
+	PageIndex int32 `uri:"pageIndex"`
 }

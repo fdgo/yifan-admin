@@ -44,11 +44,15 @@ type Handler interface {
 
 	//
 	ModifyFanStatus() gin.HandlerFunc
+	QueryFanStatus() gin.HandlerFunc
+	QueryFanStatusCondition() gin.HandlerFunc
 	QueryFan() gin.HandlerFunc
 	ModifyFan() gin.HandlerFunc
 	ModifySaveFan() gin.HandlerFunc
 	QueryPrizePostion() gin.HandlerFunc
 	ModifyGoodsPosition() gin.HandlerFunc
+	PageOfOrder() gin.HandlerFunc
+	PageOfOrderCondition() gin.HandlerFunc
 }
 type handler struct {
 	userService  service.UserService
@@ -57,6 +61,7 @@ type handler struct {
 	goodsService service.GoodsService
 	fanService   service.FanService
 	boxService   service.BoxService
+	orderService service.OrderService
 }
 
 func New(db db.Repo, cache *cache.CacheRepo) Handler {
@@ -67,5 +72,6 @@ func New(db db.Repo, cache *cache.CacheRepo) Handler {
 		goodsService: service.NewgoodsService(db, cache),
 		fanService:   service.NewFanService(db, cache),
 		boxService:   service.NewBoxService(db, cache),
+		orderService: service.NewOrderServiceImpl(db, cache),
 	}
 }
