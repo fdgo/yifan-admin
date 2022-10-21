@@ -26,6 +26,7 @@ type Ip struct {
 	ID         uint   `gorm:"primarykey" json:"id"`
 	Name       string `gorm:"comment:ip名" json:"name"`
 	CreateName string `gorm:"comment:创建人" json:"createName"`
+	CreateTime int64  `gorm:"comment:创建时间" json:"createTime"`
 	Series     []*Series
 	CreatedAt  time.Time      `json:"created_time"`
 	UpdatedAt  time.Time      `json:"updated_time"`
@@ -45,26 +46,24 @@ type Series struct {
 	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
 }
 type Goods struct {
-	ID              uint           `gorm:"primarykey" json:"id"`
-	IpID            *uint          `gorm:"comment:所属ip的id" json:"ipId"`
-	IpName          string         `gorm:"comment:ip名字" json:"ipName"`
-	SeriesID        *uint          `gorm:"comment:所属系列id" json:"seriesId"`
-	SeriesName      string         `json:"seriesName" json:"seriesName"`
-	Pic             string         `gorm:"comment:图片;type:varchar(128);not null" json:"pic"`
-	Price           float64        `gorm:"comment:建议售价" json:"price"`
-	Name            string         `gorm:"comment:名字" json:"name"`
-	SingleOrMuti    int            `json:"singleOrMuti"`
-	MultiIds        GormList       `gorm:"type:varchar(128);not null"`
-	PkgStatus       int8           `gorm:"comment:打包状态" json:"pkgStatus"`
-	Introduce       string         `gorm:"comment:介绍" json:"introduce"`
-	Integral        int32          `gorm:"comment:积分" json:"integral"`
-	SoldStatus      string         `gorm:"comment:1.预售 2.现货" json:"soldStatus"`
-	ActiveBeginTime int64          `gorm:"comment:活动开始时间" json:"activeBeginTime"`
-	ActiveEndTime   int64          `gorm:"comment:活动结束时间" json:"activeEndTime"`
-	CreatedAt       time.Time      `json:"created_time"`
-	UpdatedAt       time.Time      `json:"updated_time"`
-	WhoUpdate       string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
-	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
+	ID           uint           `gorm:"primarykey" json:"id"`                             // 商品 id
+	IpID         *uint          `gorm:"comment:所属ip的id" json:"ipId"`                      // IP的id
+	IpName       string         `gorm:"comment:ip名字" json:"ipName"`                       //  IP名字
+	SeriesID     *uint          `gorm:"comment:所属系列id" json:"seriesId"`                   //  系列id
+	SeriesName   string         `gorm:"comment:所属系列id" json:"seriesName"`                 //  系列名字
+	Name         string         `gorm:"comment:所属系列id" json:"name"`                       // 商品名
+	PkgStatus    int8           `gorm:"comment:打包状态" json:"pkgStatus"`                    // 打包状态
+	PreStore     string         `gorm:"comment:1. 预售  2.现货" json:"preStore"`              // 预存
+	Integral     int32          `gorm:"comment:积分" json:"integral"`                       //   积分
+	Pic          string         `gorm:"comment:图片;type:varchar(128);not null" json:"pic"` // 图片
+	Price        float64        `gorm:"comment:建议售价" json:"price"`                        // 价格
+	SingleOrMuti int            `gorm:"comment:组合" json:"singleOrMuti"`                   //组合个数
+	MultiIds     GormList       `gorm:"type:varchar(128);not null"`                       //组合内部商品id
+	Introduce    string         `gorm:"comment:介绍" json:"introduce"`                      //介绍
+	WhoUpdate    string         `gorm:"comment:更新人" json:"whoUpdate"`                     //谁更新了商品
+	CreatedAt    time.Time      `json:"created_time"`
+	UpdatedAt    time.Time      `json:"updated_time"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 type Box struct {
 	ID            uint    `gorm:"primarykey" json:"id"`
@@ -106,10 +105,10 @@ type Prize struct {
 	Remark            string         `gorm:"comment:备注" json:"remark"`
 	SingleOrMuti      int            `json:"singleOrMuti"`
 	MultiIds          GormList       `gorm:"type:varchar(128);not null"`
-	Status            int            `gorm:"comment:上下架" json:"status"`
-	SoldStatus        int            `gorm:"comment:是否售罄1.奖品售罄,2.奖品未售罄" json:"soldStatus"`
+	PreStore          int            `gorm:"comment:1.预售， 2.库存;index" json:"preStore"`
+	SoldStatus        int            `gorm:"comment:是否售罄1.奖品售罄,2.奖品未售罄;index" json:"soldStatus"`
 	TimeForSoldStatus string         `gorm:"comment:预售时间" json:"timeForSoldStatus,omitempty"`
-	PkgStatus         int            `gorm:"comment:打包状态" json:"pkgStatus"`
+	PkgStatus         int            `gorm:"comment:打包状态;index" json:"pkgStatus"`
 	WhoUpdate         string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
 	CreatedAt         time.Time      `json:"created_time"`
 	UpdatedAt         time.Time      `json:"updated_time"`
@@ -192,7 +191,7 @@ type Luggage struct {
 	Remark            string         `gorm:"comment:备注" json:"remark"`
 	SingleOrMuti      int            `json:"singleOrMuti"`
 	MultiIds          GormList       `gorm:"type:varchar(128);not null"`
-	Status            int            `gorm:"comment:上下架" json:"status"`
+	PreStore          int            `gorm:"comment:1.预售 2.现货" json:"preStore"`
 	SoldStatus        int            `gorm:"index;comment:是否售罄1.奖品售罄,2.奖品未售罄" json:"soldStatus"`
 	TimeForSoldStatus string         `gorm:"comment:预售时间" json:"timeForSoldStatus,omitempty"`
 	PkgStatus         int            `gorm:"comment:打包状态" json:"pkgStatus"`
@@ -270,6 +269,7 @@ type GlobalPrize struct {
 	WhoUpdate   string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 }
+
 type SpecialPrizeRecord struct {
 	ID                uint           `gorm:"primarykey" json:"id"`
 	FanId             uint           `gorm:"comment:番的id;uniqueIndex:udx_name" json:"fanId"`
@@ -282,5 +282,59 @@ type SpecialPrizeRecord struct {
 	CreatedAt         time.Time      `json:"created_time"`
 	UpdatedAt         time.Time      `json:"updated_time"`
 	WhoUpdate         string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
+	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+type Integral struct {
+	UserId    uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_time"`
+	UpdatedAt time.Time      `json:"updated_time"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+type IntegralRecord struct {
+	ID        uint           `gorm:"primarykey" json:"id"`
+	UserId    uint           `gorm:"comment:用户id" json:"user_id"`
+	CreatedAt time.Time      `json:"created_time"`
+	UpdatedAt time.Time      `json:"updated_time"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+type Adver struct {
+	ID                uint           `gorm:"primarykey" json:"id"`
+	BannerTitle       string         `gorm:"comment:BannerTitle" json:"banner_title"`
+	BannerOne         string         `gorm:"comment:BannerOne" json:"banner_one"`
+	BannerTwo         string         `gorm:"comment:BannerTne" json:"banner_two"`
+	BannerThree       string         `gorm:"comment:BannerThree" json:"banner_three"`
+	BannerFour        string         `gorm:"comment:BannerFour" json:"banner_four"`
+	BannerFive        string         `gorm:"comment:BannerFive" json:"banner_five"`
+	BannerReleatedUrl string         `gorm:"comment:轮播图对应跳转连接" json:"banner_releated_url"`
+	ReleatedUrlType   string         `gorm:"comment:轮播图对应跳转连接类型" json:"releated_url_type"`
+	TipsAfterBanner   string         `gorm:"comment:轮播图下面的文字提示" json:"tips_after_banner"`
+	ActiveBeginTime   int64          `gorm:"comment:轮播图上架时间" json:"active_begin_time"`
+	ActiveEndTime     int64          `gorm:"comment:轮播图下架时间" json:"active_end_time"`
+	CreatedAt         time.Time      `json:"created_time"`
+	UpdatedAt         time.Time      `json:"updated_time"`
+	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
+}
+type AdverTab struct {
+	ID                uint           `gorm:"primarykey" json:"id"`
+	FirstTabName      string         `gorm:"comment:推荐;index" json:"first_tab_name"`
+	FirstTabNameSons  GormListEx     `gorm:"comment:推荐下面的二级tab;type:varchar(128);not null" json:"first_tab_name_sons"`
+	SecondTabName     string         `gorm:"comment:热门;index" json:"second_tab_name"`
+	SecondTabNameSons GormListEx     `gorm:"comment:热门下面的二级tab;type:varchar(128);not null" json:"second_tab_name_sons"`
+	TabName           string         `gorm:"comment:一级;type:varchar(32);not null" json:"tab_name"`
+	TabNameSon        string         `gorm:"comment:二级;type:varchar(32);not null" json:"tab_name_son"`
+	RedirectType      string         `gorm:"comment:跳转类型" json:"redirect_type"`
+	RedirectAddress   string         `gorm:"comment:跳转地址" json:"redirect_address"`
+	ActiveByMan       int            `gorm:"comment:自动还是手动:1.自动 2.手动" json:"active_by_man"`
+	ActiveByManTime   string         `gorm:"comment:自动还是手动时间" json:"active_by_man_time"`
+	ActiveBeginTime   int64          `gorm:"comment:上架时间" json:"active_begin_time"`
+	ActiveEndTime     int64          `gorm:"comment:下架时间" json:"active_end_time"`
+	Remark            string         `gorm:"comment:备注" json:"remark"`
+	Title             string         `gorm:"comment:标题" json:"title"`
+	Pic               string         `gorm:"comment:图片" json:"pic"`
+	CreatedAt         time.Time      `json:"created_time"`
+	UpdatedAt         time.Time      `json:"updated_time"`
 	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
 }

@@ -59,31 +59,6 @@ func (s *FanServiceImpl) ModifyFanStatus(req param.ReqModifyFanStatus) error {
 					tx.Rollback()
 					return errors.New("箱子删除失败...")
 				}
-				err = tx.Model(&oneBox).Association("Prizes").Find(&oneBox.Prizes)
-				if err != nil {
-					tx.Rollback()
-					return errors.New("服务正忙...")
-				}
-				for _, onePrize := range oneBox.Prizes {
-					result = tx.Model(&onePrize).Update("status", define.YfPrizeStatusDelete)
-					if result.Error != nil {
-						tx.Rollback()
-						return errors.New("服务正忙...")
-					}
-					if result.RowsAffected == 0 {
-						tx.Rollback()
-						return errors.New("服务正忙...")
-					}
-					result = tx.Model(&onePrize).Where("id=?", onePrize.ID).Delete(&db.Prize{})
-					if result.Error != nil {
-						tx.Rollback()
-						return errors.New("服务正忙...")
-					}
-					if result.RowsAffected == 0 {
-						tx.Rollback()
-						return errors.New("箱子删除失败...")
-					}
-				}
 				result = tx.Model(&fan.Boxs).Where("id=?", oneBox.ID).Delete(&db.Box{})
 				if result.Error != nil {
 					tx.Rollback()
@@ -138,17 +113,6 @@ func (s *FanServiceImpl) ModifyFanStatus(req param.ReqModifyFanStatus) error {
 			if err != nil {
 				tx.Rollback()
 				return errors.New("服务正忙...")
-			}
-			for _, onePrize := range oneBox.Prizes {
-				result = tx.Model(&onePrize).Update("status", req.Status)
-				if result.Error != nil {
-					tx.Rollback()
-					return errors.New("服务正忙...")
-				}
-				if result.RowsAffected == 0 {
-					tx.Rollback()
-					return errors.New("服务正忙...")
-				}
 			}
 		}
 		tx.Commit()
@@ -513,7 +477,6 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 		for nindex, ele := range prizes {
 			prizes[nindex].BoxID = &box.ID
 			prizes[nindex].BoxIndex = int(box.BoxIndex)
-			prizes[nindex].Status = box.Status
 			if ele.PrizeIndexName != define.PrizeIndexNameFirst &&
 				ele.PrizeIndexName != define.PrizeIndexNameLast &&
 				ele.PrizeIndexName != define.PrizeIndexNameGlobal {

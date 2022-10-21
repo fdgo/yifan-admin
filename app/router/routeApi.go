@@ -68,6 +68,20 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 	{
 		order.POST("/pageOrder", handler.PageOfOrder())
 		order.POST("/pageOrder/condition", handler.PageOfOrderCondition())
+		order.POST("/pageOrder/detail", handler.PageOfOrderDetail())
+
+	}
+	adver := r.mux.Group("/v1/adver").Use(r.middles.Cors())
+	{
+		adver.POST("/banner", handler.GetBannerPic())
+		adver.POST("/activeByMan", handler.ActiveByMan())
+		adver.POST("/singleClick", handler.SingleClick())
+		adver.POST("/tab/second/create", handler.AddSecondTab())
+		adver.POST("/tab/second/son/create", handler.AddSecondTabSon())
+		adver.POST("/tab/second/query", handler.QuerySecondTab())
+		adver.POST("/tab/second/son/query", handler.QuerySecondSonTab())
+		adver.POST("/isShow", handler.ShowOrHideSecondTab())
+		adver.POST("/modify", handler.ModifyAndSaveSecondTab())
 	}
 	//memoryStore := persist.NewMemoryStore(1 * time.Minute)
 	//power.GET("/123", cache.CacheByRequestURI(memoryStore, 3600*time.Second),

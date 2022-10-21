@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/shopspring/decimal"
+	"github.com/tealeg/xlsx"
 	"gorm.io/gorm"
 	"math"
+	"os"
 	"strings"
 	"time"
 	"yifan/app/api/param"
@@ -55,6 +57,7 @@ func (s *BoxServiceImpl) EachBox(box *param.Box, fanId uint, fanName string) ([]
 			Remark:            prizeEle.Remark,
 			TimeForSoldStatus: prizeEle.TimeForSoldStatus,
 			SoldStatus:        define.YfPrizeStatusNotSoldOut,
+			PreStore:          prizeEle.PreStore,
 		})
 	}
 	return prizes, prizeNum
@@ -258,6 +261,64 @@ func (s *BoxServiceImpl) SetTarget(tx *gorm.DB, target db.GormList, fanId, boxId
 	}
 }
 
+func (s *BoxServiceImpl) ManyGoodNormalFeature() {
+	//获取当前目录
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	xlsxPath := dir + "/import.xlsx"
+	//打开文件路径
+	xlsxFile, err := xlsx.OpenFile(xlsxPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//读取每一个sheet
+	for _, oneSheet := range xlsxFile.Sheets {
+		if oneSheet.Name == "装箱商品一般属性" {
+			for index, row := range oneSheet.Rows {
+				//读取每个cell的内容
+				var goodNormal define.GoodsNormal
+				for i, oneCell := range row.Cells {
+					if i == 0 {
+						goodNormal.GoodId, _ = oneCell.Int()
+					}
+					if i == 1 {
+						goodNormal.PrizeIndexName = oneCell.String()
+					}
+					if i == 2 {
+						goodNormal.PrizeNum, _ = oneCell.Int()
+					}
+					if i == 3 {
+						goodNormal.Range = oneCell.String()
+					}
+					if i == 4 {
+						goodNormal.Ip = oneCell.String()
+					}
+					if i == 5 {
+						goodNormal.Series = oneCell.String()
+					}
+					if i == 6 {
+						goodNormal.GoodName = oneCell.String()
+					}
+					if i == 7 {
+						goodNormal.Pic = oneCell.String()
+					}
+					if i == 8 {
+						goodNormal.Status = oneCell.String()
+					}
+				}
+				if index != 0 {
+					define.DealWithOneGoodNormal(goodNormal)
+				}
+				//row.AddCell().Value = "测试一下新增"
+			}
+		}
+	}
+}
+
 func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 	var (
 		fanIndex = 0
@@ -324,7 +385,6 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 		for nindex, ele := range prizes {
 			prizes[nindex].BoxID = &box.ID
 			prizes[nindex].BoxIndex = int(box.BoxIndex)
-			prizes[nindex].Status = box.Status
 			if ele.PrizeIndexName != define.PrizeIndexNameFirst &&
 				ele.PrizeIndexName != define.PrizeIndexNameLast &&
 				ele.PrizeIndexName != define.PrizeIndexNameGlobal {
@@ -511,7 +571,7 @@ func (s *BoxServiceImpl) PageOfPosition(req param.ReqPageOfPosition) (param.Resp
 				Num:            onePrize.PrizeNum,
 				PrizeIndexName: onePrize.PrizeIndexName,
 				PrizeName:      onePrize.GoodName,
-				Status:         onePrize.Status,
+				Status:         onePrize.SoldStatus,
 				Postion:        positon,
 			}
 			res.Ele = append(res.Ele, ele)
@@ -580,7 +640,7 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 					Num:            onePrize.PrizeNum,
 					PrizeIndexName: onePrize.PrizeIndexName,
 					PrizeName:      onePrize.GoodName,
-					Status:         onePrize.Status,
+					Status:         onePrize.SoldStatus,
 					Postion:        positon,
 				}
 				res.Ele = append(res.Ele, ele)
@@ -643,12 +703,54 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 				Num:            onePrize.PrizeNum,
 				PrizeIndexName: onePrize.PrizeIndexName,
 				PrizeName:      onePrize.GoodName,
-				Status:         onePrize.Status,
+				Status:         onePrize.SoldStatus,
 				Postion:        positon,
 			}
 			res.Ele = append(res.Ele, ele)
 		}
 		return res, nil
+	}
+}
+
+func (s *BoxServiceImpl) ManyGoodPositionFeature() {
+	//获取当前目录
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	xlsxPath := dir + "/import.xlsx"
+	//打开文件路径
+	xlsxFile, err := xlsx.OpenFile(xlsxPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//读取每一个sheet
+	for _, oneSheet := range xlsxFile.Sheets {
+		if oneSheet.Name == "装箱商品位置属性" {
+			for index, row := range oneSheet.Rows {
+				var goodPos define.GoodsPosition
+				for i, oneCell := range row.Cells {
+					if i == 0 {
+						goodPos.PrizeName = oneCell.String()
+					}
+					if i == 1 {
+						goodPos.PrizeNum, _ = oneCell.Int()
+					}
+					if i == 2 {
+						goodPos.Range = oneCell.String()
+					}
+					if i == 3 {
+						goodPos.Remark = oneCell.String()
+					}
+				}
+				if index != 0 {
+					define.DealWithOneGoodPosition(goodPos)
+				}
+				//row.AddCell().Value = "测试一下新增"
+			}
+		}
 	}
 }
 func (s *BoxServiceImpl) SetNormalPrizePosition(req param.ReqSetNormalPrizePosition) error {
@@ -911,7 +1013,7 @@ func (s *BoxServiceImpl) QueryGoodsForBox(req param.ReqQueryGoodsForBox) (param.
 			PkgStatus:    one.PkgStatus,
 			Introduce:    one.Introduce,
 			Integral:     one.Integral,
-			SoldStatus:   one.SoldStatus,
+			Prestore:     one.PreStore,
 		})
 	}
 	resp.GInfo.Num = len(resp.GInfo.Good)

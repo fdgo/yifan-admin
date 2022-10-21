@@ -3,13 +3,72 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/tealeg/xlsx"
 	"gorm.io/gorm"
 	"math"
+	"os"
 	"yifan/app/api/param"
 	"yifan/app/db"
 	"yifan/pkg/define"
 )
 
+func (s *GoodsServiceImpl) ManyGoodsUpload() {
+	//获取当前目录
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	xlsxPath := dir + "/import.xlsx"
+	//打开文件路径
+	xlsxFile, err := xlsx.OpenFile(xlsxPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for _, oneSheet := range xlsxFile.Sheets {
+		if oneSheet.Name == "商品" {
+			//读取每个sheet下面的行数据
+			for index, row := range oneSheet.Rows {
+				//读取每个cell的内容
+				var g define.Goods
+				for i, oneCell := range row.Cells {
+					if i == 0 {
+						g.Ip = oneCell.String()
+					}
+					if i == 1 {
+						g.Series = oneCell.String()
+					}
+					if i == 2 {
+						g.GoodsName = oneCell.String()
+					}
+					if i == 3 {
+						g.PkgStatus = oneCell.String()
+					}
+					if i == 4 {
+						g.PreStore = oneCell.String()
+					}
+					if i == 5 {
+						g.Integral, _ = oneCell.Int()
+					}
+					if i == 6 {
+						g.Pic = oneCell.String()
+					}
+					if i == 7 {
+						g.Price, _ = oneCell.Float()
+					}
+					if i == 8 {
+						g.CreatTime = oneCell.String()
+					}
+				}
+				if index != 0 {
+					define.DealWithOneGood(g)
+				}
+				//row.AddCell().Value = "测试一下新增"
+			}
+		}
+	}
+}
 func (s *GoodsServiceImpl) UpLoadGoods(req param.ReqUpLoadGoods) (param.RespUpLoadGoods, error) {
 	DB := s.db.GetDb()
 	ret := param.RespUpLoadGoods{}
@@ -38,9 +97,10 @@ func (s *GoodsServiceImpl) UpLoadGoods(req param.ReqUpLoadGoods) (param.RespUpLo
 			}
 			if result.RowsAffected == 0 {
 				ret.IpIdSerId = append(ret.IpIdSerId, param.IpIdSerId{
-					IpName:  ele.IpName,
-					SerName: ele.SeriesName,
-					Tip:     "请先创建Series...",
+					IpName:   ele.IpName,
+					SerName:  ele.SeriesName,
+					GoodName: ele.GoodsName,
+					Tip:      "请先创建Series...",
 				})
 				continue
 			}
@@ -55,9 +115,10 @@ func (s *GoodsServiceImpl) UpLoadGoods(req param.ReqUpLoadGoods) (param.RespUpLo
 			if (*oneGood.IpID == ip.ID) && (*oneGood.SeriesID == series.ID) &&
 				(oneGood.Name == ele.GoodsName) {
 				ret.IpIdSerId = append(ret.IpIdSerId, param.IpIdSerId{
-					IpName:  ele.IpName,
-					SerName: ele.SeriesName,
-					Tip:     "该商品已经存在...",
+					IpName:   ele.IpName,
+					SerName:  ele.SeriesName,
+					GoodName: ele.GoodsName,
+					Tip:      "该商品已经存在...",
 				})
 				isOk = false
 			}
@@ -67,22 +128,20 @@ func (s *GoodsServiceImpl) UpLoadGoods(req param.ReqUpLoadGoods) (param.RespUpLo
 		}
 		rId := define.GetRandGoodId()
 		gs := &db.Goods{
-			ID:              rId,
-			IpID:            &ip.ID,
-			IpName:          ip.Name,
-			SeriesID:        &series.ID,
-			SeriesName:      series.Name,
-			Pic:             ele.Pic,
-			Price:           ele.Price,
-			Name:            ele.GoodsName,
-			SingleOrMuti:    ele.SingleOrMuti,
-			MultiIds:        ele.MultiIds,
-			PkgStatus:       ele.PkgStatus,
-			Introduce:       ele.Introduce,
-			Integral:        ele.Integral,
-			SoldStatus:      ele.Status,
-			ActiveBeginTime: ele.ActiveBeginTime,
-			ActiveEndTime:   ele.ActiveEndTime,
+			ID:           rId,
+			IpID:         &ip.ID,
+			IpName:       ip.Name,
+			SeriesID:     &series.ID,
+			SeriesName:   series.Name,
+			Pic:          ele.Pic,
+			Price:        ele.Price,
+			Name:         ele.GoodsName,
+			PkgStatus:    ele.PkgStatus,
+			Integral:     ele.Integral,
+			PreStore:     ele.PreStore,
+			Introduce:    ele.Introduce,
+			SingleOrMuti: ele.SingleOrMuti,
+			MultiIds:     ele.MultiIds,
 		}
 		if err := DB.Create(gs).Error; err != nil {
 			return param.RespUpLoadGoods{}, errors.New("服务正忙......")
@@ -118,10 +177,8 @@ func (s *GoodsServiceImpl) SearchGoods(req param.ReqSearchGoods) (param.RespSear
 			ret.Goods.SingleOrMuti = ele.SingleOrMuti
 			ret.Goods.MultiIds = ele.MultiIds
 			ret.Goods.Integral = ele.Integral
-			ret.Goods.SoldStatus = ele.SoldStatus
+			ret.Goods.PreStore = ele.PreStore
 			ret.Goods.WhoUpdate = ele.WhoUpdate
-			ret.Goods.ActiveBeginTime = ele.ActiveBeginTime
-			ret.Goods.ActiveEndTime = ele.ActiveEndTime
 		}
 		return ret, nil
 	}
@@ -175,7 +232,7 @@ func (s *GoodsServiceImpl) AddGoods(req param.ReqAddGoods) (uint, error) {
 		MultiIds:     req.MultiIds,
 		PkgStatus:    req.PkgStatus,
 		Integral:     req.Integral,
-		SoldStatus:   req.Status,
+		PreStore:     req.PreStore,
 	}
 	if err := DB.Create(gs).Error; err != nil {
 		return 0, errors.New("服务正忙......")
@@ -226,24 +283,22 @@ func (s *GoodsServiceImpl) QueryGoods(req param.ReqQueryGoods) (param.RespQueryG
 			mids = append(mids, id)
 		}
 		resp.GoodsInfo.Goods = append(resp.GoodsInfo.Goods, param.Goods{
-			GoodsId:         ele.ID,
-			Pic:             ele.Pic,
-			Price:           ele.Price,
-			Name:            ele.Name,
-			PkgStatus:       ele.PkgStatus,
-			Introduce:       ele.Introduce,
-			CreateTime:      ele.CreatedAt,
-			IpID:            ele.IpID,
-			IpName:          ele.IpName,
-			SeriesID:        ele.SeriesID,
-			SeriesName:      ele.SeriesName,
-			SingleOrMuti:    ele.SingleOrMuti,
-			MultiIds:        mids,
-			Integral:        ele.Integral,
-			SoldStatus:      ele.SoldStatus,
-			WhoUpdate:       ele.WhoUpdate,
-			ActiveBeginTime: ele.ActiveBeginTime,
-			ActiveEndTime:   ele.ActiveEndTime,
+			GoodsId:      ele.ID,
+			Pic:          ele.Pic,
+			Price:        ele.Price,
+			Name:         ele.Name,
+			PkgStatus:    ele.PkgStatus,
+			Introduce:    ele.Introduce,
+			CreateTime:   ele.CreatedAt,
+			IpID:         ele.IpID,
+			IpName:       ele.IpName,
+			SeriesID:     ele.SeriesID,
+			SeriesName:   ele.SeriesName,
+			SingleOrMuti: ele.SingleOrMuti,
+			MultiIds:     mids,
+			Integral:     ele.Integral,
+			PreStore:     ele.PreStore,
+			WhoUpdate:    ele.WhoUpdate,
 		})
 	}
 	resp.GoodsInfo.Num = len(resp.GoodsInfo.Goods)
@@ -275,7 +330,7 @@ func (s *GoodsServiceImpl) ModifyGoods(req param.ReqModifyGoods) error {
 		"pkg_status":        req.PkgStatus,
 		"introduce":         req.Introduce,
 		"integral":          req.Integral,
-		"status":            req.Status,
+		"preStore":          req.PreStore,
 		"active_begin_time": req.ActiveBeginTime,
 		"active_end_time":   req.ActiveEndTime,
 		"who_update":        req.WhoUpdate,

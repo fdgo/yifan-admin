@@ -47,7 +47,7 @@ type Goods struct {
 	MultiIds        []int     `json:"multiIds,omitempty"`
 	WhoUpdate       string    `json:"whoUpdate,omitempty"`
 	Integral        int32     `json:"integral,omitempty"`
-	SoldStatus      string    `json:"soldstatus,omitempty"`
+	PreStore        string    `json:"preStore,omitempty"`
 	ActiveBeginTime int64     `json:"activeBeginTime,omitempty"`
 	ActiveEndTime   int64     `json:"activeEndTime,omitempty"`
 }
@@ -199,7 +199,7 @@ type Good struct {
 	PkgStatus    int8    `json:"pkgStatus"`
 	Introduce    string  `json:"introduce"`
 	Integral     int32   `json:"integral"`
-	SoldStatus   string  `json:"soldStatus"`
+	Prestore     string  `json:"prestore"`
 }
 
 //type X struct {
@@ -410,31 +410,87 @@ type RespPageOfOrder struct {
 	Orders   []Order `json:"orders"`
 }
 type Order struct {
-	OutTradeNo string  `json:"orderId"`
-	PrizeTimes int     `json:"prizeNum"`
-	Payments   float64 `json:"price"`
-	UserName   string  `json:"userName"`
-	FanId      uint    `json:"fanId"`
-	FanName    string  `json:"fanName"`
-	BoxId      uint    `json:"boxId"`
-	BoxIndex   int     `json:"boxIndex"`
-	OpenId     string  `json:"openId"`
-	UserId     uint    `json:"userId"`
-	Avatar     string  `json:"avatar"`
-	FanPic     string  `json:"fanPic"`
-	UserMobile string  `json:"userMobile"`
-	PrepayId   string  `json:"prepayId"`
-	Appid      string  `json:"appid"`
-	TimeStamp  string  `json:"timeStamp"`
-	NonceStr   string  `json:"nonceStr"`
-	Package    string  `json:"package"`
-	SignType   string  `json:"signType"`
-	PaySign    string  `json:"paySign"`
-	OrderType  string  `json:"orderType"`
-	PayStyle   string  `json:"payStyle"`
-	Status     string  `json:"Status"`
-	Remark     string  `json:"remark"`
-	Detail     string  `json:"detail"`
+	ID         uint     `json:"-"`
+	OutTradeNo string   `json:"orderId"`
+	FanPic     string   `json:"fanPic"`
+	Price      float64  `json:"price"`
+	PrizeNum   int      `json:"prizeNum"`
+	OrderType  string   `json:"orderType"`
+	UserName   string   `json:"userName"`
+	PayStyle   string   `json:"payStyle"`
+	CreateTime int64    `json:"createTime"`
+	Status     string   `json:"status"`
+	FanId      uint     `json:"-"`
+	FanName    string   `json:"-"`
+	BoxId      uint     `json:"-"`
+	BoxIndex   int      `json:"-"`
+	OpenId     string   `json:"-"`
+	UserId     uint     `json:"-"`
+	Avatar     string   `json:"-"`
+	UserMobile string   `json:"-"`
+	PrepayId   string   `json:"-"`
+	Appid      string   `json:"-"`
+	Remark     string   `json:"remark"`
+	Detail     string   `json:"detail"`
+	Operator   string   `json:"operator"`
+	Goods      []Goodxs `json:"goods"`
 }
 type RespPageOfOrderCondition struct {
+	AllPages float64 `json:"allPages,omitempty"`
+	Num      int     `json:"num"`
+	Orders   []Order `json:"orders"`
+}
+type RespPageOfOrderDetail struct {
+	Orders Order `json:"orders"`
+}
+type Goodxs struct {
+	IpID           uint   `json:"ipId"`
+	IpName         string `json:"ipName"`
+	SeriesID       uint   `json:"seriesId"`
+	SeriesName     string `json:"seriesName"`
+	PrizeName      string `json:"prizeName"`
+	PrizeIndexName string `json:"prizeIndexName"`
+	PrizeId        uint   `json:"prizeId"`
+	Pic            string `json:"pic"`
+}
+
+type RespActiveByMan struct {
+}
+type RespSingleClick struct {
+	FanPicTitle []FanPicTitle `json:"fanPicTitle"`
+}
+type FanPicTitle struct {
+	Pic   string `json:"pic"`
+	Title string `json:"title"`
+}
+type RespGetBannerPic struct {
+	AdverTip  string   `json:"adverTip"`
+	BannerPic []string `json:"bannerPic"`
+}
+type RespAddSecondTab struct {
+}
+type RespAddSecondTabSon struct {
+}
+type RespQuerySecondTab struct {
+	SecondTab []string `json:"secondTab"`
+}
+
+type RespQuerySecondSonTab struct {
+	Tab []Tab `json:"tab"`
+}
+type Tab struct {
+	TabTag          string `json:"tabTag"`
+	TabSon          string `json:"tabSon"`
+	RedirectType    string `json:"redirect_type"`
+	RedirectAddress string `json:"redirect_address"`
+	ActiveBeginTime int64  `json:"active_begin_time"`
+	ActiveEndTime   int64  `json:"active_end_time"`
+	Remark          string `json:"remark"`
+	Title           string `json:"title"`
+	Pic             string `json:"pic"`
+}
+
+type RespShowOrHideSecondTab struct {
+}
+type RespModifyAndSaveSecondTab struct {
 }

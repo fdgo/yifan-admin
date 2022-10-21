@@ -999,3 +999,253 @@ func (h *handler) PageOfOrderCondition() gin.HandlerFunc {
 		response.ResposeSuccess(data, context)
 	}
 }
+
+// @Description PageOfOrderDetail
+// @Tags PageOfOrderDetail
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqPageOfOrderDetail body param.ReqPageOfOrderDetail true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespPageOfOrderDetail}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/order/pageOrder/detail [post]
+func (h *handler) PageOfOrderDetail() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqPageOfOrderDetail
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.orderService.PageOfOrderDetail(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description ActiveByMan
+// @Tags ActiveByMan
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqActiveByMan body param.ReqActiveByMan true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespActiveByMan}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/activeByMan [post]
+func (h *handler) ActiveByMan() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqActiveByMan
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.adverService.ActiveByMan(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description SingleClick
+// @Tags SingleClick
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqSingleClick body param.ReqSingleClick true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespSingleClick}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/singleClick [post]
+func (h *handler) SingleClick() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqSingleClick
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.adverService.SingleClick(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description GetBannerPic
+// @Tags GetBannerPic
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqGetBannerPic body param.ReqGetBannerPic true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespGetBannerPic}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/banner [post]
+func (h *handler) GetBannerPic() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqGetBannerPic
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.adverService.GetBannerPic(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description AddSecondTab
+// @Tags AddSecondTab
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqAddSecondTab body param.ReqAddSecondTab true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespAddSecondTab}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/tab/second/create [post]
+func (h *handler) AddSecondTab() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqAddSecondTab
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.adverService.AddSecondTab(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description AddSecondTabSon
+// @Tags AddSecondTabSon
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqAddSecondTabSon body param.ReqAddSecondTabSon true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespAddSecondTabSon}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/tab/second/son/create [post]
+func (h *handler) AddSecondTabSon() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqAddSecondTabSon
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.adverService.AddSecondTabSon(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description QuerySecondTab
+// @Tags QuerySecondTab
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqQuerySecondTab body param.ReqQuerySecondTab true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespQuerySecondTab}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/tab/second/query [post]
+func (h *handler) QuerySecondTab() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqQuerySecondTab
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.adverService.QuerySecondTab(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description QuerySecondSonTab
+// @Tags QuerySecondSonTab
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqQuerySecondSonTab body param.ReqQuerySecondSonTab true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespQuerySecondSonTab}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/tab/second/son/query [post]
+func (h *handler) QuerySecondSonTab() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqQuerySecondSonTab
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.adverService.QuerySecondSonTab(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description ShowOrHideSecondTab
+// @Tags ShowOrHideSecondTab
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqShowOrHideSecondTab body param.ReqShowOrHideSecondTab true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespShowOrHideSecondTab}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/isShow [post]
+func (h *handler) ShowOrHideSecondTab() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqShowOrHideSecondTab
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.adverService.ShowOrHideSecondTab(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description ModifyAndSaveSecondTab
+// @Tags ModifyAndSaveSecondTab
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqModifyAndSaveSecondTab body param.ReqModifyAndSaveSecondTab true "666"
+// @Success 200 {object} response.responseSucess{data=param.RespModifyAndSaveSecondTab}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/modify [post]
+func (h *handler) ModifyAndSaveSecondTab() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqModifyAndSaveSecondTab
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.adverService.ModifyAndSaveSecondTab(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}

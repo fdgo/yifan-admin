@@ -9,6 +9,7 @@ import (
 type OrderService interface {
 	PageOfOrder(req param.ReqPageOfOrder) (param.RespPageOfOrder, error)
 	PageOfOrderCondition(req param.ReqPageOfOrderCondition) (param.RespPageOfOrderCondition, error)
+	PageOfOrderDetail(req param.ReqPageOfOrderDetail) (param.RespPageOfOrderDetail, error)
 }
 
 type OrderServiceImpl struct {
@@ -16,7 +17,7 @@ type OrderServiceImpl struct {
 	cache *cache.CacheRepo
 }
 
-func NewOrderServiceImpl(db db.Repo, cache *cache.CacheRepo) OrderService {
+func NewOrderService(db db.Repo, cache *cache.CacheRepo) OrderService {
 	return &OrderServiceImpl{
 		db:    db,
 		cache: cache,

@@ -53,6 +53,17 @@ type Handler interface {
 	ModifyGoodsPosition() gin.HandlerFunc
 	PageOfOrder() gin.HandlerFunc
 	PageOfOrderCondition() gin.HandlerFunc
+	PageOfOrderDetail() gin.HandlerFunc
+
+	ActiveByMan() gin.HandlerFunc
+	SingleClick() gin.HandlerFunc
+	GetBannerPic() gin.HandlerFunc
+	AddSecondTab() gin.HandlerFunc
+	AddSecondTabSon() gin.HandlerFunc
+	QuerySecondTab() gin.HandlerFunc
+	QuerySecondSonTab() gin.HandlerFunc
+	ShowOrHideSecondTab() gin.HandlerFunc
+	ModifyAndSaveSecondTab() gin.HandlerFunc
 }
 type handler struct {
 	userService  service.UserService
@@ -62,6 +73,7 @@ type handler struct {
 	fanService   service.FanService
 	boxService   service.BoxService
 	orderService service.OrderService
+	adverService service.AdverService
 }
 
 func New(db db.Repo, cache *cache.CacheRepo) Handler {
@@ -72,6 +84,7 @@ func New(db db.Repo, cache *cache.CacheRepo) Handler {
 		goodsService: service.NewgoodsService(db, cache),
 		fanService:   service.NewFanService(db, cache),
 		boxService:   service.NewBoxService(db, cache),
-		orderService: service.NewOrderServiceImpl(db, cache),
+		orderService: service.NewOrderService(db, cache),
+		adverService: service.NewAdverService(db, cache),
 	}
 }
