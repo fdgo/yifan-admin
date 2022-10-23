@@ -399,6 +399,19 @@ type ReqActiveByMan struct {
 }
 type ReqSingleClick struct {
 }
+type ReqSetBannerPic struct {
+	BannerTitle       string `json:"banner_title"`
+	BannerOne         string `json:"banner_one"`
+	BannerTwo         string `json:"banner_two"`
+	BannerThree       string `json:"banner_three"`
+	BannerFour        string `json:"banner_four"`
+	BannerFive        string `json:"banner_five"`
+	BannerReleatedUrl string `json:"banner_releated_url"`
+	ReleatedUrlType   string `json:"releated_url_type"`
+	TipsAfterBanner   string `json:"tips_after_banner"`
+	ActiveBeginTime   int64  `json:"active_begin_time"`
+	ActiveEndTime     int64  `json:"active_end_time"`
+}
 type ReqGetBannerPic struct {
 }
 type ReqAddSecondTab struct {
@@ -426,6 +439,10 @@ type ReqQuerySecondSonTab struct {
 	TabSon string `json:"tabSon"`
 }
 type ReqShowOrHideSecondTab struct {
+	TabTag string `json:"tabTag"`
+	TabSon string `json:"tabSon"`
+	Id     int    `json:"id"`
+	IsHide bool   `json:"isHide"`
 }
 
 type ReqModifyAndSaveSecondTab struct {

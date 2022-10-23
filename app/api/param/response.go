@@ -464,8 +464,10 @@ type FanPicTitle struct {
 	Title string `json:"title"`
 }
 type RespGetBannerPic struct {
-	AdverTip  string   `json:"adverTip"`
-	BannerPic []string `json:"bannerPic"`
+	AdverTip        string   `json:"adverTip"`
+	BannerPic       []string `json:"bannerPic"`
+	ActiveBeginTime int64    `json:"activeBeginTime"`
+	ActiveEndTime   int64    `json:"activeEndTime"`
 }
 type RespAddSecondTab struct {
 }

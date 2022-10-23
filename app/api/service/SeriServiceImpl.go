@@ -7,108 +7,164 @@ import (
 	"gorm.io/gorm"
 	"math"
 	"os"
+	"strconv"
 	"yifan/app/api/param"
 	"yifan/app/db"
 	"yifan/pkg/define"
 )
 
-func (s *SeriServiceImpl) ManySerUpload() {
+func (s *SeriServiceImpl) UpLoadSeries(req param.ReqUpLoadSeries) (param.RespUpLoadSeries, error) {
 	//获取当前目录
 	dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
-		return
+		return param.RespUpLoadSeries{}, err
 	}
 	xlsxPath := dir + "/import.xlsx"
 	//打开文件路径
 	xlsxFile, err := xlsx.OpenFile(xlsxPath)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return param.RespUpLoadSeries{}, err
+	}
+	DB := s.db.GetDb()
+	type IpSer struct {
+		IpId  uint
+		SerId uint
 	}
 	for _, oneSheet := range xlsxFile.Sheets {
 		if oneSheet.Name == "系列" {
+			var ipSer []IpSer
 			for index, row := range oneSheet.Rows {
-				//读取每个cell的内容
-				var ser define.Series
-				for i, oneCell := range row.Cells {
-					if i == 0 {
-						ser.IpName = oneCell.String()
-					}
-					if i == 1 {
-						ser.SeriesName = oneCell.String()
-					}
-				}
 				if index != 0 {
-					define.DealWithOneSeries(ser)
-				}
-				//row.AddCell().Value = "测试一下新增"
-			}
-		}
-	}
-}
-func (s *SeriServiceImpl) UpLoadSeries(req param.ReqUpLoadSeries) (param.RespUpLoadSeries, error) {
-	ret := param.RespUpLoadSeries{}
-	DB := s.db.GetDb()
-	for _, ele := range req.ReqAddSeries {
-		if *ele.IpId == 0 {
-			ret.SeriIdNames = append(ret.SeriIdNames, param.SeriIdName{
-				IpId: *ele.IpId,
-				Name: ele.Name,
-				Tip:  "缺少IP的id参数...",
-			})
-			continue
-		}
-		ip := &db.Ip{}
-		result := DB.Where("id=?", ele.IpId).Find(&ip)
-		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-			return param.RespUpLoadSeries{}, errors.New("服务正忙...")
-		}
-		if result.RowsAffected == 0 {
-			ret.SeriIdNames = append(ret.SeriIdNames, param.SeriIdName{
-				IpId: *ele.IpId,
-				Name: ele.Name,
-				Tip:  "库中不存在这样的IP...",
-			})
-			continue
-		}
-		ser := []db.Series{}
-		rt := DB.Where("name=?", ele.Name).Find(&ser)
-		if rt.Error != nil && rt.Error != gorm.ErrRecordNotFound {
-			return param.RespUpLoadSeries{}, errors.New("服务正忙...")
-		}
-		if ser != nil { //存在该系列
-			isOk := true
-			for _, oneSer := range ser {
-				if *oneSer.IpID == *ele.IpId && oneSer.Name == ele.Name {
-					ret.SeriIdNames = append(ret.SeriIdNames, param.SeriIdName{
-						IpId: *ele.IpId,
-						Name: ele.Name,
-						Tip:  "该系列已经创建...",
+					ipx := db.Ip{}
+					serId := uint(0)
+					for n, cell := range row.Cells {
+						if n == 0 {
+							DB.Where("name=?", cell.Value).First(&ipx)
+						}
+						if n == 1 {
+							serId = define.DealWithOneSeries(DB, ipx.Name, cell.Value)
+						}
+					}
+					ipSer = append(ipSer, IpSer{
+						IpId:  ipx.ID,
+						SerId: serId,
 					})
-					isOk = false
-					break
 				}
 			}
-			if !isOk {
-				continue
+			for j, row := range oneSheet.Rows {
+				if j == 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = "IP对应ID"
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
 			}
-			tmpSer := &db.Series{ID: define.GetRandSeriesId(), Name: ele.Name, IpName: ele.IpName,
-				CreateName: ele.CreateName, IpID: ele.IpId}
-			err := DB.Create(tmpSer).Error
-			if err != nil {
-				return param.RespUpLoadSeries{}, errors.New("服务正忙...")
+			for j, row := range oneSheet.Rows {
+				if j == 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = "系列对应ID"
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
 			}
-		} else { //不存在该系列
-			tmpSer := &db.Series{ID: define.GetRandSeriesId(), Name: ele.Name, IpName: ele.IpName,
-				CreateName: ele.CreateName, IpID: ele.IpId}
-			err := DB.Create(tmpSer).Error
-			if err != nil {
-				return param.RespUpLoadSeries{}, errors.New("服务正忙...")
+			for j, row := range oneSheet.Rows {
+				if j != 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = strconv.Itoa(int(ipSer[j-1].IpId))
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
+			}
+			for j, row := range oneSheet.Rows {
+				if j != 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = strconv.Itoa(int(ipSer[j-1].SerId))
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
 			}
 		}
 	}
-	return ret, nil
+	return param.RespUpLoadSeries{}, nil
+}
+
+func (s *SeriServiceImpl) ManySerUpload(req param.ReqUpLoadSeries) (param.RespUpLoadSeries, error) {
+	//ret := param.RespUpLoadSeries{}
+	//DB := s.db.GetDb()
+	//for _, ele := range req.ReqAddSeries {
+	//	if *ele.IpId == 0 {
+	//		ret.SeriIdNames = append(ret.SeriIdNames, param.SeriIdName{
+	//			IpId: *ele.IpId,
+	//			Name: ele.Name,
+	//			Tip:  "缺少IP的id参数...",
+	//		})
+	//		continue
+	//	}
+	//	ip := &db.Ip{}
+	//	result := DB.Where("id=?", ele.IpId).Find(&ip)
+	//	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+	//		return param.RespUpLoadSeries{}, errors.New("服务正忙...")
+	//	}
+	//	if result.RowsAffected == 0 {
+	//		ret.SeriIdNames = append(ret.SeriIdNames, param.SeriIdName{
+	//			IpId: *ele.IpId,
+	//			Name: ele.Name,
+	//			Tip:  "库中不存在这样的IP...",
+	//		})
+	//		continue
+	//	}
+	//	ser := []db.Series{}
+	//	rt := DB.Where("name=?", ele.Name).Find(&ser)
+	//	if rt.Error != nil && rt.Error != gorm.ErrRecordNotFound {
+	//		return param.RespUpLoadSeries{}, errors.New("服务正忙...")
+	//	}
+	//	if ser != nil { //存在该系列
+	//		isOk := true
+	//		for _, oneSer := range ser {
+	//			if *oneSer.IpID == *ele.IpId && oneSer.Name == ele.Name {
+	//				ret.SeriIdNames = append(ret.SeriIdNames, param.SeriIdName{
+	//					IpId: *ele.IpId,
+	//					Name: ele.Name,
+	//					Tip:  "该系列已经创建...",
+	//				})
+	//				isOk = false
+	//				break
+	//			}
+	//		}
+	//		if !isOk {
+	//			continue
+	//		}
+	//		tmpSer := &db.Series{ID: define.GetRandSeriesId(), Name: ele.Name, IpName: ele.IpName,
+	//			CreateName: ele.CreateName, IpID: ele.IpId}
+	//		err := DB.Create(tmpSer).Error
+	//		if err != nil {
+	//			return param.RespUpLoadSeries{}, errors.New("服务正忙...")
+	//		}
+	//	} else { //不存在该系列
+	//		tmpSer := &db.Series{ID: define.GetRandSeriesId(), Name: ele.Name, IpName: ele.IpName,
+	//			CreateName: ele.CreateName, IpID: ele.IpId}
+	//		err := DB.Create(tmpSer).Error
+	//		if err != nil {
+	//			return param.RespUpLoadSeries{}, errors.New("服务正忙...")
+	//		}
+	//	}
+	//}
+	//return ret, nil
+	return param.RespUpLoadSeries{}, nil
 }
 
 func (s *SeriServiceImpl) SearchSeries(req param.ReqSearchSeries) (param.RespSearchSeries, error) {

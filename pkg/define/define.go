@@ -2,6 +2,7 @@ package define
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"yifan/app/db"
 )
 
@@ -242,11 +243,18 @@ type GoodsPosition struct {
 	Remark    string
 }
 
-func DealWithOneIp(ip Ip) {
-
+func DealWithOneIp(DB *gorm.DB, ipName string) uint {
+	var tmpIp db.Ip
+	tmpIp.Name = ipName
+	DB.Create(&tmpIp)
+	return tmpIp.ID
 }
-func DealWithOneSeries(ser Series) {
-
+func DealWithOneSeries(DB *gorm.DB, ipName, serName string) uint {
+	ser := db.Series{}
+	ser.Name = serName
+	ser.IpName = ipName
+	DB.Create(&ser)
+	return ser.ID
 }
 func DealWithOneGood(og Goods) {
 

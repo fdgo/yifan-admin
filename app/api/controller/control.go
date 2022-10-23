@@ -1083,7 +1083,7 @@ func (h *handler) SingleClick() gin.HandlerFunc {
 // @Param ReqGetBannerPic body param.ReqGetBannerPic true "666"
 // @Success 200 {object} response.responseSucess{data=param.RespGetBannerPic}
 // @Failure 400 {object} response.responseFailure
-// @Router /v1/adver/banner [post]
+// @Router /v1/adver/banner/query [post]
 func (h *handler) GetBannerPic() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var req param.ReqGetBannerPic
@@ -1097,6 +1097,31 @@ func (h *handler) GetBannerPic() gin.HandlerFunc {
 			return
 		}
 		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description SetBannerPic
+// @Tags SetBannerPic
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqSetBannerPic body param.ReqSetBannerPic true "666"
+// @Success 200 {object} response.responseSucess{data=int}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/banner/create [post]
+func (h *handler) SetBannerPic() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqSetBannerPic
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		err := h.adverService.SetBannerPic(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(nil, context)
 	}
 }
 
@@ -1216,12 +1241,12 @@ func (h *handler) ShowOrHideSecondTab() gin.HandlerFunc {
 			response.AbortWithBadRequestWithError(err, context)
 			return
 		}
-		data, err := h.adverService.ShowOrHideSecondTab(req)
+		err := h.adverService.ShowOrHideSecondTab(req)
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return
 		}
-		response.ResposeSuccess(data, context)
+		response.ResposeSuccess(nil, context)
 	}
 }
 

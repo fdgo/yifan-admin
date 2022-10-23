@@ -28,6 +28,23 @@ func (s *AdverServiceImpl) SingleClick(req param.ReqSingleClick) (param.RespSing
 	}
 	return resp, nil
 }
+func (s *AdverServiceImpl) SetBannerPic(req param.ReqSetBannerPic) error {
+	s.db.GetDb().Unscoped().Delete(&db.Adver{})
+	s.db.GetDb().Create(&db.Adver{
+		BannerTitle:       req.BannerTitle,
+		BannerOne:         req.BannerOne,
+		BannerTwo:         req.BannerTwo,
+		BannerThree:       req.BannerThree,
+		BannerFour:        req.BannerFour,
+		BannerFive:        req.BannerFive,
+		BannerReleatedUrl: req.BannerReleatedUrl,
+		ReleatedUrlType:   req.ReleatedUrlType,
+		TipsAfterBanner:   req.TipsAfterBanner,
+		ActiveBeginTime:   req.ActiveBeginTime,
+		ActiveEndTime:     req.ActiveEndTime,
+	})
+	return nil
+}
 func (s *AdverServiceImpl) GetBannerPic(req param.ReqGetBannerPic) (param.RespGetBannerPic, error) {
 	DB := s.db.GetDb()
 	var adver db.Adver
@@ -42,6 +59,8 @@ func (s *AdverServiceImpl) GetBannerPic(req param.ReqGetBannerPic) (param.RespGe
 	resp.BannerPic = append(resp.BannerPic, adver.BannerThree)
 	resp.BannerPic = append(resp.BannerPic, adver.BannerFour)
 	resp.BannerPic = append(resp.BannerPic, adver.BannerFive)
+	resp.ActiveBeginTime = adver.ActiveBeginTime
+	resp.ActiveEndTime = adver.ActiveEndTime
 	return resp, nil
 }
 func (s *AdverServiceImpl) AddSecondTab(req param.ReqAddSecondTab) (param.RespAddSecondTab, error) {
@@ -154,9 +173,9 @@ func (s *AdverServiceImpl) QuerySecondSonTab(req param.ReqQuerySecondSonTab) (pa
 	DB := s.db.GetDb()
 	var at []db.AdverTab
 	if req.TabTag == "推荐" {
-		DB.Where("tab_name=? and tab_name_son=?", req.TabTag, req.TabSon).Find(&at)
+		DB.Where("tab_name=? and tab_name_son=? and is_hide=?", req.TabTag, req.TabSon, false).Find(&at)
 	} else if req.TabTag == "热门" {
-		DB.Where("tab_name=? and tab_name_son=?", req.TabTag, req.TabSon).Find(&at)
+		DB.Where("tab_name=? and tab_name_son=? and is_hide=?", req.TabTag, req.TabSon, false).Find(&at)
 	} else {
 		return param.RespQuerySecondSonTab{}, errors.New("参数错误...")
 	}
@@ -177,9 +196,8 @@ func (s *AdverServiceImpl) QuerySecondSonTab(req param.ReqQuerySecondSonTab) (pa
 	return resp, nil
 }
 
-func (s *AdverServiceImpl) ShowOrHideSecondTab(req param.ReqShowOrHideSecondTab) (param.RespShowOrHideSecondTab, error) {
-	fmt.Println("ShowOrHideSecondTab...")
-	return param.RespShowOrHideSecondTab{}, nil
+func (s *AdverServiceImpl) ShowOrHideSecondTab(req param.ReqShowOrHideSecondTab) error {
+	return s.db.GetDb().Model(&db.AdverTab{}).Where("id=? and tab_name=? and tab_name_son=?", req.Id, req.TabTag, req.TabSon).Update("is_hide", req.IsHide).Error
 }
 func (s *AdverServiceImpl) ModifyAndSaveSecondTab(req param.ReqModifyAndSaveSecondTab) (param.RespModifyAndSaveSecondTab, error) {
 	fmt.Println("ModifyAndSaveSecondTab...")

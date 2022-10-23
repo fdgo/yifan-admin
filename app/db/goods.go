@@ -330,6 +330,7 @@ type AdverTab struct {
 	ActiveByManTime   string         `gorm:"comment:自动还是手动时间" json:"active_by_man_time"`
 	ActiveBeginTime   int64          `gorm:"comment:上架时间" json:"active_begin_time"`
 	ActiveEndTime     int64          `gorm:"comment:下架时间" json:"active_end_time"`
+	IsHide            bool           `gorm:"comment:是否隐藏" json:"is_hide"`
 	Remark            string         `gorm:"comment:备注" json:"remark"`
 	Title             string         `gorm:"comment:标题" json:"title"`
 	Pic               string         `gorm:"comment:图片" json:"pic"`

@@ -73,7 +73,8 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 	}
 	adver := r.mux.Group("/v1/adver").Use(r.middles.Cors())
 	{
-		adver.POST("/banner", handler.GetBannerPic())
+		adver.POST("/banner/query", handler.GetBannerPic())
+		adver.POST("/banner/create", handler.SetBannerPic())
 		adver.POST("/activeByMan", handler.ActiveByMan())
 		adver.POST("/singleClick", handler.SingleClick())
 		adver.POST("/tab/second/create", handler.AddSecondTab())

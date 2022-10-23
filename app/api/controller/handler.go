@@ -58,6 +58,7 @@ type Handler interface {
 
 	ActiveByMan() gin.HandlerFunc
 	SingleClick() gin.HandlerFunc
+	SetBannerPic() gin.HandlerFunc
 	GetBannerPic() gin.HandlerFunc
 	AddSecondTab() gin.HandlerFunc
 	AddSecondTabSon() gin.HandlerFunc
