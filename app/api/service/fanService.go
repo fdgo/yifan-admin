@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/gin-gonic/gin"
 	"yifan/app/api/param"
 	"yifan/app/cache"
 	"yifan/app/db"
@@ -14,6 +15,8 @@ type FanService interface {
 
 	QueryPrizePostion(req param.ReqQueryPrizePostion) (param.RespQueryPrizePostion, error)
 	ModifyGoodsPosition(req param.ReqModifyGoodsPosition) (param.RespModifyGoodsPosition, error)
+
+	FileUpload(c *gin.Context) (interface{}, error)
 }
 
 type FanServiceImpl struct {

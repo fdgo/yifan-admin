@@ -77,7 +77,6 @@ type Box struct {
 	Status        int     `gorm:"comment:箱子状态(1.上架有奖品.2未上架.3上架无商品)" json:"status"`
 	FanID         *uint
 	Prizes        []*Prize
-	Records       []*RecordPrize
 	CreatedAt     time.Time      `json:"created_time"`
 	UpdatedAt     time.Time      `json:"updated_time"`
 	WhoUpdate     string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
@@ -116,21 +115,10 @@ type Prize struct {
 	UpdatedAt         time.Time      `json:"updated_time"`
 	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
 }
-type RecordPrize struct {
-	ID         uint   `gorm:"primarykey" json:"id"`
-	UserId     uint   `gorm:"comment:获得者id" json:"userId"`
-	UserName   string `gorm:"comment:获得者名字" json:"userName"`
-	UserAvtar  string `gorm:"comment:获奖者头像;type:varchar(128)" json:"userAvtar"`
-	GetTime    int64  `gorm:"comment:获奖的时间" json:"getTime"`
-	PrizeIndex string `gorm:"comment:赏的次序" json:"prizeIndex"`
-	Name       string `gorm:"comment:名字" json:"name"`
-	BoxID      *uint
-	CreatedAt  time.Time      `json:"created_time"`
-	UpdatedAt  time.Time      `json:"updated_time"`
-	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
-}
 type Order struct {
 	ID              uint    `gorm:"primarykey" json:"id"`
+	OutTradeNo      string  `gorm:"unique;comment:番id" json:"outTradeNo"`
+	Times           int     `json:"times"`
 	FanId           uint    `gorm:"comment:番id" json:"fanId"`
 	FanName         string  `gorm:"comment:番名" json:"fanName"`
 	BoxId           uint    `gorm:"comment:箱id" json:"boxId"`
@@ -193,7 +181,7 @@ type User struct {
 }
 type Luggage struct {
 	ID                uint           `gorm:"primarykey" json:"id"`
-	OrderId           uint           `gorm:"index;comment:订单id" json:"orderId"`
+	OutTradeNo        string         `gorm:"unique;comment:番id" json:"outTradeNo"`
 	UserId            uint           `gorm:"index;comment:用户id" json:"userId"`
 	UserName          string         `gorm:"comment:用户昵称" json:"userName"`
 	GoodID            uint           `gorm:"comment:真实商品id;index" json:"goodId"`
@@ -288,6 +276,7 @@ type GlobalPrize struct {
 	WhoUpdate   string         `gorm:"comment:更新人" json:"whoUpdate,omitempty"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 }
+
 type SpecialPrizeRecord struct {
 	ID                  uint           `gorm:"primarykey" json:"id"`
 	FanId               uint           `gorm:"comment:番的id;uniqueIndex:udx_name" json:"fanId"`

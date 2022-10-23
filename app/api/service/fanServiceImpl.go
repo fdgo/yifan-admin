@@ -2,9 +2,11 @@ package service
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"math"
+	"path"
 	"yifan/app/api/param"
 	"yifan/app/db"
 	"yifan/pkg/define"
@@ -573,4 +575,12 @@ func (s *FanServiceImpl) ModifyGoodsPosition(req param.ReqModifyGoodsPosition) (
 	//DB.Where("fan_id=? and box_id=?", req.FanId, req.BoxId).First(&poses)
 
 	return param.RespModifyGoodsPosition{}, nil
+}
+func (s *FanServiceImpl) FileUpload(c *gin.Context) (interface{}, error) {
+	file, err := c.FormFile("fileName")
+	dst := path.Join("./static/upload", file.Filename)
+	if err == nil {
+		c.SaveUploadedFile(file, dst)
+	}
+	return dst, nil
 }

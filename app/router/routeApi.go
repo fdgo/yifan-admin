@@ -62,6 +62,10 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		fan.POST("/queryPostion", handler.QueryPrizePostion())
 		fan.POST("/modifyPosition", handler.ModifyGoodsPosition())
 	}
+	file := r.mux.Group("/v1/file").Use(r.middles.Cors())
+	{
+		file.POST("/upload", handler.FileUpload())
+	}
 	//memoryStore := persist.NewMemoryStore(1 * time.Minute)
 	//power.GET("/123", cache.CacheByRequestURI(memoryStore, 3600*time.Second),
 	//	handler.GetUser(),

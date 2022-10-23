@@ -364,3 +364,6 @@ type ReqGetOpenId struct {
 	Code          string `json:"code"`
 	Iv            string `json:"iv"`
 }
+
+type ReqFileUpload struct {
+}

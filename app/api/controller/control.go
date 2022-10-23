@@ -898,3 +898,14 @@ func (h *handler) GetOpenId() gin.HandlerFunc {
 		response.ResposeSuccess(data, context)
 	}
 }
+
+func (h *handler) FileUpload() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		data, err := h.fanService.FileUpload(context)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}

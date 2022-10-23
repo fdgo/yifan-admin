@@ -49,6 +49,8 @@ type Handler interface {
 	ModifySaveFan() gin.HandlerFunc
 	QueryPrizePostion() gin.HandlerFunc
 	ModifyGoodsPosition() gin.HandlerFunc
+
+	FileUpload() gin.HandlerFunc
 }
 type handler struct {
 	userService  service.UserService
