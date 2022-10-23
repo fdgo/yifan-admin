@@ -2,11 +2,14 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"math"
 	"path"
+	"strings"
+	"time"
 	"yifan/app/api/param"
 	"yifan/app/db"
 	"yifan/pkg/define"
@@ -296,7 +299,6 @@ func (s *FanServiceImpl) ModifyFan(req param.ReqModifyFan) (param.RespModifyFan,
 	}
 	price, _ := decimal.NewFromFloat32(float32(fan.Price)).Float64()
 	ret.EachBoxPrize = mf
-	ret.FanId = box.FanId
 	ret.FanName = box.FanName
 	ret.FanPrice = price
 	ret.BoxNum = int(totalBox)
@@ -346,7 +348,6 @@ func (s *FanServiceImpl) EachBox(box *param.Box, fanId uint, fanName string) ([]
 func (s *FanServiceImpl) PkgBoxes(tx *gorm.DB, fanId uint, req param.ReqModifySaveFan, boxIndex int32, prizeNum int32) (*db.Box, error) {
 	box := &db.Box{
 		ID:            define.GetRandBoxId(),
-		FanId:         fanId,
 		FanName:       req.Title,
 		BoxIndex:      boxIndex,
 		PriczeNum:     prizeNum,

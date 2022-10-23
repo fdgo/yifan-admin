@@ -64,11 +64,6 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		fan.POST("/queryPostion", handler.QueryPrizePostion())
 		fan.POST("/modifyPosition", handler.ModifyGoodsPosition())
 	}
-<<<<<<< HEAD
-	file := r.mux.Group("/v1/file").Use(r.middles.Cors())
-	{
-		file.POST("/upload", handler.FileUpload())
-=======
 	order := r.mux.Group("/v1/order").Use(r.middles.Cors())
 	{
 		order.POST("/pageOrder", handler.PageOfOrder())
@@ -87,7 +82,10 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		adver.POST("/tab/second/son/query", handler.QuerySecondSonTab())
 		adver.POST("/isShow", handler.ShowOrHideSecondTab())
 		adver.POST("/modify", handler.ModifyAndSaveSecondTab())
->>>>>>> e8c2ddc47ab725ce4009e4bc64422daee67ea34e
+	}
+	file := r.mux.Group("/v1/file").Use(r.middles.Cors())
+	{
+		file.POST("/upload", handler.FileUpload())
 	}
 	//memoryStore := persist.NewMemoryStore(1 * time.Minute)
 	//power.GET("/123", cache.CacheByRequestURI(memoryStore, 3600*time.Second),

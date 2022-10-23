@@ -374,9 +374,6 @@ type ReqGetOpenId struct {
 	Iv            string `json:"iv"`
 }
 
-<<<<<<< HEAD
-type ReqFileUpload struct {
-=======
 type ReqPageOfOrder struct {
 	PageSize  int32 `json:"pageSize"`
 	PageIndex int32 `json:"pageIndex"`
@@ -432,5 +429,4 @@ type ReqShowOrHideSecondTab struct {
 }
 
 type ReqModifyAndSaveSecondTab struct {
->>>>>>> e8c2ddc47ab725ce4009e4bc64422daee67ea34e
 }

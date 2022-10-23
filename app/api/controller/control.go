@@ -950,11 +950,6 @@ func (h *handler) GetOpenId() gin.HandlerFunc {
 	}
 }
 
-<<<<<<< HEAD
-func (h *handler) FileUpload() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		data, err := h.fanService.FileUpload(context)
-=======
 // @Description PageOfOrder
 // @Tags PageOfOrder
 // @Accept json
@@ -1247,7 +1242,17 @@ func (h *handler) ModifyAndSaveSecondTab() gin.HandlerFunc {
 			return
 		}
 		data, err := h.adverService.ModifyAndSaveSecondTab(req)
->>>>>>> e8c2ddc47ab725ce4009e4bc64422daee67ea34e
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+func (h *handler) FileUpload() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		data, err := h.fanService.FileUpload(context)
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return

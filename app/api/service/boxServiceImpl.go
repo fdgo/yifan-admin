@@ -175,7 +175,6 @@ func (s *BoxServiceImpl) SetGlobalPrizeAndPostion(tx *gorm.DB, globalPosition db
 func (s *BoxServiceImpl) PkgBoxes(tx *gorm.DB, fanId uint, req param.ReqAddBox, boxIndex int32, prizeNum int32) (*db.Box, error) {
 	box := &db.Box{
 		ID:            define.GetRandBoxId(),
-		FanId:         fanId,
 		FanName:       req.Title,
 		BoxIndex:      boxIndex,
 		PriczeNum:     prizeNum,

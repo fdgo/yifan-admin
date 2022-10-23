@@ -51,10 +51,7 @@ type Handler interface {
 	ModifySaveFan() gin.HandlerFunc
 	QueryPrizePostion() gin.HandlerFunc
 	ModifyGoodsPosition() gin.HandlerFunc
-<<<<<<< HEAD
 
-	FileUpload() gin.HandlerFunc
-=======
 	PageOfOrder() gin.HandlerFunc
 	PageOfOrderCondition() gin.HandlerFunc
 	PageOfOrderDetail() gin.HandlerFunc
@@ -68,7 +65,8 @@ type Handler interface {
 	QuerySecondSonTab() gin.HandlerFunc
 	ShowOrHideSecondTab() gin.HandlerFunc
 	ModifyAndSaveSecondTab() gin.HandlerFunc
->>>>>>> e8c2ddc47ab725ce4009e4bc64422daee67ea34e
+
+	FileUpload() gin.HandlerFunc
 }
 type handler struct {
 	userService  service.UserService
