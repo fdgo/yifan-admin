@@ -5,7 +5,7 @@ import (
 )
 
 type ReqGetUser struct {
-	Id uint `uri:"id" binding:"required" example:"123456789" ` //用户的id()
+	Id uint `json:"id" binding:"required" example:"123456789" ` //用户的id()
 }
 
 type ReqAddRankingQuery struct {
@@ -19,10 +19,10 @@ type ReqMakeSureBuy struct {
 	BoxId    uint `json:"boxId"`
 }
 type ReqGetAllGoods struct {
-	PageSize  int32 `uri:"pageSize"`
-	PageIndex int32 `uri:"pageIndex"`
-	StyleId   uint  `uri:"styleId"`
-	PkgStatus int8  `uri:"pkgStatus"`
+	PageSize  int32 `json:"pageSize"`
+	PageIndex int32 `json:"pageIndex"`
+	StyleId   uint  `json:"styleId"`
+	PkgStatus int8  `json:"pkgStatus"`
 }
 
 type ReqIsNeedToJoinQueue struct {
@@ -33,20 +33,20 @@ type ReqUpLoadGoods struct {
 	UpLoadGoods []UpLoadGoods `json:"goods"`
 }
 type UpLoadGoods struct {
-	GoodsName       string  `json:"goodsName" binding:"required"` //商品名
-	IpName          string  `json:"ipName" binding:"required"`
-	SeriesName      string  `json:"seriesName" binding:"required"`
-	Pic             string  `json:"pic" binding:"required"`             //图片
-	Price           float64 `json:"price" binding:"required"`           //售价
-	SingleOrMuti    int     `json:"singleOrMuti"`                       //单个还是多个
-	MultiIds        []int   `json:"multiIds" `                          //多个商品id
-	PkgStatus       int8    `json:"pkgStatus" binding:"required"`       //打包状态
-	Introduce       string  `json:"introduce" binding:"required"`       //商品简介
-	Integral        int32   `json:"integral" binding:"required"`        //积分
-	Status          string  `json:"status" binding:"required"`          //
-	ActiveBeginTime int64   `json:"activeBeginTime" binding:"required"` //活动开始时间
-	ActiveEndTime   int64   `json:"activeEndTime" binding:"required""`
+	IpName       string  `json:"ipName" binding:"required"`
+	SeriesName   string  `json:"seriesName" binding:"required"`
+	GoodsName    string  `json:"goodsName" binding:"required"` //商品名
+	PkgStatus    int8    `json:"pkgStatus" binding:"required"` //打包状态
+	PreStore     string  `json:"preStore" binding:"required"`
+	Integral     int32   `json:"integral" binding:"required"` //积分
+	Pic          string  `json:"pic" binding:"required"`      //图片
+	Price        float64 `json:"price" binding:"required"`    //售价
+	CreateTime   string  `json:"createTime" binding:"required"`
+	SingleOrMuti int     `json:"singleOrMuti"`
+	MultiIds     []int   `json:"multiIds"`
+	Introduce    string  `json:"introduce"`
 }
+
 type ReqSearchGoods struct {
 	Search string
 }
@@ -62,7 +62,7 @@ type ReqAddGoods struct {
 	MultiIds     []int   `json:"multiIds" `                    //多个商品id
 	PkgStatus    int8    `json:"pkgStatus" binding:"required"` //打包状态
 	Integral     int32   `json:"integral"`                     //积分
-	Status       string  `json:"status" binding:"required"`    //现货状态
+	PreStore     string  `json:"preStore" binding:"required"`  //现货状态
 }
 type ReqBoxBindGoods struct {
 }
@@ -86,7 +86,7 @@ type ReqModifyGoods struct {
 	PkgStatus       int8        `json:"pkgStatus"`
 	Introduce       string      `json:"introduce"`
 	Integral        int32       `json:"integral"`
-	Status          int         `json:"status"`
+	PreStore        int         `json:"preStore"`
 	WhoUpdate       string      `json:"whoUpdate"`
 	ActiveBeginTime int64       `json:"activeBeginTime"`
 	ActiveEndTime   int64       `json:"activeEndTime"`
@@ -102,6 +102,7 @@ type ReqSearchIP struct {
 type ReqAddIP struct {
 	Name       string `json:"name" binding:"required,lte=32,gte=1"`       //IP 名字
 	CreateName string `json:"createName" binding:"required,lte=32,gte=1"` //创建人
+	CreateTime int64  `json:"createTime"`
 }
 type ReqDeleteIP struct {
 	Id *int `json:"id" binding:"required"` //IP id
@@ -118,11 +119,12 @@ type ReqModifyIP struct {
 
 //
 type ReqUpLoadSeries struct {
-	ReqAddSeries []ReqAddSeries `json:"reqAddSeries"`
+	ReqAddSeries []ReqAddSeries `json:"series"`
 }
 type ReqAddSeries struct {
 	Name       string `json:"name" binding:"required,lte=32,gte=1"`
 	CreateName string `json:"createName" binding:"required,lte=32,gte=1"` //创建人
+	CreateTime int64  `json:"createTime"`
 	IpId       *uint  `json:"ipId" binding:"required"`
 	IpName     string `json:"ipName" binding:"required"`
 }
@@ -174,11 +176,11 @@ type Prize struct {
 	IpId              uint        `json:"ipId"`           //该奖品所属IP
 	IpName            string      `json:"ipName"`         //该奖品所属IP的名字
 	Remark            string      `json:"remark"`
-	SeriId            uint        `json:"seriesId"`          //该奖品所属系列
-	SeriName          string      `json:"seriesName"`        //该奖品所属系列名字
-	Pic               string      `json:"pic"`               //奖品图片
-	PkgStatus         int         `json:"pkgStatus"`         //品相状态
-	Status            int         `json:"status"`            //上下架
+	SeriId            uint        `json:"seriesId"`   //该奖品所属系列
+	SeriName          string      `json:"seriesName"` //该奖品所属系列名字
+	Pic               string      `json:"pic"`        //奖品图片
+	PkgStatus         int         `json:"pkgStatus"`  //品相状态
+	PreStore          int         `json:"preStore"`
 	SoldStatus        int         `json:"soldStatus"`        //是否售罄1.奖品售罄,2.奖品未售罄
 	TimeForSoldStatus string      `json:"timeForSoldStatus"` //预售时间
 	SingleOrMuti      int         `json:"singleOrMuti"`      //单一商品填1, 有n个组合就写n
@@ -278,6 +280,11 @@ type ReqDeleteBoxGoods struct {
 //	WhoCreated    string  `json:"whoCreated"`
 //	Pic           string  `json:"pic"` //蕃的图片
 //}
+type ReqQueryFanStatus struct {
+}
+type ReqQueryFanStatusCondition struct {
+	FanId uint `json:"fanId"`
+}
 type ReqQueryFan struct {
 	PageSize  int32 `json:"pageSize" binding:"required"`
 	PageIndex int32 `json:"pageIndex" binding:"required"`
@@ -287,21 +294,23 @@ type ReqModifyFanStatus struct {
 	FanId  uint `json:"fanId" binding:"required"`
 	Status int  `json:"status" binding:"required"`
 }
+
 type ReqModifyFan struct {
 	FanId uint `json:"fanId" binding:"required"`
 }
+
 type ReqModifySaveFan struct {
-	FanID           uint     `json:"fanId"`
-	FanName         string   `json:"fanName"`
-	Rule            string   `json:"rule"`
-	Title           string   `json:"title"`
-	FanPrice        float64  `json:"fanPrice"`
-	ActiveBeginTime int64    `json:"activeBeginTime"`
-	ActiveEndTime   int64    `json:"activeEndTime"`
-	DetailPic       string   `json:"detailPic"`
-	SharePic        string   `json:"sharePic"`
-	TotalBoxNum     int      `json:"totalBoxNum"`
-	Prizes          []PrizeX `json:"prizes"` //每个箱的所有奖品
+	FanID           uint    `json:"fanId"`
+	Type            string  `json:"type"`            //蕃的类型
+	FanPrice        float64 `json:"fanPrice"`        //蕃的价格
+	ActiveBeginTime int64   `json:"activeBeginTime"` //上架时间
+	ActiveEndTime   int64   `json:"activeEndTime"`   //下架时间
+	BoxNum          int     `json:"boxNum"`          //一个蕃的箱数
+	Rule            string  `json:"rule"`            //活动规则
+	Title           string  `json:"title"`           //活动标题
+	DetailPic       string  `json:"detailPic"`       //详细图片
+	SharePic        string  `json:"sharePic"`        //分享图片
+	Boxes           Box     `json:"box"`             //所有箱数的数组
 }
 type PrizeX struct {
 	GoodId         uint        `json:"goodId"`
@@ -365,5 +374,63 @@ type ReqGetOpenId struct {
 	Iv            string `json:"iv"`
 }
 
+<<<<<<< HEAD
 type ReqFileUpload struct {
+=======
+type ReqPageOfOrder struct {
+	PageSize  int32 `json:"pageSize"`
+	PageIndex int32 `json:"pageIndex"`
+}
+
+type ReqPageOfOrderCondition struct {
+	PageSize    int32  `json:"pageSize"`
+	PageIndex   int32  `json:"pageIndex"`
+	OrderId     string `json:"orderId"`
+	Mobile      string `json:"mobile"`
+	UserId      uint   `json:"userId"`
+	OrderStatus string `json:"orderStatus"`
+	PayStyle    string `json:"payStyle"`
+}
+
+type ReqPageOfOrderDetail struct {
+	OrderId string `json:"orderId"`
+}
+
+type ReqActiveByMan struct {
+	TabName    string `json:"tabName"`
+	TabNameSon string `json:"tabNameSon"`
+}
+type ReqSingleClick struct {
+}
+type ReqGetBannerPic struct {
+}
+type ReqAddSecondTab struct {
+	TabTag  string   `json:"tabTag"`
+	TabSons []string `json:"tabSons"`
+}
+type ReqAddSecondTabSon struct {
+	TabTag          string `json:"tabTag"`
+	TabSon          string `json:"tabSon"`
+	RedirectType    string `json:"redirectType"`
+	RedirectAddress string `json:"redirectAddress"`
+	ActiveBeginTime int64  `json:"activeBeginTime"`
+	ActiveEndTime   int64  `json:"activeEndTime"`
+	Remark          string `json:"remark"`
+	Title           string `json:"title"`
+	Pic             string `json:"pic"`
+}
+
+type ReqQuerySecondTab struct {
+	TabTag string `json:"tabTag"`
+}
+
+type ReqQuerySecondSonTab struct {
+	TabTag string `json:"tabTag"`
+	TabSon string `json:"tabSon"`
+}
+type ReqShowOrHideSecondTab struct {
+}
+
+type ReqModifyAndSaveSecondTab struct {
+>>>>>>> e8c2ddc47ab725ce4009e4bc64422daee67ea34e
 }

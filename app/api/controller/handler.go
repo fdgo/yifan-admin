@@ -44,13 +44,31 @@ type Handler interface {
 
 	//
 	ModifyFanStatus() gin.HandlerFunc
+	QueryFanStatus() gin.HandlerFunc
+	QueryFanStatusCondition() gin.HandlerFunc
 	QueryFan() gin.HandlerFunc
 	ModifyFan() gin.HandlerFunc
 	ModifySaveFan() gin.HandlerFunc
 	QueryPrizePostion() gin.HandlerFunc
 	ModifyGoodsPosition() gin.HandlerFunc
+<<<<<<< HEAD
 
 	FileUpload() gin.HandlerFunc
+=======
+	PageOfOrder() gin.HandlerFunc
+	PageOfOrderCondition() gin.HandlerFunc
+	PageOfOrderDetail() gin.HandlerFunc
+
+	ActiveByMan() gin.HandlerFunc
+	SingleClick() gin.HandlerFunc
+	GetBannerPic() gin.HandlerFunc
+	AddSecondTab() gin.HandlerFunc
+	AddSecondTabSon() gin.HandlerFunc
+	QuerySecondTab() gin.HandlerFunc
+	QuerySecondSonTab() gin.HandlerFunc
+	ShowOrHideSecondTab() gin.HandlerFunc
+	ModifyAndSaveSecondTab() gin.HandlerFunc
+>>>>>>> e8c2ddc47ab725ce4009e4bc64422daee67ea34e
 }
 type handler struct {
 	userService  service.UserService
@@ -59,6 +77,8 @@ type handler struct {
 	goodsService service.GoodsService
 	fanService   service.FanService
 	boxService   service.BoxService
+	orderService service.OrderService
+	adverService service.AdverService
 }
 
 func New(db db.Repo, cache *cache.CacheRepo) Handler {
@@ -69,5 +89,7 @@ func New(db db.Repo, cache *cache.CacheRepo) Handler {
 		goodsService: service.NewgoodsService(db, cache),
 		fanService:   service.NewFanService(db, cache),
 		boxService:   service.NewBoxService(db, cache),
+		orderService: service.NewOrderService(db, cache),
+		adverService: service.NewAdverService(db, cache),
 	}
 }

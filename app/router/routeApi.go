@@ -56,15 +56,38 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		Use(r.middles.Cors())
 	{
 		fan.POST("/modify/status", handler.ModifyFanStatus())
+		fan.POST("/query/status", handler.QueryFanStatus())
+		fan.POST("/query/status/condition", handler.QueryFanStatusCondition())
 		fan.POST("/query", handler.QueryFan())
 		fan.POST("/modify", handler.ModifyFan())
 		fan.POST("/modify/save", handler.ModifySaveFan())
 		fan.POST("/queryPostion", handler.QueryPrizePostion())
 		fan.POST("/modifyPosition", handler.ModifyGoodsPosition())
 	}
+<<<<<<< HEAD
 	file := r.mux.Group("/v1/file").Use(r.middles.Cors())
 	{
 		file.POST("/upload", handler.FileUpload())
+=======
+	order := r.mux.Group("/v1/order").Use(r.middles.Cors())
+	{
+		order.POST("/pageOrder", handler.PageOfOrder())
+		order.POST("/pageOrder/condition", handler.PageOfOrderCondition())
+		order.POST("/pageOrder/detail", handler.PageOfOrderDetail())
+
+	}
+	adver := r.mux.Group("/v1/adver").Use(r.middles.Cors())
+	{
+		adver.POST("/banner", handler.GetBannerPic())
+		adver.POST("/activeByMan", handler.ActiveByMan())
+		adver.POST("/singleClick", handler.SingleClick())
+		adver.POST("/tab/second/create", handler.AddSecondTab())
+		adver.POST("/tab/second/son/create", handler.AddSecondTabSon())
+		adver.POST("/tab/second/query", handler.QuerySecondTab())
+		adver.POST("/tab/second/son/query", handler.QuerySecondSonTab())
+		adver.POST("/isShow", handler.ShowOrHideSecondTab())
+		adver.POST("/modify", handler.ModifyAndSaveSecondTab())
+>>>>>>> e8c2ddc47ab725ce4009e4bc64422daee67ea34e
 	}
 	//memoryStore := persist.NewMemoryStore(1 * time.Minute)
 	//power.GET("/123", cache.CacheByRequestURI(memoryStore, 3600*time.Second),

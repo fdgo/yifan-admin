@@ -2,13 +2,51 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"github.com/tealeg/xlsx"
 	"gorm.io/gorm"
 	"math"
+	"os"
 	"yifan/app/api/param"
 	"yifan/app/db"
 	"yifan/pkg/define"
 )
 
+func (s *SeriServiceImpl) ManySerUpload() {
+	//获取当前目录
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	xlsxPath := dir + "/import.xlsx"
+	//打开文件路径
+	xlsxFile, err := xlsx.OpenFile(xlsxPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for _, oneSheet := range xlsxFile.Sheets {
+		if oneSheet.Name == "系列" {
+			for index, row := range oneSheet.Rows {
+				//读取每个cell的内容
+				var ser define.Series
+				for i, oneCell := range row.Cells {
+					if i == 0 {
+						ser.IpName = oneCell.String()
+					}
+					if i == 1 {
+						ser.SeriesName = oneCell.String()
+					}
+				}
+				if index != 0 {
+					define.DealWithOneSeries(ser)
+				}
+				//row.AddCell().Value = "测试一下新增"
+			}
+		}
+	}
+}
 func (s *SeriServiceImpl) UpLoadSeries(req param.ReqUpLoadSeries) (param.RespUpLoadSeries, error) {
 	ret := param.RespUpLoadSeries{}
 	DB := s.db.GetDb()

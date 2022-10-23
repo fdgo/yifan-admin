@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/shopspring/decimal"
+	"github.com/tealeg/xlsx"
 	"gorm.io/gorm"
 	"math"
+	"os"
 	"strings"
 	"time"
 	"yifan/app/api/param"
@@ -55,6 +57,7 @@ func (s *BoxServiceImpl) EachBox(box *param.Box, fanId uint, fanName string) ([]
 			Remark:            prizeEle.Remark,
 			TimeForSoldStatus: prizeEle.TimeForSoldStatus,
 			SoldStatus:        define.YfPrizeStatusNotSoldOut,
+			PreStore:          prizeEle.PreStore,
 		})
 	}
 	return prizes, prizeNum
@@ -189,37 +192,131 @@ func (s *BoxServiceImpl) PkgBoxes(tx *gorm.DB, fanId uint, req param.ReqAddBox, 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 func (s *BoxServiceImpl) SetSure(tx *gorm.DB, sure db.GormList, fanId, boxId uint) error {
-	err := tx.Unscoped().Where("fan_id=? and box_id=?", fanId, boxId).Delete(&db.Sure{}).Error
-	if err != nil {
-		return err
+	result := tx.Where("fan_id=? and box_id=?", fanId, boxId).First(&db.Sure{})
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return result.Error
 	}
-	return tx.FirstOrCreate(&db.Sure{
-		FanId:      fanId,
-		BoxId:      boxId,
-		PrizeIndex: sure,
-	}).Error
+	if result.RowsAffected == 0 {
+		return tx.Create(&db.Sure{
+			FanId:      fanId,
+			BoxId:      boxId,
+			PrizeIndex: sure,
+		}).Error
+	} else {
+		err := tx.Model(&db.Sure{}).Unscoped().Where("fan_id=? and box_id=?", fanId, boxId).Delete(&db.Sure{}).Error
+		if err != nil {
+			return err
+		}
+		return tx.Create(&db.Sure{
+			FanId:      fanId,
+			BoxId:      boxId,
+			PrizeIndex: sure,
+		}).Error
+	}
 }
 func (s *BoxServiceImpl) SetLeft(tx *gorm.DB, left db.GormList, fanId, boxId uint) error {
-	err := tx.Unscoped().Model(&db.Left{}).Where("fan_id=? and box_id=?", fanId, boxId).Delete(&db.Left{}).Error
-	if err != nil {
-		return err
+	result := tx.Where("fan_id=? and box_id=?", fanId, boxId).First(&db.Left{})
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return result.Error
 	}
-	return tx.FirstOrCreate(&db.Left{
-		FanId:      fanId,
-		BoxId:      boxId,
-		PrizeIndex: left,
-	}).Error
+	if result.RowsAffected == 0 {
+		return tx.Create(&db.Left{
+			FanId:      fanId,
+			BoxId:      boxId,
+			PrizeIndex: left,
+		}).Error
+	} else {
+		err := tx.Model(&db.Left{}).Unscoped().Where("fan_id=? and box_id=?", fanId, boxId).Delete(&db.Left{}).Error
+		if err != nil {
+			return err
+		}
+		return tx.Save(&db.Left{
+			FanId:      fanId,
+			BoxId:      boxId,
+			PrizeIndex: left,
+		}).Error
+	}
 }
 func (s *BoxServiceImpl) SetTarget(tx *gorm.DB, target db.GormList, fanId, boxId uint) error {
-	err := tx.Unscoped().Model(&db.Target{}).Where("fan_id=? and box_id=?", fanId, boxId).Delete(&db.Target{}).Error
-	if err != nil {
-		return err
+	result := tx.Where("fan_id=? and box_id=?", fanId, boxId).First(&db.Target{})
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return result.Error
 	}
-	return tx.FirstOrCreate(&db.Target{
-		FanId:      fanId,
-		BoxId:      boxId,
-		PrizeIndex: target,
-	}).Error
+	if result.RowsAffected == 0 {
+		return tx.Create(&db.Target{
+			FanId:      fanId,
+			BoxId:      boxId,
+			PrizeIndex: target,
+		}).Error
+	} else {
+		err := tx.Model(&db.Target{}).Unscoped().Where("fan_id=? and box_id=?", fanId, boxId).Delete(&db.Target{}).Error
+		if err != nil {
+			return err
+		}
+		return tx.Create(&db.Target{
+			FanId:      fanId,
+			BoxId:      boxId,
+			PrizeIndex: target,
+		}).Error
+	}
+}
+
+func (s *BoxServiceImpl) ManyGoodNormalFeature() {
+	//获取当前目录
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	xlsxPath := dir + "/import.xlsx"
+	//打开文件路径
+	xlsxFile, err := xlsx.OpenFile(xlsxPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//读取每一个sheet
+	for _, oneSheet := range xlsxFile.Sheets {
+		if oneSheet.Name == "装箱商品一般属性" {
+			for index, row := range oneSheet.Rows {
+				//读取每个cell的内容
+				var goodNormal define.GoodsNormal
+				for i, oneCell := range row.Cells {
+					if i == 0 {
+						goodNormal.GoodId, _ = oneCell.Int()
+					}
+					if i == 1 {
+						goodNormal.PrizeIndexName = oneCell.String()
+					}
+					if i == 2 {
+						goodNormal.PrizeNum, _ = oneCell.Int()
+					}
+					if i == 3 {
+						goodNormal.Range = oneCell.String()
+					}
+					if i == 4 {
+						goodNormal.Ip = oneCell.String()
+					}
+					if i == 5 {
+						goodNormal.Series = oneCell.String()
+					}
+					if i == 6 {
+						goodNormal.GoodName = oneCell.String()
+					}
+					if i == 7 {
+						goodNormal.Pic = oneCell.String()
+					}
+					if i == 8 {
+						goodNormal.Status = oneCell.String()
+					}
+				}
+				if index != 0 {
+					define.DealWithOneGoodNormal(goodNormal)
+				}
+				//row.AddCell().Value = "测试一下新增"
+			}
+		}
+	}
 }
 
 func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
@@ -288,7 +385,6 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 		for nindex, ele := range prizes {
 			prizes[nindex].BoxID = &box.ID
 			prizes[nindex].BoxIndex = int(box.BoxIndex)
-			prizes[nindex].Status = box.Status
 			if ele.PrizeIndexName != define.PrizeIndexNameFirst &&
 				ele.PrizeIndexName != define.PrizeIndexNameLast &&
 				ele.PrizeIndexName != define.PrizeIndexNameGlobal {
@@ -458,7 +554,8 @@ func (s *BoxServiceImpl) PageOfPosition(req param.ReqPageOfPosition) (param.Resp
 
 	for _, oneBox := range boxes {
 		var prizes []db.Prize
-		s.db.GetDb().Model(&oneBox).Association("Prizes").Find(&prizes)
+		s.db.GetDb().Model(&oneBox).Where("prize_index_name<>? and prize_index_name<>? and prize_index_name<>?",
+			define.PrizeIndexNameGlobal, define.PrizeIndexNameLast, define.PrizeIndexNameFirst).Association("Prizes").Find(&prizes)
 		for _, onePrize := range prizes {
 			tmpPosition := "["
 			for _, p := range onePrize.Position {
@@ -469,11 +566,12 @@ func (s *BoxServiceImpl) PageOfPosition(req param.ReqPageOfPosition) (param.Resp
 
 			ele := param.Ele{
 				FanId:          fan.ID,
+				FanTitle:       fan.Title,
 				BoxId:          oneBox.ID,
 				Num:            onePrize.PrizeNum,
 				PrizeIndexName: onePrize.PrizeIndexName,
 				PrizeName:      onePrize.GoodName,
-				Status:         onePrize.Status,
+				Status:         onePrize.SoldStatus,
 				Postion:        positon,
 			}
 			res.Ele = append(res.Ele, ele)
@@ -513,14 +611,17 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 					sql += " and good_name=? "
 					value = append(value, req.PrizeName)
 				}
-				err = s.db.GetDb().Model(&oneBox).Where(sql, value).Association("Prizes").Find(&prizes)
+				err = s.db.GetDb().Model(&oneBox).Where(sql, value).Where("prize_index_name<>? and prize_index_name<>? and prize_index_name<>?",
+					define.PrizeIndexNameGlobal, define.PrizeIndexNameLast, define.PrizeIndexNameFirst).Association("Prizes").Find(&prizes)
 			} else {
 				if req.PrizeName != "All" {
 					sql += "good_name=?"
 					value = append(value, req.PrizeName)
-					err = s.db.GetDb().Model(&oneBox).Where(sql, value).Association("Prizes").Find(&prizes)
+					err = s.db.GetDb().Model(&oneBox).Where(sql, value).Where("prize_index_name<>? and prize_index_name<>? and prize_index_name<>?",
+						define.PrizeIndexNameGlobal, define.PrizeIndexNameLast, define.PrizeIndexNameFirst).Association("Prizes").Find(&prizes)
 				} else {
-					err = s.db.GetDb().Model(&oneBox).Association("Prizes").Find(&prizes)
+					err = s.db.GetDb().Model(&oneBox).Where("prize_index_name<>? and prize_index_name<>? and prize_index_name<>?",
+						define.PrizeIndexNameGlobal, define.PrizeIndexNameLast, define.PrizeIndexNameFirst).Association("Prizes").Find(&prizes)
 				}
 			}
 			if err != nil {
@@ -539,7 +640,7 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 					Num:            onePrize.PrizeNum,
 					PrizeIndexName: onePrize.PrizeIndexName,
 					PrizeName:      onePrize.GoodName,
-					Status:         onePrize.Status,
+					Status:         onePrize.SoldStatus,
 					Postion:        positon,
 				}
 				res.Ele = append(res.Ele, ele)
@@ -572,14 +673,17 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 				sql += " and good_name=? "
 				value = append(value, req.PrizeName)
 			}
-			err = s.db.GetDb().Model(&box).Where(sql, value).Association("Prizes").Find(&prizes)
+			err = s.db.GetDb().Model(&box).Where(sql, value).Where("prize_index_name<>? and prize_index_name<>? and prize_index_name<>?",
+				define.PrizeIndexNameGlobal, define.PrizeIndexNameLast, define.PrizeIndexNameFirst).Association("Prizes").Find(&prizes)
 		} else {
 			if req.PrizeName != "All" {
 				sql += "good_name=?"
 				value = append(value, req.PrizeName)
-				err = s.db.GetDb().Model(&box).Where(sql, value).Association("Prizes").Find(&prizes)
+				err = s.db.GetDb().Model(&box).Where(sql, value).Where("prize_index_name<>? and prize_index_name<>? and prize_index_name<>?",
+					define.PrizeIndexNameGlobal, define.PrizeIndexNameLast, define.PrizeIndexNameFirst).Association("Prizes").Find(&prizes)
 			} else {
-				err = s.db.GetDb().Model(&box).Association("Prizes").Find(&prizes)
+				err = s.db.GetDb().Model(&box).Where("prize_index_name<>? and prize_index_name<>? and prize_index_name<>?",
+					define.PrizeIndexNameGlobal, define.PrizeIndexNameLast, define.PrizeIndexNameFirst).Association("Prizes").Find(&prizes)
 			}
 		}
 		if err != nil {
@@ -599,12 +703,54 @@ func (s *BoxServiceImpl) PageOfPositionCondition(req param.ReqPageOfPositionCond
 				Num:            onePrize.PrizeNum,
 				PrizeIndexName: onePrize.PrizeIndexName,
 				PrizeName:      onePrize.GoodName,
-				Status:         onePrize.Status,
+				Status:         onePrize.SoldStatus,
 				Postion:        positon,
 			}
 			res.Ele = append(res.Ele, ele)
 		}
 		return res, nil
+	}
+}
+
+func (s *BoxServiceImpl) ManyGoodPositionFeature() {
+	//获取当前目录
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	xlsxPath := dir + "/import.xlsx"
+	//打开文件路径
+	xlsxFile, err := xlsx.OpenFile(xlsxPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//读取每一个sheet
+	for _, oneSheet := range xlsxFile.Sheets {
+		if oneSheet.Name == "装箱商品位置属性" {
+			for index, row := range oneSheet.Rows {
+				var goodPos define.GoodsPosition
+				for i, oneCell := range row.Cells {
+					if i == 0 {
+						goodPos.PrizeName = oneCell.String()
+					}
+					if i == 1 {
+						goodPos.PrizeNum, _ = oneCell.Int()
+					}
+					if i == 2 {
+						goodPos.Range = oneCell.String()
+					}
+					if i == 3 {
+						goodPos.Remark = oneCell.String()
+					}
+				}
+				if index != 0 {
+					define.DealWithOneGoodPosition(goodPos)
+				}
+				//row.AddCell().Value = "测试一下新增"
+			}
+		}
 	}
 }
 func (s *BoxServiceImpl) SetNormalPrizePosition(req param.ReqSetNormalPrizePosition) error {
@@ -867,7 +1013,7 @@ func (s *BoxServiceImpl) QueryGoodsForBox(req param.ReqQueryGoodsForBox) (param.
 			PkgStatus:    one.PkgStatus,
 			Introduce:    one.Introduce,
 			Integral:     one.Integral,
-			SoldStatus:   one.SoldStatus,
+			Prestore:     one.PreStore,
 		})
 	}
 	resp.GInfo.Num = len(resp.GInfo.Good)

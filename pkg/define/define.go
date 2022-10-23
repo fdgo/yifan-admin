@@ -205,3 +205,55 @@ type SnsOauth2 struct {
 	Sessionkey string `json:"session_key"`
 	Openid     string `json:"openid"`
 }
+
+type Ip struct {
+	IpName string
+}
+type Series struct {
+	IpName     string
+	SeriesName string
+}
+type Goods struct {
+	Ip        string
+	Series    string
+	GoodsName string
+	PkgStatus string
+	PreStore  string
+	Integral  int
+	Pic       string
+	Price     float64
+	CreatTime string
+}
+type GoodsNormal struct {
+	GoodId         int
+	PrizeIndexName string
+	PrizeNum       int
+	Range          string
+	Ip             string
+	Series         string
+	GoodName       string
+	Pic            string
+	Status         string
+}
+type GoodsPosition struct {
+	PrizeName string
+	PrizeNum  int
+	Range     string
+	Remark    string
+}
+
+func DealWithOneIp(ip Ip) {
+
+}
+func DealWithOneSeries(ser Series) {
+
+}
+func DealWithOneGood(og Goods) {
+
+}
+func DealWithOneGoodNormal(nor GoodsNormal) {
+
+}
+func DealWithOneGoodPosition(pos GoodsPosition) {
+
+}

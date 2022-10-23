@@ -7,6 +7,15 @@ import (
 	"time"
 )
 
+type GormListEx []string
+
+func (g GormListEx) Value() (driver.Value, error) {
+	return json.Marshal(g)
+}
+func (g *GormListEx) Scan(value interface{}) error {
+	return json.Unmarshal(value.([]byte), &g)
+}
+
 type GormList []int
 
 func (g GormList) Value() (driver.Value, error) {

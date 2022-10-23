@@ -2,37 +2,74 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"github.com/tealeg/xlsx"
 	"gorm.io/gorm"
 	"math"
+	"os"
 	"yifan/app/api/param"
 	"yifan/app/db"
 	"yifan/pkg/define"
 )
 
-func (s *IpServiceImpl) UpLoadIPs(req param.ReqUpLoadIPs) (param.RespUpLoadIPs, error) {
-	ret := param.RespUpLoadIPs{}
-	DB := s.db.GetDb()
-	for _, ele := range req.ReqAddIP {
-		ip := &db.Ip{}
-		result := DB.Where("name=?", ele.Name).First(&ip)
-		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-			return param.RespUpLoadIPs{}, errors.New("服务正忙...")
-		}
-		if result.RowsAffected != 0 {
-			ret.IpIdNames = append(ret.IpIdNames, param.IpIdName{
-				Id:   ip.ID,
-				Name: ip.Name,
-				Tip:  "该IP已经创建...",
-			})
-			continue
-		}
-		ip = &db.Ip{ID: define.GetRandIpId(), Name: ele.Name, CreateName: ele.CreateName}
-		err := DB.Create(ip).Error
-		if err != nil {
-			return param.RespUpLoadIPs{}, errors.New("服务正忙...")
+func (s *IpServiceImpl) ManyIpUpload() {
+	//获取当前目录
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	xlsxPath := dir + "/import.xlsx"
+	//打开文件路径
+	xlsxFile, err := xlsx.OpenFile(xlsxPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//读取每一个sheet
+	for _, oneSheet := range xlsxFile.Sheets {
+		if oneSheet.Name == "IP" {
+			for index, row := range oneSheet.Rows {
+				//读取每个cell的内容
+				var ip define.Ip
+				for i, oneCell := range row.Cells {
+					if i == 0 {
+						ip.IpName = oneCell.String()
+					}
+				}
+				if index != 0 {
+					define.DealWithOneIp(ip)
+				}
+				//row.AddCell().Value = "测试一下新增"
+			}
 		}
 	}
-	return ret, nil
+}
+func (s *IpServiceImpl) UpLoadIPs(req param.ReqUpLoadIPs) (param.RespUpLoadIPs, error) {
+	return param.RespUpLoadIPs{}, nil
+	//ret := param.RespUpLoadIPs{}
+	//DB := s.db.GetDb()
+	//for _, ele := range req.ReqAddIP {
+	//	ip := &db.Ip{}
+	//	result := DB.Where("name=?", ele.Name).First(&ip)
+	//	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+	//		return param.RespUpLoadIPs{}, errors.New("服务正忙...")
+	//	}
+	//	if result.RowsAffected != 0 {
+	//		ret.IpIdNames = append(ret.IpIdNames, param.IpIdName{
+	//			Id:   ip.ID,
+	//			Name: ip.Name,
+	//			Tip:  "该IP已经创建...",
+	//		})
+	//		continue
+	//	}
+	//	ip = &db.Ip{ID: define.GetRandIpId(), Name: ele.Name, CreateName: ele.CreateName, CreateTime: ele.CreateTime}
+	//	err := DB.Create(ip).Error
+	//	if err != nil {
+	//		return param.RespUpLoadIPs{}, errors.New("服务正忙...")
+	//	}
+	//}
+	//return ret, nil
 }
 func (s *IpServiceImpl) SearchIP(req param.ReqSearchIP) (param.RespSearchIp, error) {
 	DB := s.db.GetDb()
