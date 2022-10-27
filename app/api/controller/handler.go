@@ -52,6 +52,7 @@ type Handler interface {
 	QueryPrizePostion() gin.HandlerFunc
 	ModifyGoodsPosition() gin.HandlerFunc
 
+	AddRemark() gin.HandlerFunc
 	PageOfOrder() gin.HandlerFunc
 	PageOfOrderCondition() gin.HandlerFunc
 	PageOfOrderDetail() gin.HandlerFunc
@@ -59,15 +60,20 @@ type Handler interface {
 	ActiveByMan() gin.HandlerFunc
 	SingleClick() gin.HandlerFunc
 	SetBannerPic() gin.HandlerFunc
+	DelBannerPic() gin.HandlerFunc
 	GetBannerPic() gin.HandlerFunc
 	AddSecondTab() gin.HandlerFunc
 	AddSecondTabSon() gin.HandlerFunc
 	QuerySecondTab() gin.HandlerFunc
 	QuerySecondSonTab() gin.HandlerFunc
-	ShowOrHideSecondTab() gin.HandlerFunc
-	ModifyAndSaveSecondTab() gin.HandlerFunc
 
+	ShowOrHideBanner() gin.HandlerFunc
+	ShowOrHideSecondTab() gin.HandlerFunc
+	ShowOrHideSecondTabSon() gin.HandlerFunc
+	DeleteTabSon() gin.HandlerFunc
+	ModifyAndSaveSecondTab() gin.HandlerFunc
 	FileUpload() gin.HandlerFunc
+	UserList() gin.HandlerFunc
 }
 type handler struct {
 	userService  service.UserService

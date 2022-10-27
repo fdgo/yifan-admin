@@ -104,5 +104,7 @@ func RegisterTables(db *gorm.DB) {
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='积分记录表'").AutoMigrate(&IntegralRecord{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='广告表'").AutoMigrate(&Adver{})
 	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='广告下面的tab表'").AutoMigrate(&AdverTab{})
-
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='地址表'").AutoMigrate(&Address{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='提货订单表'").AutoMigrate(&OrderDeliver{})
+	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COMMENT='提货订单细节表'").AutoMigrate(&OrderDeliverDetail{})
 }

@@ -78,6 +78,12 @@ const (
 	PrizeIndexNameLast   = "Last"
 	PrizeIndexNameGlobal = "全局"
 
+	OrderStatusToBePickUp  = 1 // 1.待提货
+	OrderStatusToDelivered = 2 // 2.待发货
+	OrderStatusToReceive   = 3 // 3.等收货
+	OrderStatusFinish      = 4 // 4.已完成
+	OrderStatusAll         = 5 //全部
+	
 	PrizeIndexNameA = "A"
 	PrizeIndexNameB = "B"
 	PrizeIndexNameC = "C"

@@ -9,6 +9,10 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 	//config := cors.DefaultConfig()
 	//config.AllowAllOrigins = true
 	//config.AllowHeaders = append(config.AllowHeaders, "token")
+	user := r.mux.Group("/v1/user")
+	{
+		user.POST("/list", handler.UserList())
+	}
 	ip := r.mux.Group("/v1/ip")
 	{
 		ip.POST("/upload", handler.UpLoadIPs())
@@ -66,6 +70,7 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 	}
 	order := r.mux.Group("/v1/order").Use(r.middles.Cors())
 	{
+		order.POST("/addRemark", handler.AddRemark())
 		order.POST("/pageOrder", handler.PageOfOrder())
 		order.POST("/pageOrder/condition", handler.PageOfOrderCondition())
 		order.POST("/pageOrder/detail", handler.PageOfOrderDetail())
@@ -75,6 +80,8 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 	{
 		adver.POST("/banner/query", handler.GetBannerPic())
 		adver.POST("/banner/create", handler.SetBannerPic())
+		adver.POST("/banner/isShow", handler.ShowOrHideBanner())
+		adver.POST("/banner/delete", handler.DelBannerPic())
 		adver.POST("/activeByMan", handler.ActiveByMan())
 		adver.POST("/singleClick", handler.SingleClick())
 		adver.POST("/tab/second/create", handler.AddSecondTab())
@@ -82,6 +89,8 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		adver.POST("/tab/second/query", handler.QuerySecondTab())
 		adver.POST("/tab/second/son/query", handler.QuerySecondSonTab())
 		adver.POST("/isShow", handler.ShowOrHideSecondTab())
+		adver.POST("/isShow/son", handler.ShowOrHideSecondTabSon())
+		adver.POST("/son/delete", handler.DeleteTabSon())
 		adver.POST("/modify", handler.ModifyAndSaveSecondTab())
 	}
 	file := r.mux.Group("/v1/file").Use(r.middles.Cors())

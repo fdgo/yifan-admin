@@ -8,6 +8,7 @@ import (
 type UserService interface {
 	IsNew(req param.ReqIsNew) (bool, error)
 	GetOpenId(req param.ReqGetOpenId) (param.RespGetOpenId, error)
+	UserList(req param.ReqUserList) (param.RespUserList, error)
 }
 
 type UserServiceImpl struct {

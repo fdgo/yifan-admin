@@ -7,6 +7,7 @@ import (
 )
 
 type OrderService interface {
+	AddRemark(req param.ReqAddRemark) error
 	PageOfOrder(req param.ReqPageOfOrder) (param.RespPageOfOrder, error)
 	PageOfOrderCondition(req param.ReqPageOfOrderCondition) (param.RespPageOfOrderCondition, error)
 	PageOfOrderDetail(req param.ReqPageOfOrderDetail) (param.RespPageOfOrderDetail, error)

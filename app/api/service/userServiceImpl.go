@@ -8,8 +8,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -172,4 +174,25 @@ func (s *UserServiceImpl) GenToken(user_id uint) (string, int64) {
 	jwtoken := &jwtex.JwtToken{SigningKey: []byte(configs.GetConfig().Jwt.JwtSecret)}
 	token, _ := jwtoken.CreateToken(claims)
 	return token, exp
+}
+func (s *UserServiceImpl) UserList(req param.ReqUserList) (param.RespUserList, error) {
+	DB := s.db.GetDb()
+	total := int64(0)
+	err := DB.Model(&db.User{}).Count(&total).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return param.RespUserList{}, errors.New("服务正忙......")
+	}
+	users := []*db.User{}
+	if err = DB.Limit(int(req.PageSize)).Offset(int((req.PageIndex - 1) * req.PageSize)).Order("created_at desc").Find(&users).Error; err != nil {
+		return param.RespUserList{}, errors.New("服务正忙...")
+	}
+	var resp param.RespUserList
+	for _, oneUser := range users {
+		var u db.User
+		copier.Copy(&u, oneUser)
+		resp.Users = append(resp.Users, u)
+	}
+	resp.Num = len(resp.Users)
+	resp.AllPages = math.Ceil(float64(total) / float64(req.PageSize))
+	return resp, nil
 }

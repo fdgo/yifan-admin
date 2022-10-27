@@ -10,6 +10,9 @@ import (
 	"yifan/app/db"
 )
 
+func (s *OrderServiceImpl) AddRemark(req param.ReqAddRemark) error {
+	return s.db.GetDb().Model(&db.Order{}).Where("out_trade_no=?", req.OrderId).Update("remark", req.Remark).Error
+}
 func (s *OrderServiceImpl) PageOfOrder(req param.ReqPageOfOrder) (param.RespPageOfOrder, error) {
 	DB := s.db.GetDb()
 	var order []db.Order
@@ -124,9 +127,15 @@ func (s *OrderServiceImpl) PageOfOrderDetail(req param.ReqPageOfOrderDetail) (pa
 			Pic:            oneLugg.Pic,
 		})
 	}
+	resp.Orders.FinishTime = orderSrc.FinishTime
+	resp.Orders.UserMobile = orderSrc.UserMobile
+	resp.Orders.UserId = orderSrc.UserId
+	resp.Orders.UserName = orderSrc.UserName
+	resp.Orders.PrizeNum = orderSrc.PrizeNum
+	resp.Orders.OutTradeNo = orderSrc.OutTradeNo
 	resp.Orders.Price = orderSrc.Price
 	resp.Orders.PayStyle = orderSrc.PayStyle
-	resp.Orders.PrepayId = orderSrc.PrepayId
+	resp.Orders.TansactionId = orderSrc.TransactionId
 	resp.Orders.CreateTime = TimetToInt64(orderSrc.CreatedAt)
 	return resp, nil
 }

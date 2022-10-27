@@ -403,37 +403,42 @@ type RespGetOpenId struct {
 	NickName string `json:"nick_name"`
 	Avatar   string `json:"avatar"`
 }
-
+type RespUserList struct {
+	AllPages float64   `json:"allPages"`
+	Num      int       `json:"num"`
+	Users    []db.User `json:"users"`
+}
 type RespPageOfOrder struct {
 	AllPages float64 `json:"allPages,omitempty"`
 	Num      int     `json:"num"`
 	Orders   []Order `json:"orders"`
 }
 type Order struct {
-	ID         uint     `json:"-"`
-	OutTradeNo string   `json:"orderId"`
-	FanPic     string   `json:"fanPic"`
-	Price      float64  `json:"price"`
-	PrizeNum   int      `json:"prizeNum"`
-	OrderType  string   `json:"orderType"`
-	UserName   string   `json:"userName"`
-	PayStyle   string   `json:"payStyle"`
-	CreateTime int64    `json:"createTime"`
-	Status     string   `json:"status"`
-	FanId      uint     `json:"-"`
-	FanName    string   `json:"-"`
-	BoxId      uint     `json:"-"`
-	BoxIndex   int      `json:"-"`
-	OpenId     string   `json:"-"`
-	UserId     uint     `json:"-"`
-	Avatar     string   `json:"-"`
-	UserMobile string   `json:"-"`
-	PrepayId   string   `json:"-"`
-	Appid      string   `json:"-"`
-	Remark     string   `json:"remark"`
-	Detail     string   `json:"detail"`
-	Operator   string   `json:"operator"`
-	Goods      []Goodxs `json:"goods"`
+	ID           uint     `json:"-"`
+	OutTradeNo   string   `json:"outTradeNo"`
+	FanPic       string   `json:"fanPic"`
+	Price        float64  `json:"price"`
+	PrizeNum     int      `json:"prizeNum"`
+	OrderType    string   `json:"orderType"`
+	UserName     string   `json:"userName"`
+	PayStyle     string   `json:"payStyle"`
+	CreateTime   int64    `json:"createTime"`
+	Status       string   `json:"status"`
+	FanId        uint     `json:"-"`
+	FanName      string   `json:"-"`
+	BoxId        uint     `json:"-"`
+	BoxIndex     int      `json:"-"`
+	OpenId       string   `json:"-"`
+	UserId       uint     `json:"userId"`
+	Avatar       string   `json:"-"`
+	UserMobile   string   `json:"userMobile"`
+	FinishTime   int64    `json:"finishTime"`
+	TansactionId string   `json:"tansactionId"`
+	Appid        string   `json:"-"`
+	Remark       string   `json:"remark"`
+	Detail       string   `json:"detail"`
+	Operator     string   `json:"operator"`
+	Goods        []Goodxs `json:"goods"`
 }
 type RespPageOfOrderCondition struct {
 	AllPages float64 `json:"allPages,omitempty"`
@@ -460,15 +465,14 @@ type RespSingleClick struct {
 	FanPicTitle []FanPicTitle `json:"fanPicTitle"`
 }
 type FanPicTitle struct {
+	FanId uint   `json:"fanId"`
 	Pic   string `json:"pic"`
 	Title string `json:"title"`
 }
 type RespGetBannerPic struct {
-	AdverTip        string   `json:"adverTip"`
-	BannerPic       []string `json:"bannerPic"`
-	ActiveBeginTime int64    `json:"activeBeginTime"`
-	ActiveEndTime   int64    `json:"activeEndTime"`
+	Banners []Banner `json:"banners"`
 }
+
 type RespAddSecondTab struct {
 }
 type RespAddSecondTabSon struct {

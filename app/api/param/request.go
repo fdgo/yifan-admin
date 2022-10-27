@@ -373,7 +373,14 @@ type ReqGetOpenId struct {
 	Code          string `json:"code"`
 	Iv            string `json:"iv"`
 }
-
+type ReqUserList struct {
+	PageSize  int32 `json:"pageSize"`
+	PageIndex int32 `json:"pageIndex"`
+}
+type ReqAddRemark struct {
+	OrderId string
+	Remark  string
+}
 type ReqPageOfOrder struct {
 	PageSize  int32 `json:"pageSize"`
 	PageIndex int32 `json:"pageIndex"`
@@ -382,7 +389,7 @@ type ReqPageOfOrder struct {
 type ReqPageOfOrderCondition struct {
 	PageSize    int32  `json:"pageSize"`
 	PageIndex   int32  `json:"pageIndex"`
-	OrderId     string `json:"orderId"`
+	OrderId     string `json:"outTradeNo"`
 	Mobile      string `json:"mobile"`
 	UserId      uint   `json:"userId"`
 	OrderStatus string `json:"orderStatus"`
@@ -390,7 +397,7 @@ type ReqPageOfOrderCondition struct {
 }
 
 type ReqPageOfOrderDetail struct {
-	OrderId string `json:"orderId"`
+	OrderId string `json:"outTradeNo"`
 }
 
 type ReqActiveByMan struct {
@@ -399,18 +406,23 @@ type ReqActiveByMan struct {
 }
 type ReqSingleClick struct {
 }
+type ReqDelBannerPic struct {
+	Id uint `json:"id"`
+}
 type ReqSetBannerPic struct {
-	BannerTitle       string `json:"banner_title"`
-	BannerOne         string `json:"banner_one"`
-	BannerTwo         string `json:"banner_two"`
-	BannerThree       string `json:"banner_three"`
-	BannerFour        string `json:"banner_four"`
-	BannerFive        string `json:"banner_five"`
-	BannerReleatedUrl string `json:"banner_releated_url"`
-	ReleatedUrlType   string `json:"releated_url_type"`
-	TipsAfterBanner   string `json:"tips_after_banner"`
-	ActiveBeginTime   int64  `json:"active_begin_time"`
-	ActiveEndTime     int64  `json:"active_end_time"`
+	Banners []Banner `json:"banners"`
+}
+type Banner struct {
+	Id                uint   `json:"id"`
+	BannerTitle       string `json:"bannerTitle"`
+	Pic               string `json:"pic"`
+	BannerReleatedUrl string `json:"bannerReleatedUrl"`
+	ReleatedUrlType   string `json:"releatedUrlType"`
+	Remark            string `json:"remark"`
+	IsHide            bool   `json:"isHide"`
+	TipsAfterBanner   string `json:"tipsAfterBanner"`
+	ActiveBeginTime   int64  `json:"activeBeginTime"`
+	ActiveEndTime     int64  `json:"activeEndTime"`
 }
 type ReqGetBannerPic struct {
 }
@@ -438,12 +450,23 @@ type ReqQuerySecondSonTab struct {
 	TabTag string `json:"tabTag"`
 	TabSon string `json:"tabSon"`
 }
+type ReqShowOrHideBanner struct {
+	BannerId int  `json:"bannerId"`
+	IsHide   bool `json:"isHide"`
+}
 type ReqShowOrHideSecondTab struct {
+	TabTag string `json:"tabTag"`
+	TabSon string `json:"tabSon"`
+	IsHide bool   `json:"isHide"`
+}
+type ReqShowOrHideSecondTabSon struct {
 	TabTag string `json:"tabTag"`
 	TabSon string `json:"tabSon"`
 	Id     int    `json:"id"`
 	IsHide bool   `json:"isHide"`
 }
-
+type ReqDeleteTabSon struct {
+	Id int `json:"id"`
+}
 type ReqModifyAndSaveSecondTab struct {
 }

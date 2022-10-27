@@ -7,69 +7,190 @@ import (
 	"gorm.io/gorm"
 	"math"
 	"os"
+	"strconv"
+	"time"
 	"yifan/app/api/param"
 	"yifan/app/db"
 	"yifan/pkg/define"
 )
 
-func (s *GoodsServiceImpl) ManyGoodsUpload() {
+func (s *GoodsServiceImpl) UpLoadGoods() error {
 	//获取当前目录
 	dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	xlsxPath := dir + "/import.xlsx"
 	//打开文件路径
 	xlsxFile, err := xlsx.OpenFile(xlsxPath)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
+	}
+	tx := s.db.GetDb().Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	type IpSerGood struct {
+		IpId   uint
+		SerId  uint
+		GoodId uint
 	}
 	for _, oneSheet := range xlsxFile.Sheets {
 		if oneSheet.Name == "商品" {
 			//读取每个sheet下面的行数据
+			IpSerGoods := []IpSerGood{}
 			for index, row := range oneSheet.Rows {
-				//读取每个cell的内容
-				var g define.Goods
-				for i, oneCell := range row.Cells {
-					if i == 0 {
-						g.Ip = oneCell.String()
-					}
-					if i == 1 {
-						g.Series = oneCell.String()
-					}
-					if i == 2 {
-						g.GoodsName = oneCell.String()
-					}
-					if i == 3 {
-						g.PkgStatus = oneCell.String()
-					}
-					if i == 4 {
-						g.PreStore = oneCell.String()
-					}
-					if i == 5 {
-						g.Integral, _ = oneCell.Int()
-					}
-					if i == 6 {
-						g.Pic = oneCell.String()
-					}
-					if i == 7 {
-						g.Price, _ = oneCell.Float()
-					}
-					if i == 8 {
-						g.CreatTime = oneCell.String()
-					}
-				}
 				if index != 0 {
-					define.DealWithOneGood(g)
+					//读取每个cell的内容
+					var g define.Goods
+					ipx := db.Ip{}
+					serx := db.Series{}
+					goodx := db.Goods{}
+					for i, oneCell := range row.Cells {
+						if i == 0 {
+							err = tx.Where("name=?", oneCell.Value).First(&ipx).Error
+							if err != nil {
+								tx.Rollback()
+								return err
+							}
+						}
+						if i == 1 {
+							err = tx.Where("name=?", oneCell.Value).First(&serx).Error
+							if err != nil {
+								tx.Rollback()
+								return err
+							}
+						}
+						if i == 2 {
+							g.GoodsName = oneCell.String()
+						}
+						if i == 3 {
+							g.PkgStatus = oneCell.String()
+						}
+						if i == 4 {
+							g.PreStore = oneCell.String()
+						}
+						if i == 5 {
+							g.Integral, _ = oneCell.Int()
+						}
+						if i == 6 {
+							g.Pic = oneCell.String()
+						}
+						if i == 7 {
+							g.Price, _ = oneCell.Float()
+						}
+						if i == 8 {
+							g.CreatTime = oneCell.String()
+							goodx.IpID = &ipx.ID
+							goodx.SeriesID = &serx.ID
+							goodx.IpName = ipx.Name
+							goodx.SeriesName = serx.Name
+							if g.PkgStatus == "全新未拆盒" {
+								goodx.PkgStatus = define.YfGoodsPkgStatusNewNew
+							}
+							if g.PkgStatus == "拆盒拆袋" {
+								goodx.PkgStatus = define.YfGoodsPkgStatusOldOld
+							}
+							if g.PkgStatus == "拆盒未拆袋" {
+								goodx.PkgStatus = define.YfGoodsPkgStatusNewOld
+							}
+							goodx.Name = g.GoodsName
+							goodx.PreStore = g.PreStore
+							goodx.Integral = int32(g.Integral)
+							goodx.Pic = g.Pic
+							goodx.Price = g.Price
+							t, _ := time.ParseInLocation("20060102150405", g.CreatTime, time.Local)
+							goodx.CreatedAt = t
+							err = tx.Create(&goodx).Error
+							if err != nil {
+								tx.Rollback()
+								return err
+							}
+						}
+					}
+					IpSerGoods = append(IpSerGoods, IpSerGood{
+						IpId:   ipx.ID,
+						SerId:  serx.ID,
+						GoodId: goodx.ID,
+					})
 				}
-				//row.AddCell().Value = "测试一下新增"
+			} //
+			tx.Commit()
+			for j, row := range oneSheet.Rows {
+				if j == 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = "IP对应ID"
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
+			}
+			for j, row := range oneSheet.Rows {
+				if j == 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = "系列对应ID"
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
+			}
+			for j, row := range oneSheet.Rows {
+				if j == 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = "商品对应ID"
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
+			}
+			for j, row := range oneSheet.Rows {
+				if j != 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = strconv.Itoa(int(IpSerGoods[j-1].IpId))
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
+			}
+			for j, row := range oneSheet.Rows {
+				if j != 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = strconv.Itoa(int(IpSerGoods[j-1].SerId))
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
+			}
+			for j, row := range oneSheet.Rows {
+				if j != 0 {
+					for k, _ := range row.Cells {
+						if k+1 == len(row.Cells) {
+							x := row.AddCell()
+							x.Value = strconv.Itoa(int(IpSerGoods[j-1].GoodId))
+							xlsxFile.Save(xlsxPath)
+						}
+					}
+				}
 			}
 		}
 	}
+	return nil
 }
-func (s *GoodsServiceImpl) UpLoadGoods(req param.ReqUpLoadGoods) (param.RespUpLoadGoods, error) {
+func (s *GoodsServiceImpl) ManyGoodsUpload(req param.ReqUpLoadGoods) (param.RespUpLoadGoods, error) {
 	DB := s.db.GetDb()
 	ret := param.RespUpLoadGoods{}
 	for _, ele := range req.UpLoadGoods {

@@ -322,12 +322,12 @@ func (h *handler) UpLoadGoods() gin.HandlerFunc {
 			response.AbortWithBadRequestWithError(err, context)
 			return
 		}
-		data, err := h.goodsService.UpLoadGoods(req)
+		err := h.goodsService.UpLoadGoods()
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return
 		}
-		response.ResposeSuccess(data, context)
+		response.ResposeSuccess(nil, context)
 	}
 }
 
@@ -950,6 +950,31 @@ func (h *handler) GetOpenId() gin.HandlerFunc {
 	}
 }
 
+// @Description AddRemark
+// @Tags AddRemark
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqAddRemark body param.ReqAddRemark true "666"
+// @Success 200 {object} response.responseSucess{data=int}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/order/addRemark [post]
+func (h *handler) AddRemark() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqAddRemark
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		err := h.orderService.AddRemark(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(nil, context)
+	}
+}
+
 // @Description PageOfOrder
 // @Tags PageOfOrder
 // @Accept json
@@ -1072,6 +1097,31 @@ func (h *handler) SingleClick() gin.HandlerFunc {
 			return
 		}
 		response.ResposeSuccess(data, context)
+	}
+}
+
+// @Description DelBannerPic
+// @Tags DelBannerPic
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqDelBannerPic body param.ReqDelBannerPic true "666"
+// @Success 200 {object} response.responseSucess{data=int}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/banner/delete [post]
+func (h *handler) DelBannerPic() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqDelBannerPic
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		err := h.adverService.DelBannerPic(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(nil, context)
 	}
 }
 
@@ -1225,15 +1275,40 @@ func (h *handler) QuerySecondSonTab() gin.HandlerFunc {
 	}
 }
 
+// @Description ShowOrHideBanner
+// @Tags ShowOrHideBanner
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqShowOrHideBanner body param.ReqShowOrHideBanner true "666"
+// @Success 200 {object} response.responseSucess{data=int}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/isShow [post]
+func (h *handler) ShowOrHideBanner() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqShowOrHideBanner
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		err := h.adverService.ShowOrHideBanner(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(nil, context)
+	}
+}
+
 // @Description ShowOrHideSecondTab
 // @Tags ShowOrHideSecondTab
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param ReqShowOrHideSecondTab body param.ReqShowOrHideSecondTab true "666"
-// @Success 200 {object} response.responseSucess{data=param.RespShowOrHideSecondTab}
+// @Success 200 {object} response.responseSucess{data=int}
 // @Failure 400 {object} response.responseFailure
-// @Router /v1/adver/isShow [post]
+// @Router /v1/adver/banner/isShow [post]
 func (h *handler) ShowOrHideSecondTab() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var req param.ReqShowOrHideSecondTab
@@ -1242,6 +1317,56 @@ func (h *handler) ShowOrHideSecondTab() gin.HandlerFunc {
 			return
 		}
 		err := h.adverService.ShowOrHideSecondTab(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(nil, context)
+	}
+}
+
+// @Description ShowOrHideSecondTabSon
+// @Tags ShowOrHideSecondTabSon
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqShowOrHideSecondTabSon body param.ReqShowOrHideSecondTabSon true "666"
+// @Success 200 {object} response.responseSucess{data=int}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/isShow/son [post]
+func (h *handler) ShowOrHideSecondTabSon() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqShowOrHideSecondTabSon
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		err := h.adverService.ShowOrHideSecondTabSon(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(nil, context)
+	}
+}
+
+// @Description DeleteTabSon
+// @Tags DeleteTabSon
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ReqDeleteTabSon body param.ReqDeleteTabSon true "666"
+// @Success 200 {object} response.responseSucess{data=int}
+// @Failure 400 {object} response.responseFailure
+// @Router /v1/adver/son/delete [post]
+func (h *handler) DeleteTabSon() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqDeleteTabSon
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		err := h.adverService.DeleteTabSon(req)
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return
@@ -1278,6 +1403,22 @@ func (h *handler) ModifyAndSaveSecondTab() gin.HandlerFunc {
 func (h *handler) FileUpload() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		data, err := h.fanService.FileUpload(context)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+func (h *handler) UserList() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqUserList
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.userService.UserList(req)
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return

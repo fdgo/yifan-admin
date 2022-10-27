@@ -179,6 +179,7 @@ func (s *BoxServiceImpl) PkgBoxes(tx *gorm.DB, fanId uint, req param.ReqAddBox, 
 		BoxIndex:      boxIndex,
 		PriczeNum:     prizeNum,
 		PriczeLeftNum: prizeNum,
+		FanID:         &fanId,
 		Status:        define.YfBoxStatusNotOnBoard,
 	}
 	err := tx.Create(box).Error

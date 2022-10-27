@@ -114,33 +114,97 @@ type Prize struct {
 	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
 }
 type Order struct {
-	ID         uint           `gorm:"primarykey" json:"id"`
-	OutTradeNo string         `gorm:"comment:订单编号;index" json:"orderId"`
-	PrizeNum   int            `gorm:"comment:奖品数量（抽奖次数，不包括特殊赏）" json:"prizeNum"`
-	Price      float64        `gorm:"comment:金额" json:"price"`
-	UserName   string         `gorm:"comment:用户名" json:"userName"`
-	FanId      uint           `gorm:"comment:蕃id" json:"fanId"`
-	FanName    string         `gorm:"comment:蕃名" json:"fanName"`
-	BoxId      uint           `gorm:"comment:箱id" json:"boxId"`
-	BoxIndex   int            `gorm:"comment:箱名顺序" json:"boxIndex"`
-	OpenId     string         `gorm:"comment:用户openid " json:"openId"`
-	UserId     uint           `gorm:"comment:用户id" json:"userId"`
-	Avatar     string         `gorm:"comment:头像" json:"avatar"`
-	FanPic     string         `gorm:"comment:蕃图片" json:"fanPic"`
-	UserMobile string         `gorm:"comment:用户手机号" json:"userMobile"`
-	PrepayId   string         `gorm:"comment:支付流水号 " json:"prepayId"`
-	Appid      string         `gorm:"comment:appid" json:"appid"`
-	OrderType  string         `gorm:"comment:订单类型" json:"orderType"`
-	PayStyle   string         `gorm:"comment:支付方式 " json:"payStyle"`
-	Status     string         `gorm:"comment:订单状态" json:"Status"`
-	Remark     string         `gorm:"comment:备注" json:"remark"`
-	Detail     string         `gorm:"comment:详情" json:"detail"`
-	Operator   string         `gorm:"comment:操作" json:"operator"`
-	CreatedAt  time.Time      `json:"created_time"`
-	UpdatedAt  time.Time      `json:"updated_time"`
-	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
+	ID            uint           `gorm:"primarykey" json:"id"`
+	OutTradeNo    string         `gorm:"comment:订单编号;index" json:"orderId"`
+	PrizeNum      int            `gorm:"comment:奖品数量（抽奖次数，不包括特殊赏）" json:"prizeNum"`
+	Price         float64        `gorm:"comment:金额" json:"price"`
+	UserName      string         `gorm:"comment:用户名" json:"userName"`
+	FanId         uint           `gorm:"comment:蕃id" json:"fanId"`
+	FanName       string         `gorm:"comment:蕃名" json:"fanName"`
+	BoxId         uint           `gorm:"comment:箱id" json:"boxId"`
+	BoxIndex      int            `gorm:"comment:箱名顺序" json:"boxIndex"`
+	OpenId        string         `gorm:"comment:用户openid " json:"openId"`
+	UserId        uint           `gorm:"comment:用户id" json:"userId"`
+	Avatar        string         `gorm:"comment:头像" json:"avatar"`
+	FanPic        string         `gorm:"comment:蕃图片" json:"fanPic"`
+	UserMobile    string         `gorm:"comment:用户手机号" json:"userMobile"`
+	TransactionId string         `gorm:"comment:交易流水号" json:"transactionId"`
+	Appid         string         `gorm:"comment:appid" json:"appid"`
+	FinishTime    int64          `gorm:"comment:完成时间" json:"finishTime"`
+	OrderType     string         `gorm:"comment:订单类型" json:"orderType"`
+	PayStyle      string         `gorm:"comment:支付方式 " json:"payStyle"`
+	Status        string         `gorm:"comment:订单状态" json:"Status"`
+	Remark        string         `gorm:"comment:备注" json:"remark"`
+	Detail        string         `gorm:"comment:详情" json:"detail"`
+	Operator      string         `gorm:"comment:操作" json:"operator"`
+	CreatedAt     time.Time      `json:"created_time"`
+	UpdatedAt     time.Time      `json:"updated_time"`
+	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+type OrderDeliver struct {
+	ID             uint           `gorm:"primarykey" json:"id"`
+	DeleCompany    string         `gorm:"comment:快递公司地址" json:"deleCompany"`
+	DeleOrderId    int            `gorm:"comment:快递单号;index" json:"deleOrderId"`
+	ActiveSureTime int64          `gorm:"comment:自动确认时间;index" json:"activeSureTime"`
+	AddressId      uint           `gorm:"comment:地址id;index" json:"addressId"`
+	OutTradeNo     string         `gorm:"comment:订单编号;index" json:"orderId"`
+	PrizeNum       int            `gorm:"comment:奖品数量（抽奖次数，不包括特殊赏）" json:"prizeNum"`
+	Price          float32        `gorm:"comment:金额" json:"price"`
+	UserName       string         `gorm:"comment:用户名" json:"userName"`
+	OpenId         string         `gorm:"comment:用户openid " json:"openId"`
+	UserId         uint           `gorm:"comment:用户id;index" json:"userId"`
+	Avatar         string         `gorm:"comment:头像" json:"avatar"`
+	UserMobile     string         `gorm:"comment:用户手机号" json:"userMobile"`
+	TransactionId  string         `gorm:"comment:交易流水号" json:"transactionId"`
+	Appid          string         `gorm:"comment:appid" json:"appid"`
+	FinishTime     int64          `gorm:"comment:完成时间" json:"finishTime"`
+	OrderType      string         `gorm:"comment:订单类型" json:"orderType"`
+	PayStyle       string         `gorm:"comment:支付方式 " json:"payStyle"`
+	DeleverStatus  int            `gorm:"comment:1.待提货,2.待发货,3.已经收货;index" json:"deleverStatus"`
+	Status         string         `gorm:"comment:支付状态;index" json:"status"`
+	Remark         string         `gorm:"comment:备注" json:"remark"`
+	Detail         string         `gorm:"comment:详情" json:"detail"`
+	Operator       string         `gorm:"comment:操作" json:"operator"`
+	CreatedAt      time.Time      `json:"created_time"`
+	UpdatedAt      time.Time      `json:"updated_time"`
+	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
+}
+type OrderDeliverDetail struct {
+	ID             uint           `gorm:"primarykey" json:"id"`
+	AddressId      uint           `gorm:"comment:地址id;index" json:"addressId"`
+	LuggageId      uint           `gorm:"comment:提货柜商品id;index" json:"luggageId"`
+	OutTradeNo     string         `gorm:"comment:订单编号;index" json:"orderId"`
+	UserName       string         `gorm:"comment:用户名" json:"userName"`
+	FanId          uint           `gorm:"comment:蕃id" json:"fanId"`
+	GoodId         uint           `gorm:"comment:商品id" json:"goodId"`
+	GoodName       string         `gorm:"comment:商品名" json:"goodName"`
+	IpName         string         `gorm:"comment:IP名称" json:"ipName"`
+	SeriesName     string         `gorm:"comment:系列名称" json:"seriesName"`
+	PkgStatus      int            `gorm:"comment:打包状态" json:"pkgStatus"`
+	PrizeIndexName string         `gorm:"comment:商品等级名" json:"prizeIndexName"`
+	FanName        string         `gorm:"comment:蕃名" json:"fanName"`
+	BoxId          uint           `gorm:"comment:箱id" json:"boxId"`
+	BoxIndex       int            `gorm:"comment:箱名顺序" json:"boxIndex"`
+	OpenId         string         `gorm:"comment:用户openid " json:"openId"`
+	UserId         uint           `gorm:"comment:用户id;index" json:"userId"`
+	Avatar         string         `gorm:"comment:头像" json:"avatar"`
+	Pic            string         `gorm:"comment:图片" json:"pic"`
+	UserMobile     string         `gorm:"comment:用户手机号" json:"userMobile"`
+	TransactionId  string         `gorm:"comment:交易流水号" json:"transactionId"`
+	Appid          string         `gorm:"comment:appid" json:"appid"`
+	FinishTime     int64          `gorm:"comment:完成时间" json:"finishTime"`
+	OrderType      string         `gorm:"comment:订单类型" json:"orderType"`
+	PayStyle       string         `gorm:"comment:支付方式 " json:"payStyle"`
+	DeleverStatus  int            `gorm:"comment:1.待提货,2.待发货,3.已经收货;index" json:"deleverStatus"`
+	Status         string         `gorm:"comment:首付款;index" json:"status"`
+	Remark         string         `gorm:"comment:备注" json:"remark"`
+	Detail         string         `gorm:"comment:详情" json:"detail"`
+	Operator       string         `gorm:"comment:操作" json:"operator"`
+	CreatedAt      time.Time      `json:"created_time"`
+	UpdatedAt      time.Time      `json:"updated_time"`
+	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
+}
 type User struct {
 	ID          uint           `gorm:"primarykey" json:"id"`
 	NickName    string         `gorm:"comment:昵称" json:"nickName"` //昵称
@@ -191,7 +255,7 @@ type Luggage struct {
 	SingleOrMuti      int            `json:"singleOrMuti"`
 	MultiIds          GormList       `gorm:"type:varchar(128);not null"`
 	PreStore          int            `gorm:"comment:1.预售 2.现货" json:"preStore"`
-	SoldStatus        int            `gorm:"index;comment:是否售罄1.奖品售罄,2.奖品未售罄" json:"soldStatus"`
+	DeleverStatus     int            `gorm:"index;comment:1.待提货,2.待发货,3.已经收货" json:"deleverStatus"`
 	TimeForSoldStatus string         `gorm:"comment:预售时间" json:"timeForSoldStatus,omitempty"`
 	PkgStatus         int            `gorm:"comment:打包状态" json:"pkgStatus"`
 	CreatedAt         time.Time      `json:"created_time"`
@@ -302,16 +366,14 @@ type IntegralRecord struct {
 type Adver struct {
 	ID                uint           `gorm:"primarykey" json:"id"`
 	BannerTitle       string         `gorm:"comment:BannerTitle" json:"banner_title"`
-	BannerOne         string         `gorm:"comment:BannerOne" json:"banner_one"`
-	BannerTwo         string         `gorm:"comment:BannerTne" json:"banner_two"`
-	BannerThree       string         `gorm:"comment:BannerThree" json:"banner_three"`
-	BannerFour        string         `gorm:"comment:BannerFour" json:"banner_four"`
-	BannerFive        string         `gorm:"comment:BannerFive" json:"banner_five"`
+	Pic               string         `gorm:"comment:Pic" json:"pic"`
 	BannerReleatedUrl string         `gorm:"comment:轮播图对应跳转连接" json:"banner_releated_url"`
 	ReleatedUrlType   string         `gorm:"comment:轮播图对应跳转连接类型" json:"releated_url_type"`
 	TipsAfterBanner   string         `gorm:"comment:轮播图下面的文字提示" json:"tips_after_banner"`
 	ActiveBeginTime   int64          `gorm:"comment:轮播图上架时间" json:"active_begin_time"`
 	ActiveEndTime     int64          `gorm:"comment:轮播图下架时间" json:"active_end_time"`
+	IsHide            bool           `gorm:"comment:是否隐藏" json:"is_hide"`
+	Remark            string         `gorm:"comment:备注" json:"remark"`
 	CreatedAt         time.Time      `json:"created_time"`
 	UpdatedAt         time.Time      `json:"updated_time"`
 	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
@@ -331,10 +393,26 @@ type AdverTab struct {
 	ActiveBeginTime   int64          `gorm:"comment:上架时间" json:"active_begin_time"`
 	ActiveEndTime     int64          `gorm:"comment:下架时间" json:"active_end_time"`
 	IsHide            bool           `gorm:"comment:是否隐藏" json:"is_hide"`
+	IsSonHide         bool           `gorm:"comment:是否隐藏" json:"is_son_hide"`
 	Remark            string         `gorm:"comment:备注" json:"remark"`
 	Title             string         `gorm:"comment:标题" json:"title"`
 	Pic               string         `gorm:"comment:图片" json:"pic"`
 	CreatedAt         time.Time      `json:"created_time"`
 	UpdatedAt         time.Time      `json:"updated_time"`
 	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
+}
+type Address struct {
+	ID        uint           `gorm:"primarykey" json:"id"`
+	UserName  string         `gorm:"comment:用户" json:"userName"`
+	Post      string         `gorm:"comment:邮编" json:"post"`
+	UserId    uint           `gorm:"comment:用户;index" json:"userId"`
+	Mobile    string         `gorm:"comment:手机号" json:"mobile"`
+	Province  string         `gorm:"comment:省份" json:"province"`
+	City      string         `gorm:"comment:城市" json:"city"`
+	Country   string         `gorm:"comment:县区" json:"country"`
+	Detail    string         `gorm:"comment:详细地址;unique" json:"detail"`
+	IsDefault bool           `gorm:"comment:是否默认" json:"isDefault"`
+	CreatedAt time.Time      `json:"created_time"`
+	UpdatedAt time.Time      `json:"updated_time"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
