@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"github.com/tealeg/xlsx"
 	"gorm.io/gorm"
 	"math"
-	"path"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 	"yifan/app/api/param"
@@ -709,11 +711,135 @@ func (s *FanServiceImpl) ModifyGoodsPosition(req param.ReqModifyGoodsPosition) (
 
 	return param.RespModifyGoodsPosition{}, nil
 }
-func (s *FanServiceImpl) FileUpload(c *gin.Context) (interface{}, error) {
-	file, err := c.FormFile("fileName")
-	dst := path.Join("./static/upload", file.Filename)
-	if err == nil {
-		c.SaveUploadedFile(file, dst)
+
+//func (s *FanServiceImpl) Upload(c *gin.Context) (interface{}, error) {
+//	file, err := c.FormFile("fileName")
+//	dst := path.Join("./static/upload", file.Filename)
+//	if err == nil {
+//		c.SaveUploadedFile(file, dst)
+//	}
+//	return dst, nil
+//}
+func (s *FanServiceImpl) PrizesDownLoad(context *gin.Context) {
+	var prizes []db.Prize
+	s.db.GetDb().Find(&prizes)
+	path := filepath.Join("./", "prizes.xlsx")
+	f := xlsx.NewFile()
+	sk, _ := f.AddSheet("奖品位置")
+
+	r := sk.AddRow()
+	c := r.AddCell()
+	c.SetString("商品ID")
+	c = r.AddCell()
+	c.SetString("奖项名称")
+	c = r.AddCell()
+	c.SetString("奖品数量")
+	c = r.AddCell()
+	c.SetString("设置范围")
+	c = r.AddCell()
+	c.SetString("备注")
+	for ri := 0; ri < len(prizes); ri++ {
+		r = sk.AddRow()
+		for ci := 0; ci < 5; ci++ {
+			if ci == 0 {
+				c = r.AddCell()
+				c.SetString(strconv.Itoa(int(prizes[ri].GoodID)))
+			}
+			if ci == 1 {
+				c = r.AddCell()
+				c.SetString(prizes[ri].GoodName)
+			}
+			if ci == 2 {
+				c = r.AddCell()
+				c.SetInt(int(prizes[ri].PrizeNum))
+			}
+			if ci == 3 {
+				tmpPosition := "["
+				for _, onePos := range prizes[ri].Position {
+					tmpPosition += fmt.Sprintf("%d,", onePos)
+				}
+				positon := strings.TrimRight(tmpPosition, ",")
+				positon += "]"
+				c = r.AddCell()
+				c.SetString(positon)
+			}
+			if ci == 4 {
+				c = r.AddCell()
+				c.SetString(prizes[ri].Remark)
+			}
+		}
 	}
-	return dst, nil
+	f.Save(path)
+	context.File(path)
+}
+func (s *FanServiceImpl) GoodsDownLoad(context *gin.Context) {
+	var goods []db.Goods
+	s.db.GetDb().Find(&goods)
+	path := filepath.Join("./", "goods.xlsx")
+	f := xlsx.NewFile()
+	sk, _ := f.AddSheet("商品")
+	r := sk.AddRow()
+	c := r.AddCell()
+	c.SetString("IP")
+	c = r.AddCell()
+	c.SetString("系列")
+	c = r.AddCell()
+	c.SetString("商品名")
+	c = r.AddCell()
+	c.SetString("品相")
+	c = r.AddCell()
+	c.SetString("状态")
+	c = r.AddCell()
+	c.SetString("兑换积分")
+	c = r.AddCell()
+	c.SetString("图片地址")
+	c = r.AddCell()
+	c.SetString("建议售价")
+	for ri := 0; ri < len(goods); ri++ {
+		r = sk.AddRow()
+		for ci := 0; ci < 8; ci++ {
+			if ci == 0 {
+				c = r.AddCell()
+				c.SetString(goods[ri].IpName)
+			}
+			if ci == 1 {
+				c = r.AddCell()
+				c.SetString(goods[ri].SeriesName)
+			}
+			if ci == 2 {
+				c = r.AddCell()
+				c.SetString(goods[ri].Name)
+			}
+			if ci == 3 {
+				c = r.AddCell()
+				if int(goods[ri].PkgStatus) == 1 {
+					c.SetString("拆盒未拆袋")
+				}
+				if int(goods[ri].PkgStatus) == 2 {
+					c.SetString("全新")
+				}
+				if int(goods[ri].PkgStatus) == 3 {
+					c.SetString("拆盒拆袋")
+				}
+			}
+			if ci == 4 {
+				c = r.AddCell()
+				c.SetString(goods[ri].PreStore)
+			}
+			if ci == 5 {
+				c = r.AddCell()
+				c.SetInt(int(goods[ri].Integral))
+			}
+			if ci == 6 {
+				c = r.AddCell()
+				c.SetString(goods[ri].Pic)
+			}
+			if ci == 7 {
+				c = r.AddCell()
+				c.SetFloat(goods[ri].Price)
+			}
+		}
+	}
+	f.Save(path)
+	context.File(path)
 }

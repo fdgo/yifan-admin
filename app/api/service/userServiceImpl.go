@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"math"
@@ -20,6 +19,7 @@ import (
 	"yifan/configs"
 	"yifan/pkg/define"
 	"yifan/pkg/jwtex"
+	timex "yifan/pkg/times"
 )
 
 func Dncrypt(rawData, key, iv string) (string, error) {
@@ -175,6 +175,292 @@ func (s *UserServiceImpl) GenToken(user_id uint) (string, int64) {
 	token, _ := jwtoken.CreateToken(claims)
 	return token, exp
 }
+
+func (s *UserServiceImpl) Delever(req param.ReqDelever) (param.RespDelever, error) {
+	resp := param.RespDelever{}
+	tx := s.db.GetDb().Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	total := int64(0)
+	err := tx.Model(&db.OrderDeliver{}).Count(&total).Error
+	if err != nil {
+		tx.Rollback()
+		return param.RespDelever{}, errors.New("服务正忙...")
+	}
+	var deles []db.OrderDeliver
+	result := tx.Find(&deles)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		tx.Rollback()
+		return param.RespDelever{}, errors.New("服务正忙...")
+	}
+	for _, dele := range deles {
+		var oneDel param.OneDelever
+		var details []*db.OrderDeliverDetail
+		result = tx.Where("out_trade_no=?", dele.OutTradeNo).Find(&details)
+		if result.Error != nil {
+			tx.Rollback()
+			return param.RespDelever{}, result.Error
+		}
+		for _, oneDelDetail := range details {
+			oneDel.DeleverGoods = append(oneDel.DeleverGoods, param.DeleverGood{
+				Pic:            oneDelDetail.Pic,
+				GoodName:       oneDelDetail.GoodName,
+				IpName:         oneDelDetail.IpName,
+				SeriesName:     oneDelDetail.SeriesName,
+				PkgStatus:      oneDelDetail.PkgStatus,
+				PrizeIndexName: oneDelDetail.PrizeIndexName,
+			})
+		}
+		address := db.Address{}
+		result = tx.Where("id=?", dele.AddressId).First(&address)
+		if result.Error != nil {
+			tx.Rollback()
+			return param.RespDelever{}, result.Error
+		}
+		oneDel.DeleCompany = dele.DeleCompany
+		oneDel.DeleOrderId = dele.DeleOrderId
+		oneDel.ActiveSureTime = dele.ActiveSureTime
+		oneDel.Num = dele.PrizeNum
+		oneDel.Price = dele.Price
+		oneDel.DeleverUserInfo = param.DeleverUserInfo{
+			Address:  address.Detail,
+			UserName: dele.UserName,
+			UserId:   dele.UserId,
+			Mobile:   dele.UserMobile,
+		}
+		oneDel.DeleverStatus = dele.DeleverStatus
+		oneDel.OrderId = dele.ID
+		oneDel.CreateTime = timex.TimeInt64ToTimeString(timex.TimetToInt64(dele.CreatedAt))
+		resp.OneDelevers = append(resp.OneDelevers, oneDel)
+	}
+	resp.Num = len(resp.OneDelevers)
+	resp.Num = len(resp.OneDelevers)
+	resp.AllPages = math.Ceil(float64(total) / float64(req.PageSize))
+	tx.Commit()
+	return resp, nil
+}
+func (s *UserServiceImpl) OneDel(dele db.OrderDeliver) (param.OneDelever, error) {
+	DB := s.db.GetDb()
+	var oneDel param.OneDelever
+	var details []*db.OrderDeliverDetail
+	result := DB.Where("out_trade_no=?", dele.OutTradeNo).Find(&details)
+	if result.Error != nil {
+		return param.OneDelever{}, result.Error
+	}
+	for _, oneDelDetail := range details {
+		oneDel.DeleverGoods = append(oneDel.DeleverGoods, param.DeleverGood{
+			Pic:            oneDelDetail.Pic,
+			GoodName:       oneDelDetail.GoodName,
+			IpName:         oneDelDetail.IpName,
+			SeriesName:     oneDelDetail.SeriesName,
+			PkgStatus:      oneDelDetail.PkgStatus,
+			PrizeIndexName: oneDelDetail.PrizeIndexName,
+		})
+	}
+	address := db.Address{}
+	result = DB.Where("id=?", dele.AddressId).First(&address)
+	if result.Error != nil {
+		return param.OneDelever{}, result.Error
+	}
+	oneDel.DeleCompany = dele.DeleCompany
+	oneDel.DeleOrderId = dele.DeleOrderId
+	oneDel.ActiveSureTime = dele.ActiveSureTime
+	oneDel.Num = dele.PrizeNum
+	oneDel.Price = dele.Price
+	oneDel.DeleverUserInfo = param.DeleverUserInfo{
+		Address:  address.Detail,
+		UserName: dele.UserName,
+		Mobile:   dele.UserMobile,
+		UserId:   dele.UserId,
+	}
+	oneDel.DeleverStatus = dele.DeleverStatus
+	oneDel.OrderId = dele.ID
+	oneDel.CreateTime = timex.TimeInt64ToTimeString(timex.TimetToInt64(dele.CreatedAt))
+	return oneDel, nil
+}
+
+func (s *UserServiceImpl) SetDelId(req param.ReqSetDelId) error {
+	err := s.db.GetDb().Model(&db.OrderDeliver{}).Where("id=?", req.Id).Update("dele_order_id", req.DeleOrderId).Update("dele_company", req.DeleCompany).Error
+	return err
+}
+
+func (s *UserServiceImpl) DeleverCondition(req param.ReqDeleverCondition) (param.RespDeleverCondition, error) {
+	if req.GoodId != 0 {
+		var (
+			DB              = s.db.GetDb()
+			total           = int64(0)
+			resp            = param.RespDeleverCondition{}
+			orderDelDetails []db.OrderDeliverDetail
+		)
+		DB.Model(&db.OrderDeliverDetail{}).Where("good_id=?", req.GoodId).Find(&orderDelDetails)
+		for _, oneOdd := range orderDelDetails {
+			var orderDels []db.OrderDeliver
+			if req.DeleverStatus != 0 {
+				DB = DB.Model(&db.OrderDeliver{}).Where("out_trade_no=?", oneOdd.OutTradeNo).Where("delever_status=?", req.DeleverStatus)
+			}
+			if req.OrderId != 0 {
+				DB = DB.Model(&db.OrderDeliver{}).Where("out_trade_no=?", oneOdd.OutTradeNo).Where("id=?", req.OrderId)
+			}
+			if req.DeleOrderId != 0 {
+				DB = DB.Model(&db.OrderDeliver{}).Where("out_trade_no=?", oneOdd.OutTradeNo).Where("dele_order_id=?", req.UserId)
+			}
+			if req.Mobile != "" {
+				DB = DB.Model(&db.OrderDeliver{}).Where("out_trade_no=?", oneOdd.OutTradeNo).Where("user_mobile=?", req.Mobile)
+			}
+			if req.UserId != 0 {
+				DB = DB.Model(&db.OrderDeliver{}).Where("out_trade_no=?", oneOdd.OutTradeNo).Where("user_id=?", req.UserId)
+			}
+			if len(req.TimeRange) == 2 {
+				DB = DB.Model(&db.OrderDeliver{}).Where("out_trade_no=?", oneOdd.OutTradeNo).Where("created_at Between ? and ?",
+					time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
+					time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05"))
+			}
+			result := DB.Find(&orderDels)
+			if result.Error != nil {
+				return param.RespDeleverCondition{}, result.Error
+			}
+			if len(orderDels) == 0 {
+				continue
+			}
+			var oneDel param.OneDelever
+			oneDel.DeleverGoods = append(oneDel.DeleverGoods, param.DeleverGood{
+				Pic:            oneOdd.Pic,
+				GoodName:       oneOdd.GoodName,
+				IpName:         oneOdd.IpName,
+				SeriesName:     oneOdd.SeriesName,
+				PkgStatus:      oneOdd.PkgStatus,
+				PrizeIndexName: oneOdd.PrizeIndexName,
+			})
+			for _, dele := range orderDels {
+				address := db.Address{}
+				result = DB.Where("id=?", dele.AddressId).First(&address)
+				if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+					return param.RespDeleverCondition{}, result.Error
+				}
+				oneDel.DeleCompany = dele.DeleCompany
+				oneDel.DeleOrderId = dele.DeleOrderId
+				oneDel.ActiveSureTime = dele.ActiveSureTime
+				oneDel.Num = dele.PrizeNum
+				oneDel.Price = dele.Price
+				oneDel.DeleverUserInfo = param.DeleverUserInfo{
+					Address:  address.Detail,
+					UserName: dele.UserName,
+					Mobile:   dele.UserMobile,
+					UserId:   dele.UserId,
+				}
+				oneDel.DeleverStatus = dele.DeleverStatus
+				oneDel.OrderId = dele.ID
+				oneDel.CreateTime = timex.TimeInt64ToTimeString(timex.TimetToInt64(dele.CreatedAt))
+			}
+			resp.OneDelevers = append(resp.OneDelevers, oneDel)
+			total = int64(len(orderDels))
+		}
+		resp.Num = len(resp.OneDelevers)
+		resp.AllPages = math.Ceil(float64(total) / float64(req.PageSize))
+		return resp, nil
+	} else {
+		DB := s.db.GetDb()
+		if req.DeleverStatus != 0 {
+			DB = DB.Model(&db.OrderDeliver{}).Where("delever_status=?", req.DeleverStatus)
+		}
+		if req.OrderId != 0 {
+			DB = DB.Model(&db.OrderDeliver{}).Where("id=?", req.OrderId)
+		}
+		if req.DeleOrderId != 0 {
+			DB = DB.Model(&db.OrderDeliver{}).Where("dele_order_id=?", req.UserId)
+		}
+		if req.Mobile != "" {
+			DB = DB.Model(&db.OrderDeliver{}).Where("user_mobile=?", req.Mobile)
+		}
+		if req.UserId != 0 {
+			DB = DB.Model(&db.OrderDeliver{}).Where("user_id=?", req.UserId)
+		}
+		if len(req.TimeRange) == 2 {
+			DB = DB.Model(&db.OrderDeliver{}).Where("created_at Between ? and ?",
+				time.Unix(req.TimeRange[0], 0).Format("2006-01-02 15:04:05"),
+				time.Unix(req.TimeRange[1], 0).Format("2006-01-02 15:04:05"))
+		}
+		var resp param.RespDeleverCondition
+		total := int64(0)
+		err := DB.Model(&db.OrderDeliver{}).Count(&total).Error
+		if err != nil {
+			return param.RespDeleverCondition{}, err
+		}
+		var orderDelivers []db.OrderDeliver
+		if err := DB.Limit(int(req.PageSize)).Offset(int((req.PageIndex - 1) * req.PageSize)).Order("created_at desc").Find(&orderDelivers).Error; err != nil {
+			return param.RespDeleverCondition{}, errors.New("服务正忙...")
+		}
+		for _, oneOd := range orderDelivers {
+			oneDer, err := s.OneDel(oneOd)
+			if err != nil {
+				return param.RespDeleverCondition{}, err
+			}
+			resp.OneDelevers = append(resp.OneDelevers, oneDer)
+		}
+		resp.Num = len(resp.OneDelevers)
+		resp.AllPages = math.Ceil(float64(total) / float64(req.PageSize))
+		return resp, nil
+	}
+}
+func (s *UserServiceImpl) DeleverDetail(req param.ReqDeleverDetail) (param.RespDeleverDetail, error) {
+	resp := param.RespDeleverDetail{}
+	tx := s.db.GetDb().Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	var dele db.OrderDeliver
+	result := tx.Where("id=?", req.Id).First(&dele)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		tx.Rollback()
+		return param.RespDeleverDetail{}, errors.New("服务正忙...")
+	}
+	var details []*db.OrderDeliverDetail
+	result = tx.Where("out_trade_no=?", dele.OutTradeNo).Find(&details)
+	if result.Error != nil {
+		tx.Rollback()
+		return param.RespDeleverDetail{}, result.Error
+	}
+	for _, oneDelDetail := range details {
+		resp.DeleverGoods = append(resp.DeleverGoods, param.DeleverGood{
+			Pic:            oneDelDetail.Pic,
+			GoodName:       oneDelDetail.GoodName,
+			IpName:         oneDelDetail.IpName,
+			SeriesName:     oneDelDetail.SeriesName,
+			PkgStatus:      oneDelDetail.PkgStatus,
+			PrizeIndexName: oneDelDetail.PrizeIndexName,
+			GoodId:         oneDelDetail.GoodId,
+		})
+	}
+	address := db.Address{}
+	result = tx.Where("id=?", dele.AddressId).First(&address)
+	if result.Error != nil {
+		tx.Rollback()
+		return param.RespDeleverDetail{}, result.Error
+	}
+	resp.DeleCompany = dele.DeleCompany
+	resp.DeleOrderId = dele.DeleOrderId
+	resp.ActiveSureTime = dele.ActiveSureTime
+	resp.Num = dele.PrizeNum
+	resp.Price = dele.Price
+	resp.PayStyle = dele.PayStyle
+	resp.DeleverUserInfo = param.DeleverUserInfo{
+		Address:  address.Detail,
+		UserName: dele.UserName,
+		Mobile:   dele.UserMobile,
+		UserId:   dele.UserId,
+	}
+	resp.DeleverStatus = dele.DeleverStatus
+	resp.OrderId = dele.ID
+	resp.CreateTime = timex.TimeInt64ToTimeString(timex.TimetToInt64(dele.CreatedAt))
+	tx.Commit()
+	return resp, nil
+}
+
 func (s *UserServiceImpl) UserList(req param.ReqUserList) (param.RespUserList, error) {
 	DB := s.db.GetDb()
 	total := int64(0)
@@ -188,8 +474,86 @@ func (s *UserServiceImpl) UserList(req param.ReqUserList) (param.RespUserList, e
 	}
 	var resp param.RespUserList
 	for _, oneUser := range users {
-		var u db.User
-		copier.Copy(&u, oneUser)
+		lugs := []db.Luggage{}
+		DB.Model(&db.Luggage{}).Where("user_id=?", oneUser.ID).Find(&lugs)
+		var u param.User
+		for _, one := range lugs {
+			u.ConsumptionFee += one.Price
+			u.Luggage = append(u.Luggage, param.Luggage{
+				ID:             one.ID,
+				OutTradeNo:     one.OutTradeNo,
+				GoodID:         one.GoodID,
+				GoodName:       one.GoodName,
+				IpID:           one.IpID,
+				IpName:         one.IpName,
+				SeriesID:       one.SeriesID,
+				SeriesName:     one.SeriesName,
+				Pic:            one.Pic,
+				Price:          one.Price,
+				PrizeIndexName: one.PrizeIndexName,
+				PrizeIndex:     one.PrizeIndex,
+			})
+		}
+		u.LuggageNum = int64(len(lugs))
+		u.UserId = oneUser.ID
+		u.Mobile = oneUser.Mobile
+		u.NickName = oneUser.NickName
+		u.Avatar = oneUser.AvatarUrl
+		u.CreatTime = oneUser.CreatedAt.Format("2006-01-02 15:04:05")
+		resp.Users = append(resp.Users, u)
+	}
+	resp.Num = len(resp.Users)
+	resp.AllPages = math.Ceil(float64(total) / float64(req.PageSize))
+	return resp, nil
+}
+func (s *UserServiceImpl) UserListCondition(req param.ReqUserListCondition) (param.RespUserListCondition, error) {
+	DB := s.db.GetDb()
+	if req.UserId != 0 {
+		DB = DB.Where("id=?", req.UserId)
+	}
+	if req.NickName != "" {
+		DB = DB.Where("nick_name=?", req.NickName)
+	}
+	if req.Mobile != "" {
+		DB = DB.Where("mobile=?", req.Mobile)
+	}
+	total := int64(0)
+	err := DB.Model(&db.User{}).Count(&total).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return param.RespUserListCondition{}, errors.New("服务正忙......")
+	}
+	users := []*db.User{}
+	if err = DB.Limit(int(req.PageSize)).Offset(int((req.PageIndex - 1) * req.PageSize)).Order("created_at desc").Find(&users).Error; err != nil {
+		return param.RespUserListCondition{}, errors.New("服务正忙...")
+	}
+	var resp param.RespUserListCondition
+	for _, oneUser := range users {
+		lugs := []db.Luggage{}
+		s.db.GetDb().Model(&db.Luggage{}).Where("user_id=?", oneUser.ID).Find(&lugs)
+		var u param.User
+		for _, one := range lugs {
+			u.ConsumptionFee += one.Price
+			u.Luggage = append(u.Luggage, param.Luggage{
+				ID:             one.ID,
+				OutTradeNo:     one.OutTradeNo,
+				GoodID:         one.GoodID,
+				GoodName:       one.GoodName,
+				IpID:           one.IpID,
+				IpName:         one.IpName,
+				SeriesID:       one.SeriesID,
+				SeriesName:     one.SeriesName,
+				Pic:            one.Pic,
+				Price:          one.Price,
+				PrizeIndexName: one.PrizeIndexName,
+				PrizeIndex:     one.PrizeIndex,
+			})
+		}
+		u.LuggageNum = int64(len(lugs))
+		u.UserId = oneUser.ID
+		u.Mobile = oneUser.Mobile
+		u.NickName = oneUser.NickName
+		u.Avatar = oneUser.AvatarUrl
+		u.CreatTime = oneUser.CreatedAt.Format("2006-01-02 15:04:05")
 		resp.Users = append(resp.Users, u)
 	}
 	resp.Num = len(resp.Users)

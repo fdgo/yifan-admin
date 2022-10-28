@@ -18,7 +18,8 @@ type FanService interface {
 	QueryPrizePostion(req param.ReqQueryPrizePostion) (param.RespQueryPrizePostion, error)
 	ModifyGoodsPosition(req param.ReqModifyGoodsPosition) (param.RespModifyGoodsPosition, error)
 
-	FileUpload(c *gin.Context) (interface{}, error)
+	GoodsDownLoad(c *gin.Context)
+	PrizesDownLoad(c *gin.Context)
 }
 
 type FanServiceImpl struct {

@@ -143,9 +143,9 @@ type Order struct {
 }
 
 type OrderDeliver struct {
-	ID             uint           `gorm:"primarykey" json:"id"`
-	DeleCompany    string         `gorm:"comment:快递公司地址" json:"deleCompany"`
-	DeleOrderId    int            `gorm:"comment:快递单号;index" json:"deleOrderId"`
+	ID             uint           `gorm:"primarykey;comment:提货单号;" json:"id"`
+	DeleCompany    string         `gorm:"comment:快递公司地址;index" json:"deleCompany"`
+	DeleOrderId    uint           `gorm:"comment:快递单号;index" json:"deleOrderId"`
 	ActiveSureTime int64          `gorm:"comment:自动确认时间;index" json:"activeSureTime"`
 	AddressId      uint           `gorm:"comment:地址id;index" json:"addressId"`
 	OutTradeNo     string         `gorm:"comment:订单编号;index" json:"orderId"`

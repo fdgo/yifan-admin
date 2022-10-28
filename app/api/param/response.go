@@ -404,9 +404,94 @@ type RespGetOpenId struct {
 	Avatar   string `json:"avatar"`
 }
 type RespUserList struct {
-	AllPages float64   `json:"allPages"`
-	Num      int       `json:"num"`
-	Users    []db.User `json:"users"`
+	AllPages float64 `json:"allPages"`
+	Num      int     `json:"num"`
+	Users    []User  `json:"users"`
+}
+type RespUserListCondition struct {
+	AllPages float64 `json:"allPages"`
+	Num      int     `json:"num"`
+	Users    []User  `json:"users"`
+}
+type User struct {
+	UserId         uint      `json:"userId"`
+	NickName       string    `json:"nickName"`
+	Mobile         string    `json:"mobile"`
+	AppId          string    `json:"appId"`
+	OpenId         string    `json:"openId"`
+	Avatar         string    `json:"avatar"`
+	CreatTime      string    `json:"creatTime"`
+	SessionKey     string    `json:"sessionKey"`
+	RealName       string    `json:"realName"`
+	LuggageNum     int64     `json:"luggageNum"`
+	ConsumptionFee float64   `json:"consumptionFee"`
+	Luggage        []Luggage `json:"luggage"`
+}
+type Luggage struct {
+	ID             uint    `json:"id"`
+	OutTradeNo     string  `json:"outTradeNo"`
+	GoodID         uint    `json:"goodId"`
+	GoodName       string  `json:"goodName"`
+	IpID           uint    `json:"ipId"`
+	IpName         string  `json:"ipName"`
+	SeriesID       uint    `json:"seriesId"`
+	SeriesName     string  `json:"seriesName"`
+	Pic            string  `json:"pic"`
+	Price          float64 `json:"price"`
+	PrizeIndexName string  `json:"prizeIndexName"`
+	PrizeIndex     int     `json:"prizeIndex"`
+}
+type RespDelever struct {
+	AllPages    float64      `json:"allPages"`
+	Num         int          `json:"num"`
+	OneDelevers []OneDelever `json:"oneDelevers"`
+}
+type RespDeleverCondition struct {
+	AllPages    float64      `json:"allPages"`
+	Num         int          `json:"num"`
+	OneDelevers []OneDelever `json:"oneDelevers"`
+}
+type OneDelever struct {
+	Price           float32         `json:"price"`
+	DeleCompany     string          `json:"deleCompany"`
+	DeleOrderId     uint            `json:"deleOrderId"`
+	ActiveSureTime  int64           `json:"activeSureTime"`
+	OrderId         uint            `json:"orderId"`
+	CreateTime      string          `json:"createTime"`
+	DeleverUserInfo DeleverUserInfo `json:"deleverUserInfo"`
+	Num             int             `json:"num"`
+	DeleverStatus   int             `json:"deleverStatus"`
+	DeleverGoods    []DeleverGood   `json:"deleverGoods"`
+}
+
+type RespDeleverDetail struct {
+	Price           float32         `json:"price"`
+	DeleCompany     string          `json:"deleCompany"`
+	DeleOrderId     uint            `json:"deleOrderId"`
+	ActiveSureTime  int64           `json:"activeSureTime"`
+	OrderId         uint            `json:"orderId"`
+	CreateTime      string          `json:"createTime"`
+	DeleverUserInfo DeleverUserInfo `json:"deleverUserInfo"`
+	Num             int             `json:"num"`
+	DeleverStatus   int             `json:"deleverStatus"`
+	DeleverGoods    []DeleverGood   `json:"deleverGoods"`
+	PayStyle        string          `json:"payStyle"`
+}
+type DeleverUserInfo struct {
+	Address  string `json:"address"`
+	UserName string `json:"userName"`
+	Mobile   string `json:"mobile"`
+	UserId   uint   `json:"userId"`
+}
+type DeleverGood struct {
+	Pic            string `json:"pic"`
+	GoodName       string `json:"goodName"`
+	IpName         string `json:"ipName"`
+	SeriesName     string `json:"seriesName"`
+	PkgStatus      int    `json:"pkgStatus"`
+	PrizeIndexName string `json:"prizeIndexName"`
+	GoodId         uint   `json:"goodId"`
+	PrizeId        uint   `json:"prizeId"`
 }
 type RespPageOfOrder struct {
 	AllPages float64 `json:"allPages,omitempty"`

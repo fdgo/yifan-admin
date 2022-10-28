@@ -72,8 +72,14 @@ type Handler interface {
 	ShowOrHideSecondTabSon() gin.HandlerFunc
 	DeleteTabSon() gin.HandlerFunc
 	ModifyAndSaveSecondTab() gin.HandlerFunc
-	FileUpload() gin.HandlerFunc
+	GoodsDownLoad() gin.HandlerFunc
+	PrizesDownLoad() gin.HandlerFunc
+	Delever() gin.HandlerFunc
+	DeleverCondition() gin.HandlerFunc
+	DeleverDetail() gin.HandlerFunc
+	SetDelId() gin.HandlerFunc
 	UserList() gin.HandlerFunc
+	UserListCondition() gin.HandlerFunc
 }
 type handler struct {
 	userService  service.UserService

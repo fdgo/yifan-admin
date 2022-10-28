@@ -373,9 +373,42 @@ type ReqGetOpenId struct {
 	Code          string `json:"code"`
 	Iv            string `json:"iv"`
 }
+
+type ReqDelever struct {
+	PageSize  int `json:"pageSize"`
+	PageIndex int `json:"pageIndex"`
+}
+type ReqDeleverCondition struct {
+	PageSize      int     `json:"pageSize"`
+	PageIndex     int     `json:"pageIndex"`
+	DeleverStatus int     `json:"deleverStatus"`
+	OrderId       uint    `json:"orderId"`
+	Mobile        string  `json:"mobile"`
+	UserId        uint    `json:"userId"`
+	GoodId        uint    `json:"goodId"`
+	DeleOrderId   uint    `json:"deleOrderId"`
+	TimeRange     []int64 `json:"timeRange"`
+}
+type ReqDeleverDetail struct {
+	Id uint `json:"id"`
+}
+
+type ReqSetDelId struct {
+	Id          uint   `json:"id"`
+	DeleOrderId uint   `json:"deleOrderId"`
+	DeleCompany string `json:"deleCompany"`
+}
 type ReqUserList struct {
+	User      uint  `json:"user"`
 	PageSize  int32 `json:"pageSize"`
 	PageIndex int32 `json:"pageIndex"`
+}
+type ReqUserListCondition struct {
+	UserId    uint   `json:"userId"`
+	Mobile    string `json:"mobile"`
+	NickName  string `json:"nickName"`
+	PageSize  int    `json:"pageSize"`
+	PageIndex int    `json:"pageIndex"`
 }
 type ReqAddRemark struct {
 	OrderId string

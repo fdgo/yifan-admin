@@ -44,7 +44,7 @@ func (s *AdverServiceImpl) SetBannerPic(req param.ReqSetBannerPic) error {
 			TipsAfterBanner:   one.TipsAfterBanner,
 			ActiveBeginTime:   one.ActiveBeginTime,
 			ActiveEndTime:     one.ActiveEndTime,
-			IsHide:            false,
+			IsHide:            true,
 		})
 	}
 	return nil

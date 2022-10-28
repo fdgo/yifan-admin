@@ -1400,14 +1400,77 @@ func (h *handler) ModifyAndSaveSecondTab() gin.HandlerFunc {
 	}
 }
 
-func (h *handler) FileUpload() gin.HandlerFunc {
+func (h *handler) GoodsDownLoad() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		data, err := h.fanService.FileUpload(context)
+		h.fanService.GoodsDownLoad(context)
+	}
+}
+
+func (h *handler) PrizesDownLoad() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		h.fanService.PrizesDownLoad(context)
+	}
+}
+func (h *handler) Delever() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqDelever
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.userService.Delever(req)
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return
 		}
 		response.ResposeSuccess(data, context)
+	}
+}
+func (h *handler) DeleverCondition() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqDeleverCondition
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.userService.DeleverCondition(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+func (h *handler) DeleverDetail() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqDeleverDetail
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.userService.DeleverDetail(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+func (h *handler) SetDelId() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqSetDelId
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		err := h.userService.SetDelId(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(nil, context)
 	}
 }
 
@@ -1419,6 +1482,22 @@ func (h *handler) UserList() gin.HandlerFunc {
 			return
 		}
 		data, err := h.userService.UserList(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(data, context)
+	}
+}
+
+func (h *handler) UserListCondition() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqUserListCondition
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		data, err := h.userService.UserListCondition(req)
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return

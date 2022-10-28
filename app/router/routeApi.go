@@ -9,11 +9,12 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 	//config := cors.DefaultConfig()
 	//config.AllowAllOrigins = true
 	//config.AllowHeaders = append(config.AllowHeaders, "token")
-	user := r.mux.Group("/v1/user")
+	user := r.mux.Group("/v1/admin/user")
 	{
 		user.POST("/list", handler.UserList())
+		user.POST("/list/condition", handler.UserListCondition())
 	}
-	ip := r.mux.Group("/v1/ip")
+	ip := r.mux.Group("/v1/admin/ip")
 	{
 		ip.POST("/upload", handler.UpLoadIPs())
 		ip.POST("/search", handler.SearchIP())
@@ -22,7 +23,7 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		ip.POST("/query", handler.QueryIP())
 		ip.POST("/modify", handler.ModifyIP())
 	}
-	series := r.mux.Group("/v1/series").
+	series := r.mux.Group("/v1/admin/series").
 		Use(r.middles.Cors())
 	{
 		series.POST("/upload", handler.UpLoadSeries())
@@ -32,7 +33,7 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		series.POST("/query", handler.QuerySeries())
 		series.POST("/modify", handler.ModifySeries())
 	}
-	goods := r.mux.Group("/v1/goods").
+	goods := r.mux.Group("/v1/admin/goods").
 		Use(r.middles.Cors())
 	{
 		goods.POST("/upload", handler.UpLoadGoods())
@@ -42,7 +43,7 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		goods.POST("/query", handler.QueryGoods())
 		goods.POST("/modify", handler.ModifyGoods())
 	}
-	box := r.mux.Group("/v1/box").
+	box := r.mux.Group("/v1/admin/box").
 		Use(r.middles.Cors())
 	{
 		box.POST("/create", handler.AddBox())
@@ -56,7 +57,7 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		box.POST("/goods/modify", handler.ModifyBoxGoods())
 		box.POST("/goods/delete", handler.DeleteBoxGoods())
 	}
-	fan := r.mux.Group("/v1/fan").
+	fan := r.mux.Group("/v1/admin/fan").
 		Use(r.middles.Cors())
 	{
 		fan.POST("/modify/status", handler.ModifyFanStatus())
@@ -68,7 +69,7 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		fan.POST("/queryPostion", handler.QueryPrizePostion())
 		fan.POST("/modifyPosition", handler.ModifyGoodsPosition())
 	}
-	order := r.mux.Group("/v1/order").Use(r.middles.Cors())
+	order := r.mux.Group("/v1/admin/order").Use(r.middles.Cors())
 	{
 		order.POST("/addRemark", handler.AddRemark())
 		order.POST("/pageOrder", handler.PageOfOrder())
@@ -76,7 +77,7 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		order.POST("/pageOrder/detail", handler.PageOfOrderDetail())
 
 	}
-	adver := r.mux.Group("/v1/adver").Use(r.middles.Cors())
+	adver := r.mux.Group("/v1/admin/adver").Use(r.middles.Cors())
 	{
 		adver.POST("/banner/query", handler.GetBannerPic())
 		adver.POST("/banner/create", handler.SetBannerPic())
@@ -93,10 +94,19 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		adver.POST("/son/delete", handler.DeleteTabSon())
 		adver.POST("/modify", handler.ModifyAndSaveSecondTab())
 	}
-	file := r.mux.Group("/v1/file").Use(r.middles.Cors())
+	file := r.mux.Group("/v1/admin/file").Use(r.middles.Cors())
 	{
-		file.POST("/upload", handler.FileUpload())
+		file.GET("/download/goods", handler.GoodsDownLoad())
+		file.GET("/download/prize", handler.PrizesDownLoad())
 	}
+	luggage := r.mux.Group("/v1/admin/luggage").Use(r.middles.Cors())
+	{
+		luggage.POST("/delever", handler.Delever())
+		luggage.POST("/delever/condition", handler.DeleverCondition())
+		luggage.POST("/delever/detail", handler.DeleverDetail())
+		luggage.POST("/delever/setDelId", handler.SetDelId())
+	}
+
 	//memoryStore := persist.NewMemoryStore(1 * time.Minute)
 	//power.GET("/123", cache.CacheByRequestURI(memoryStore, 3600*time.Second),
 	//	handler.GetUser(),
