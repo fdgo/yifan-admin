@@ -772,6 +772,419 @@ func (s *FanServiceImpl) PrizesDownLoad(context *gin.Context) {
 	f.Save(path)
 	context.File(path)
 }
+
+func (s *FanServiceImpl) DeliverDownLoad(context *gin.Context) {
+	var delevers []db.OrderDeliver
+	s.db.GetDb().Find(&delevers)
+	path := filepath.Join("./", "delver.xlsx")
+	f := xlsx.NewFile()
+	sk, _ := f.AddSheet("提货单")
+	r := sk.AddRow()
+	c := r.AddCell()
+	c.SetString("支付单id")
+	c = r.AddCell()
+	c.SetString("商品ID")
+	c = r.AddCell()
+	c.SetString("商品名称")
+	c = r.AddCell()
+	c.SetString("用户id")
+	c = r.AddCell()
+	c.SetString("用户名称")
+	c = r.AddCell()
+	c.SetString("手机号码")
+	c = r.AddCell()
+	c.SetString("收货人")
+	c = r.AddCell()
+	c.SetString("收货地址")
+	c = r.AddCell()
+	c.SetString("创建时间")
+	c = r.AddCell()
+	c.SetString("备注")
+	for ri := 0; ri < len(delevers); ri++ {
+		r = sk.AddRow()
+		for ci := 0; ci < 13; ci++ {
+			if ci == 0 {
+				c = r.AddCell()
+				c.SetString(delevers[ri].OutTradeNo)
+			}
+			if ci == 1 {
+				c = r.AddCell()
+				c.SetString("商品id")
+			}
+			if ci == 2 {
+				c = r.AddCell()
+				c.SetString("商品名称")
+			}
+			if ci == 3 {
+				c = r.AddCell()
+				c.SetInt64(int64(delevers[ri].UserId))
+			}
+			if ci == 4 {
+				c = r.AddCell()
+				c.SetString(delevers[ri].UserName)
+			}
+			if ci == 5 {
+				c = r.AddCell()
+				c.SetString(delevers[ri].UserMobile)
+			}
+			if ci == 6 {
+				c = r.AddCell()
+				c.SetString(delevers[ri].UserName)
+			}
+			if ci == 7 {
+				c = r.AddCell()
+				c.SetInt(int(delevers[ri].AddressId))
+			}
+			if ci == 8 {
+				c = r.AddCell()
+				c.SetString(delevers[ri].CreatedAt.Format("2006-01-02 15:04:05"))
+			}
+			if ci == 9 {
+				c = r.AddCell()
+				c.SetString(delevers[ri].Remark)
+			}
+		}
+	}
+	f.Save(path)
+	context.File(path)
+}
+func (s *FanServiceImpl) DeliverDetailDownLoad(context *gin.Context) {
+	var deldetails []db.OrderDeliverDetail
+	s.db.GetDb().Find(&deldetails)
+	path := filepath.Join("./", "deldetail.xlsx")
+	f := xlsx.NewFile()
+	sk, _ := f.AddSheet("提货单详情")
+	r := sk.AddRow()
+	c := r.AddCell()
+	c.SetString("支付单号")
+	c = r.AddCell()
+	c.SetString("商品ID")
+	c = r.AddCell()
+	c.SetString("商品名称")
+	c = r.AddCell()
+	c.SetString("商品等级")
+	c = r.AddCell()
+	c.SetString("蕃id")
+	c = r.AddCell()
+	c.SetString("蕃名")
+	c = r.AddCell()
+	c.SetString("箱id")
+	c = r.AddCell()
+	c.SetString("用户id")
+	c = r.AddCell()
+	c.SetString("用户昵称")
+	c = r.AddCell()
+	c.SetString("商品图片")
+	c = r.AddCell()
+	c.SetString("商品价格")
+	c = r.AddCell()
+	c.SetString("物流状态")
+	c = r.AddCell()
+	c.SetString("品相")
+	c = r.AddCell()
+	c.SetString("创建时间")
+	c = r.AddCell()
+	c.SetString("备注")
+	c = r.AddCell()
+	c.SetString("详情")
+	c = r.AddCell()
+	c.SetString("地址")
+	for ri := 0; ri < len(deldetails); ri++ {
+		r = sk.AddRow()
+		for ci := 0; ci < 16; ci++ {
+			if ci == 0 {
+				c = r.AddCell()
+				c.SetString(deldetails[ri].OutTradeNo)
+			}
+			if ci == 1 {
+				c = r.AddCell()
+				c.SetInt64(int64(deldetails[ri].GoodId))
+			}
+			if ci == 2 {
+				c = r.AddCell()
+				c.SetString(deldetails[ri].GoodName)
+			}
+			if ci == 3 {
+				c = r.AddCell()
+				c.SetString(deldetails[ri].PrizeIndexName)
+			}
+			if ci == 4 {
+				c = r.AddCell()
+				c.SetInt64(int64(deldetails[ri].FanId))
+			}
+			if ci == 5 {
+				c = r.AddCell()
+				c.SetString(deldetails[ri].FanName)
+			}
+			if ci == 6 {
+				c = r.AddCell()
+				c.SetInt64(int64(deldetails[ri].BoxId))
+			}
+			if ci == 7 {
+				c = r.AddCell()
+				c.SetInt64(int64(deldetails[ri].UserId))
+			}
+			if ci == 8 {
+				c = r.AddCell()
+				c.SetString(deldetails[ri].UserName)
+			}
+			if ci == 9 {
+				c = r.AddCell()
+				c.SetString(deldetails[ri].Pic)
+			}
+			if ci == 10 {
+				c = r.AddCell()
+				c.SetString("物流费")
+			}
+			if ci == 11 {
+				c = r.AddCell()
+				c.SetInt64(int64(deldetails[ri].DeleverStatus))
+			}
+			if ci == 12 {
+				c = r.AddCell()
+				c.SetInt64(int64(deldetails[ri].PkgStatus))
+			}
+			if ci == 13 {
+				c = r.AddCell()
+				c.SetString(deldetails[ri].CreatedAt.Format("2006-01-02 15:04:05"))
+			}
+			if ci == 14 {
+				c = r.AddCell()
+				c.SetString(deldetails[ri].Remark)
+			}
+			if ci == 15 {
+				c = r.AddCell()
+				c.SetString(deldetails[ri].Detail)
+			}
+			if ci == 16 {
+				c = r.AddCell()
+				c.SetInt64(int64(deldetails[ri].AddressId))
+			}
+		}
+	}
+	f.Save(path)
+	context.File(path)
+}
+
+func (s *FanServiceImpl) LuggageDownLoad(context *gin.Context) {
+	var luggs []db.Luggage
+	s.db.GetDb().Find(&luggs)
+	path := filepath.Join("./", "luggage.xlsx")
+	f := xlsx.NewFile()
+	sk, _ := f.AddSheet("详细订单")
+	r := sk.AddRow()
+	c := r.AddCell()
+	c.SetString("支付单号")
+	c = r.AddCell()
+	c.SetString("用户id")
+	c = r.AddCell()
+	c.SetString("用户昵称")
+	c = r.AddCell()
+	c.SetString("商品ID")
+	c = r.AddCell()
+	c.SetString("商品名字")
+	c = r.AddCell()
+	c.SetString("蕃id")
+	c = r.AddCell()
+	c.SetString("蕃名")
+	c = r.AddCell()
+	c.SetString("箱id")
+	c = r.AddCell()
+	c.SetString("箱名index")
+	c = r.AddCell()
+	c.SetString("商品等级别名")
+	c = r.AddCell()
+	c.SetString("价格")
+	c = r.AddCell()
+	c.SetString("预售/现货")
+	c = r.AddCell()
+	c.SetString("品相")
+	c = r.AddCell()
+	c.SetString("图片")
+	c = r.AddCell()
+	for ri := 0; ri < len(luggs); ri++ {
+		r = sk.AddRow()
+		for ci := 0; ci < 14; ci++ {
+			if ci == 0 {
+				c = r.AddCell()
+				c.SetString(luggs[ri].OutTradeNo)
+			}
+			if ci == 1 {
+				c = r.AddCell()
+				c.SetInt64(int64(luggs[ri].UserId))
+			}
+			if ci == 2 {
+				c = r.AddCell()
+				c.SetString(luggs[ri].UserName)
+			}
+			if ci == 3 {
+				c = r.AddCell()
+				c.SetInt64(int64(luggs[ri].GoodID))
+			}
+			if ci == 4 {
+				c = r.AddCell()
+				c.SetString(luggs[ri].GoodName)
+			}
+			if ci == 5 {
+				c = r.AddCell()
+				c.SetInt64(int64(luggs[ri].FanId))
+			}
+			if ci == 6 {
+				c = r.AddCell()
+				c.SetString(luggs[ri].FanName)
+			}
+			if ci == 7 {
+				c = r.AddCell()
+				c.SetInt64(int64(luggs[ri].BoxId))
+			}
+			if ci == 8 {
+				c = r.AddCell()
+				c.SetInt64(int64(luggs[ri].BoxIndex))
+			}
+			if ci == 9 {
+				c = r.AddCell()
+				c.SetString(luggs[ri].PrizeIndexName)
+			}
+			if ci == 10 {
+				c = r.AddCell()
+				c.SetFloat(luggs[ri].Price)
+			}
+			if ci == 11 {
+				c = r.AddCell()
+				c.SetInt(luggs[ri].PreStore)
+			}
+			if ci == 12 {
+				c = r.AddCell()
+				c.SetInt(luggs[ri].PkgStatus)
+			}
+			if ci == 13 {
+				c = r.AddCell()
+				c.SetString(luggs[ri].Pic)
+			}
+		}
+	}
+	f.Save(path)
+	context.File(path)
+}
+
+func (s *FanServiceImpl) OrderDownLoad(context *gin.Context) {
+	var orders []db.Order
+	s.db.GetDb().Find(&orders)
+	path := filepath.Join("./", "orders.xlsx")
+	f := xlsx.NewFile()
+	sk, _ := f.AddSheet("订单")
+	r := sk.AddRow()
+	c := r.AddCell()
+	c.SetString("订单编号")
+	c = r.AddCell()
+	c.SetString("订单名")
+	c = r.AddCell()
+	c.SetString("价格")
+	c = r.AddCell()
+	c.SetString("优惠金额")
+	c = r.AddCell()
+	c.SetString("商品数量")
+	c = r.AddCell()
+	c.SetString("用户昵称")
+	c = r.AddCell()
+	c.SetString("UID")
+	c = r.AddCell()
+	c.SetString("手机号码")
+	c = r.AddCell()
+	c.SetString("赏池ID")
+	c = r.AddCell()
+	c.SetString("箱子ID")
+	c = r.AddCell()
+	c.SetString("支付方式")
+	c = r.AddCell()
+	c.SetString("创建时间")
+	c = r.AddCell()
+	c.SetString("状态")
+	c = r.AddCell()
+	c.SetString("第三方支付单号")
+	c = r.AddCell()
+	c.SetString("奖品等级")
+	c = r.AddCell()
+	c.SetString("商品详情")
+	c = r.AddCell()
+	c.SetString("商品ID")
+	for ri := 0; ri < len(orders); ri++ {
+		r = sk.AddRow()
+		for ci := 0; ci < 17; ci++ {
+			if ci == 0 {
+				c = r.AddCell()
+				c.SetInt64(int64(orders[ri].ID))
+			}
+			if ci == 1 {
+				c = r.AddCell()
+				c.SetString("订单名")
+			}
+			if ci == 2 {
+				c = r.AddCell()
+				c.SetFloat(orders[ri].Price)
+			}
+			if ci == 3 {
+				c = r.AddCell()
+				c.SetString("优惠金额")
+
+			}
+			if ci == 4 {
+				c = r.AddCell()
+				c.SetInt(orders[ri].PrizeNum)
+			}
+			if ci == 5 {
+				c = r.AddCell()
+				c.SetString(orders[ri].UserName)
+			}
+			if ci == 6 {
+				c = r.AddCell()
+				c.SetInt64(int64(orders[ri].UserId))
+			}
+			if ci == 7 {
+				c = r.AddCell()
+				c.SetString(orders[ri].UserMobile)
+			}
+			if ci == 8 {
+				c = r.AddCell()
+				c.SetInt64(int64(orders[ri].FanId))
+			}
+			if ci == 9 {
+				c = r.AddCell()
+				c.SetInt64(int64(orders[ri].BoxId))
+			}
+			if ci == 10 {
+				c = r.AddCell()
+				c.SetString(orders[ri].PayStyle)
+			}
+			if ci == 11 {
+				c = r.AddCell()
+				c.SetString(orders[ri].CreatedAt.Format("2006-01-02 15:04:05"))
+			}
+			if ci == 12 {
+				c = r.AddCell()
+				c.SetString(orders[ri].Status)
+			}
+			if ci == 13 {
+				c = r.AddCell()
+				c.SetString(orders[ri].OutTradeNo)
+			}
+			if ci == 14 {
+				c = r.AddCell()
+				c.SetString("奖品等级")
+			}
+			if ci == 15 {
+				c = r.AddCell()
+				c.SetString("商品详情")
+			}
+			if ci == 16 {
+				c = r.AddCell()
+				c.SetString("商品ID")
+			}
+		}
+	}
+	f.Save(path)
+	context.File(path)
+}
 func (s *FanServiceImpl) GoodsDownLoad(context *gin.Context) {
 	var goods []db.Goods
 	s.db.GetDb().Find(&goods)

@@ -14,7 +14,7 @@ import (
 	"yifan/pkg/define"
 )
 
-func (s *GoodsServiceImpl) UpLoadGoods() error {
+func (s *GoodsServiceImpl) ManyGoodsUpload() error {
 	//获取当前目录
 	dir, err := os.Getwd()
 	if err != nil {
@@ -190,7 +190,7 @@ func (s *GoodsServiceImpl) UpLoadGoods() error {
 	}
 	return nil
 }
-func (s *GoodsServiceImpl) ManyGoodsUpload(req param.ReqUpLoadGoods) (param.RespUpLoadGoods, error) {
+func (s *GoodsServiceImpl) UpLoadGoods(req param.ReqUpLoadGoods) (param.RespUpLoadGoods, error) {
 	DB := s.db.GetDb()
 	ret := param.RespUpLoadGoods{}
 	for _, ele := range req.UpLoadGoods {

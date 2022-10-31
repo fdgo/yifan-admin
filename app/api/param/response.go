@@ -53,6 +53,8 @@ type Goods struct {
 }
 
 //////////////////////////////////////////////////////////////////////
+type RespGlobalConfig struct {
+}
 type RespUpLoadIPs struct {
 	IpIdNames []IpIdName `json:"ipIdNames,omitempty"`
 }
@@ -563,22 +565,45 @@ type RespAddSecondTab struct {
 type RespAddSecondTabSon struct {
 }
 type RespQuerySecondTab struct {
-	SecondTab []string `json:"secondTab"`
+	TabSon1  string `json:"tabSon1"`
+	TabSon2  string `json:"tabSon2"`
+	TabSon3  string `json:"tabSon3"`
+	TabSon4  string `json:"tabSon4"`
+	TabSon5  string `json:"tabSon5"`
+	TabSon6  string `json:"tabSon6"`
+	TabSon7  string `json:"tabSon7"`
+	TabSon8  string `json:"tabSon8"`
+	TabSon9  string `json:"tabSon9"`
+	TabSon10 string `json:"tabSon10"`
+	IsHide1  bool   `json:"isHide1"`
+	IsHide2  bool   `json:"isHide2"`
+	IsHide3  bool   `json:"isHide3"`
+	IsHide4  bool   `json:"isHide4"`
+	IsHide5  bool   `json:"isHide5"`
+	IsHide6  bool   `json:"isHide6"`
+	IsHide7  bool   `json:"isHide7"`
+	IsHide8  bool   `json:"isHide8"`
+	IsHide9  bool   `json:"isHide9"`
+	IsHide10 bool   `json:"isHide10"`
 }
 
 type RespQuerySecondSonTab struct {
-	Tab []Tab `json:"tab"`
+	TabContent []TabContent `json:"tabContent"`
 }
-type Tab struct {
+type TabContent struct {
+	Id              uint   `json:"id"`
 	TabTag          string `json:"tabTag"`
 	TabSon          string `json:"tabSon"`
-	RedirectType    string `json:"redirect_type"`
-	RedirectAddress string `json:"redirect_address"`
-	ActiveBeginTime int64  `json:"active_begin_time"`
-	ActiveEndTime   int64  `json:"active_end_time"`
-	Remark          string `json:"remark"`
+	ActiveBeginTime int64  `json:"activeBeginTime"`
+	ActiveEndTime   int64  `json:"activeEndTime"`
 	Title           string `json:"title"`
-	Pic             string `json:"pic"`
+	FanId           uint   `json:"fanId"`
+	FanTitle        string `json:"fanTitle"`
+	AdvPic          string `json:"advPic"`
+	Remark          string `json:"remark"`
+	IsHide          bool   `json:"isHide"`
+	RedirectUrl     string `json:"redirectUrl"`
+	RedirectType    string `json:"redirectType"`
 }
 
 type RespShowOrHideSecondTab struct {

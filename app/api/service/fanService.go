@@ -20,6 +20,10 @@ type FanService interface {
 
 	GoodsDownLoad(c *gin.Context)
 	PrizesDownLoad(c *gin.Context)
+	OrderDownLoad(c *gin.Context)
+	LuggageDownLoad(c *gin.Context)
+	DeliverDownLoad(c *gin.Context)
+	DeliverDetailDownLoad(c *gin.Context)
 }
 
 type FanServiceImpl struct {

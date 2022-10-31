@@ -7,7 +7,7 @@ import (
 )
 
 type GoodsService interface {
-	UpLoadGoods() error
+	UpLoadGoods(req param.ReqUpLoadGoods) (param.RespUpLoadGoods, error)
 	SearchGoods(req param.ReqSearchGoods) (param.RespSearchGoods, error)
 	AddGoods(req param.ReqAddGoods) (uint, error)
 	DeleteGoods(req param.ReqDeleteGoods) error

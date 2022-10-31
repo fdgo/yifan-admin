@@ -179,3 +179,11 @@ func (s *IpServiceImpl) ModifyIP(req param.ReqModifyIP) error {
 	}
 	return nil
 }
+
+func (s *IpServiceImpl) SetGlobalConfig(req param.ReqGlobalConfig) error {
+	s.db.GetDb().Model(&db.Config{}).Unscoped().Where("id>?", 0).Delete(&db.Config{})
+	return s.db.GetDb().Create(&db.Config{
+		Fee:         req.Fee,
+		FeeLimitNum: req.FeeLimitNum,
+	}).Error
+}

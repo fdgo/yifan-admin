@@ -6,6 +6,22 @@ import (
 	"yifan/pkg/response"
 )
 
+func (h *handler) SetGlobalConfig() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		var req param.ReqGlobalConfig
+		if err := context.ShouldBindJSON(&req); err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		err := h.ipService.SetGlobalConfig(req)
+		if err != nil {
+			response.AbortWithBadRequestWithError(err, context)
+			return
+		}
+		response.ResposeSuccess(nil, context)
+	}
+}
+
 // @Description UpLoadIPs
 // @Tags UpLoadIPs
 // @Accept json
@@ -322,12 +338,12 @@ func (h *handler) UpLoadGoods() gin.HandlerFunc {
 			response.AbortWithBadRequestWithError(err, context)
 			return
 		}
-		err := h.goodsService.UpLoadGoods()
+		data, err := h.goodsService.UpLoadGoods(req)
 		if err != nil {
 			response.AbortWithBadRequestWithError(err, context)
 			return
 		}
-		response.ResposeSuccess(nil, context)
+		response.ResposeSuccess(data, context)
 	}
 }
 
@@ -1308,7 +1324,7 @@ func (h *handler) ShowOrHideBanner() gin.HandlerFunc {
 // @Param ReqShowOrHideSecondTab body param.ReqShowOrHideSecondTab true "666"
 // @Success 200 {object} response.responseSucess{data=int}
 // @Failure 400 {object} response.responseFailure
-// @Router /v1/adver/banner/isShow [post]
+// @Router /v1/adver/tab/second/isShow [post]
 func (h *handler) ShowOrHideSecondTab() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var req param.ReqShowOrHideSecondTab
@@ -1397,6 +1413,28 @@ func (h *handler) ModifyAndSaveSecondTab() gin.HandlerFunc {
 			return
 		}
 		response.ResposeSuccess(data, context)
+	}
+}
+
+func (h *handler) DeliverDownLoad() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		h.fanService.DeliverDownLoad(context)
+	}
+}
+func (h *handler) DeliverDetailDownLoad() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		h.fanService.DeliverDetailDownLoad(context)
+	}
+}
+
+func (h *handler) LuggageDownLoad() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		h.fanService.LuggageDownLoad(context)
+	}
+}
+func (h *handler) OrderDownLoad() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		h.fanService.OrderDownLoad(context)
 	}
 }
 

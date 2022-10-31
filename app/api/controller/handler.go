@@ -74,11 +74,18 @@ type Handler interface {
 	ModifyAndSaveSecondTab() gin.HandlerFunc
 	GoodsDownLoad() gin.HandlerFunc
 	PrizesDownLoad() gin.HandlerFunc
+	OrderDownLoad() gin.HandlerFunc
+	LuggageDownLoad() gin.HandlerFunc
+
+	DeliverDownLoad() gin.HandlerFunc
+	DeliverDetailDownLoad() gin.HandlerFunc
+
 	Delever() gin.HandlerFunc
 	DeleverCondition() gin.HandlerFunc
 	DeleverDetail() gin.HandlerFunc
 	SetDelId() gin.HandlerFunc
 	UserList() gin.HandlerFunc
+	SetGlobalConfig() gin.HandlerFunc
 	UserListCondition() gin.HandlerFunc
 }
 type handler struct {

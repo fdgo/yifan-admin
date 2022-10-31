@@ -92,6 +92,11 @@ type ReqModifyGoods struct {
 	ActiveEndTime   int64       `json:"activeEndTime"`
 }
 
+type ReqGlobalConfig struct {
+	Fee         float64 `json:"fee"`
+	FeeLimitNum int     `json:"feeLimitNum"`
+}
+
 //
 type ReqUpLoadIPs struct {
 	ReqAddIP []ReqAddIP `json:"ips"`
@@ -460,19 +465,41 @@ type Banner struct {
 type ReqGetBannerPic struct {
 }
 type ReqAddSecondTab struct {
-	TabTag  string   `json:"tabTag"`
-	TabSons []string `json:"tabSons"`
+	TabTag   string `json:"tabTag"`
+	TabSon1  string `json:"tabSon1"`
+	TabSon2  string `json:"tabSon2"`
+	TabSon3  string `json:"tabSon3"`
+	TabSon4  string `json:"tabSon4"`
+	TabSon5  string `json:"tabSon5"`
+	TabSon6  string `json:"tabSon6"`
+	TabSon7  string `json:"tabSon7"`
+	TabSon8  string `json:"tabSon8"`
+	TabSon9  string `json:"tabSon9"`
+	TabSon10 string `json:"tabSon10"`
+	IsHide1  bool   `json:"isHide1"`
+	IsHide2  bool   `json:"isHide2"`
+	IsHide3  bool   `json:"isHide3"`
+	IsHide4  bool   `json:"isHide4"`
+	IsHide5  bool   `json:"isHide5"`
+	IsHide6  bool   `json:"isHide6"`
+	IsHide7  bool   `json:"isHide7"`
+	IsHide8  bool   `json:"isHide8"`
+	IsHide9  bool   `json:"isHide9"`
+	IsHide10 bool   `json:"isHide10"`
 }
 type ReqAddSecondTabSon struct {
 	TabTag          string `json:"tabTag"`
 	TabSon          string `json:"tabSon"`
-	RedirectType    string `json:"redirectType"`
-	RedirectAddress string `json:"redirectAddress"`
 	ActiveBeginTime int64  `json:"activeBeginTime"`
 	ActiveEndTime   int64  `json:"activeEndTime"`
-	Remark          string `json:"remark"`
 	Title           string `json:"title"`
-	Pic             string `json:"pic"`
+	FanId           uint   `json:"fanId"`
+	FanTitle        string `json:"fanTitle"`
+	IsHide          bool   `json:"isHide"`
+	AdvPic          string `json:"advPic"`
+	Remark          string `json:"remark"`
+	RedirectUrl     string `json:"redirectUrl"`
+	RedirectType    string `json:"redirectType"`
 }
 
 type ReqQuerySecondTab struct {
@@ -488,9 +515,12 @@ type ReqShowOrHideBanner struct {
 	IsHide   bool `json:"isHide"`
 }
 type ReqShowOrHideSecondTab struct {
-	TabTag string `json:"tabTag"`
-	TabSon string `json:"tabSon"`
-	IsHide bool   `json:"isHide"`
+	TabTag  string `json:"tabTag"`
+	IsHide1 int    `json:"isHide1"`
+	IsHide2 int    `json:"isHide2"`
+	IsHide3 int    `json:"isHide3"`
+	IsHide4 int    `json:"isHide4"`
+	IsHide5 int    `json:"isHide5"`
 }
 type ReqShowOrHideSecondTabSon struct {
 	TabTag string `json:"tabTag"`

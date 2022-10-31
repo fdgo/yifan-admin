@@ -9,6 +9,10 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 	//config := cors.DefaultConfig()
 	//config.AllowAllOrigins = true
 	//config.AllowHeaders = append(config.AllowHeaders, "token")
+	config := r.mux.Group("/v1/admin/config")
+	{
+		config.POST("", handler.SetGlobalConfig())
+	}
 	user := r.mux.Group("/v1/admin/user")
 	{
 		user.POST("/list", handler.UserList())
@@ -85,12 +89,15 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 		adver.POST("/banner/delete", handler.DelBannerPic())
 		adver.POST("/activeByMan", handler.ActiveByMan())
 		adver.POST("/singleClick", handler.SingleClick())
+
 		adver.POST("/tab/second/create", handler.AddSecondTab())
 		adver.POST("/tab/second/son/create", handler.AddSecondTabSon())
+
 		adver.POST("/tab/second/query", handler.QuerySecondTab())
 		adver.POST("/tab/second/son/query", handler.QuerySecondSonTab())
-		adver.POST("/isShow", handler.ShowOrHideSecondTab())
-		adver.POST("/isShow/son", handler.ShowOrHideSecondTabSon())
+
+		adver.POST("/tab/second/isShow", handler.ShowOrHideSecondTab())
+		adver.POST("/tab/second/son/isShow", handler.ShowOrHideSecondTabSon())
 		adver.POST("/son/delete", handler.DeleteTabSon())
 		adver.POST("/modify", handler.ModifyAndSaveSecondTab())
 	}
@@ -98,6 +105,11 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 	{
 		file.GET("/download/goods", handler.GoodsDownLoad())
 		file.GET("/download/prize", handler.PrizesDownLoad())
+		file.GET("/download/order", handler.OrderDownLoad())
+		file.GET("/download/luggage", handler.LuggageDownLoad())
+
+		file.GET("/download/deliver", handler.DeliverDownLoad())
+		file.GET("/download/deliver/detail", handler.DeliverDetailDownLoad())
 	}
 	luggage := r.mux.Group("/v1/admin/luggage").Use(r.middles.Cors())
 	{

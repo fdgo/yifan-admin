@@ -7,6 +7,7 @@ import (
 )
 
 type IpService interface {
+	SetGlobalConfig(req param.ReqGlobalConfig) error
 	UpLoadIPs(req param.ReqUpLoadIPs) (param.RespUpLoadIPs, error)
 	SearchIP(req param.ReqSearchIP) (param.RespSearchIp, error)
 	AddIP(req param.ReqAddIP) (uint, error)
