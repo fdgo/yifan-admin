@@ -442,6 +442,9 @@ type Luggage struct {
 	Price          float64 `json:"price"`
 	PrizeIndexName string  `json:"prizeIndexName"`
 	PrizeIndex     int     `json:"prizeIndex"`
+	InLuggageTime  int64   `json:"inLuggageTime"`
+	OutLuggageTime int64   `json:"outLuggageTime"`
+	DeleStatus     int     `json:"deleStatus"`
 }
 type RespDelever struct {
 	AllPages    float64      `json:"allPages"`

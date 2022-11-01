@@ -898,7 +898,7 @@ func (s *FanServiceImpl) DeliverDetailDownLoad(context *gin.Context) {
 			}
 			if ci == 1 {
 				c = r.AddCell()
-				c.SetInt64(int64(deldetails[ri].GoodId))
+				c.SetString(strconv.Itoa(int(deldetails[ri].GoodId)))
 			}
 			if ci == 2 {
 				c = r.AddCell()
@@ -910,7 +910,7 @@ func (s *FanServiceImpl) DeliverDetailDownLoad(context *gin.Context) {
 			}
 			if ci == 4 {
 				c = r.AddCell()
-				c.SetInt64(int64(deldetails[ri].FanId))
+				c.SetString(strconv.Itoa(int(deldetails[ri].FanId)))
 			}
 			if ci == 5 {
 				c = r.AddCell()
@@ -918,11 +918,11 @@ func (s *FanServiceImpl) DeliverDetailDownLoad(context *gin.Context) {
 			}
 			if ci == 6 {
 				c = r.AddCell()
-				c.SetInt64(int64(deldetails[ri].BoxId))
+				c.SetString(strconv.Itoa(int(deldetails[ri].BoxId)))
 			}
 			if ci == 7 {
 				c = r.AddCell()
-				c.SetInt64(int64(deldetails[ri].UserId))
+				c.SetString(strconv.Itoa(int(deldetails[ri].UserId)))
 			}
 			if ci == 8 {
 				c = r.AddCell()
@@ -1002,16 +1002,17 @@ func (s *FanServiceImpl) LuggageDownLoad(context *gin.Context) {
 	c = r.AddCell()
 	c.SetString("图片")
 	c = r.AddCell()
+	c.SetString("时间")
 	for ri := 0; ri < len(luggs); ri++ {
 		r = sk.AddRow()
-		for ci := 0; ci < 14; ci++ {
+		for ci := 0; ci < 15; ci++ {
 			if ci == 0 {
 				c = r.AddCell()
 				c.SetString(luggs[ri].OutTradeNo)
 			}
 			if ci == 1 {
 				c = r.AddCell()
-				c.SetInt64(int64(luggs[ri].UserId))
+				c.SetString(strconv.Itoa(int(luggs[ri].UserId)))
 			}
 			if ci == 2 {
 				c = r.AddCell()
@@ -1019,7 +1020,7 @@ func (s *FanServiceImpl) LuggageDownLoad(context *gin.Context) {
 			}
 			if ci == 3 {
 				c = r.AddCell()
-				c.SetInt64(int64(luggs[ri].GoodID))
+				c.SetString(strconv.Itoa(int(luggs[ri].GoodID)))
 			}
 			if ci == 4 {
 				c = r.AddCell()
@@ -1027,7 +1028,7 @@ func (s *FanServiceImpl) LuggageDownLoad(context *gin.Context) {
 			}
 			if ci == 5 {
 				c = r.AddCell()
-				c.SetInt64(int64(luggs[ri].FanId))
+				c.SetString(strconv.Itoa(int(luggs[ri].FanId)))
 			}
 			if ci == 6 {
 				c = r.AddCell()
@@ -1035,7 +1036,7 @@ func (s *FanServiceImpl) LuggageDownLoad(context *gin.Context) {
 			}
 			if ci == 7 {
 				c = r.AddCell()
-				c.SetInt64(int64(luggs[ri].BoxId))
+				c.SetString(strconv.Itoa(int(luggs[ri].BoxId)))
 			}
 			if ci == 8 {
 				c = r.AddCell()
@@ -1061,6 +1062,10 @@ func (s *FanServiceImpl) LuggageDownLoad(context *gin.Context) {
 				c = r.AddCell()
 				c.SetString(luggs[ri].Pic)
 			}
+			if ci == 14 {
+				c = r.AddCell()
+				c.SetString(luggs[ri].CreatedAt.Format("2006-01-02 15:04:05"))
+			}
 		}
 	}
 	f.Save(path)
@@ -1075,9 +1080,7 @@ func (s *FanServiceImpl) OrderDownLoad(context *gin.Context) {
 	sk, _ := f.AddSheet("订单")
 	r := sk.AddRow()
 	c := r.AddCell()
-	c.SetString("订单编号")
-	c = r.AddCell()
-	c.SetString("订单名")
+	c.SetString("支付单号")
 	c = r.AddCell()
 	c.SetString("价格")
 	c = r.AddCell()
@@ -1101,8 +1104,6 @@ func (s *FanServiceImpl) OrderDownLoad(context *gin.Context) {
 	c = r.AddCell()
 	c.SetString("状态")
 	c = r.AddCell()
-	c.SetString("第三方支付单号")
-	c = r.AddCell()
 	c.SetString("奖品等级")
 	c = r.AddCell()
 	c.SetString("商品详情")
@@ -1113,70 +1114,62 @@ func (s *FanServiceImpl) OrderDownLoad(context *gin.Context) {
 		for ci := 0; ci < 17; ci++ {
 			if ci == 0 {
 				c = r.AddCell()
-				c.SetInt64(int64(orders[ri].ID))
+				c.SetString(orders[ri].OutTradeNo)
 			}
 			if ci == 1 {
 				c = r.AddCell()
-				c.SetString("订单名")
-			}
-			if ci == 2 {
-				c = r.AddCell()
 				c.SetFloat(orders[ri].Price)
 			}
-			if ci == 3 {
+			if ci == 2 {
 				c = r.AddCell()
 				c.SetString("优惠金额")
 
 			}
-			if ci == 4 {
+			if ci == 3 {
 				c = r.AddCell()
 				c.SetInt(orders[ri].PrizeNum)
 			}
-			if ci == 5 {
+			if ci == 4 {
 				c = r.AddCell()
 				c.SetString(orders[ri].UserName)
 			}
-			if ci == 6 {
+			if ci == 5 {
 				c = r.AddCell()
-				c.SetInt64(int64(orders[ri].UserId))
+				c.SetString(strconv.Itoa(int(orders[ri].UserId)))
 			}
-			if ci == 7 {
+			if ci == 6 {
 				c = r.AddCell()
 				c.SetString(orders[ri].UserMobile)
 			}
+			if ci == 7 {
+				c = r.AddCell()
+				c.SetString(strconv.Itoa(int(orders[ri].FanId)))
+			}
 			if ci == 8 {
 				c = r.AddCell()
-				c.SetInt64(int64(orders[ri].FanId))
+				c.SetString(strconv.Itoa(int(orders[ri].BoxId)))
 			}
 			if ci == 9 {
 				c = r.AddCell()
-				c.SetInt64(int64(orders[ri].BoxId))
+				c.SetString(orders[ri].PayStyle)
 			}
 			if ci == 10 {
 				c = r.AddCell()
-				c.SetString(orders[ri].PayStyle)
+				c.SetString(orders[ri].CreatedAt.Format("2006-01-02 15:04:05"))
 			}
 			if ci == 11 {
 				c = r.AddCell()
-				c.SetString(orders[ri].CreatedAt.Format("2006-01-02 15:04:05"))
+				c.SetString(orders[ri].Status)
 			}
 			if ci == 12 {
 				c = r.AddCell()
-				c.SetString(orders[ri].Status)
+				c.SetString("奖品等级")
 			}
 			if ci == 13 {
 				c = r.AddCell()
-				c.SetString(orders[ri].OutTradeNo)
-			}
-			if ci == 14 {
-				c = r.AddCell()
-				c.SetString("奖品等级")
-			}
-			if ci == 15 {
-				c = r.AddCell()
 				c.SetString("商品详情")
 			}
-			if ci == 16 {
+			if ci == 14 {
 				c = r.AddCell()
 				c.SetString("商品ID")
 			}

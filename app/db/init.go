@@ -76,7 +76,7 @@ func GormMysql() (*gorm.DB, error) {
 	}); err != nil {
 		return nil, err
 	} else {
-		//RegisterTables(db)
+		RegisterTables(db)
 		sqlDB, _ := db.DB()
 		sqlDB.SetMaxIdleConns(100)
 		sqlDB.SetMaxOpenConns(100)

@@ -364,19 +364,21 @@ type IntegralRecord struct {
 }
 
 type Adver struct {
-	ID                uint           `gorm:"primarykey" json:"id"`
-	BannerTitle       string         `gorm:"comment:BannerTitle" json:"banner_title"`
-	Pic               string         `gorm:"comment:Pic" json:"pic"`
-	BannerReleatedUrl string         `gorm:"comment:轮播图对应跳转连接" json:"banner_releated_url"`
-	ReleatedUrlType   string         `gorm:"comment:轮播图对应跳转连接类型" json:"releated_url_type"`
-	TipsAfterBanner   string         `gorm:"comment:轮播图下面的文字提示" json:"tips_after_banner"`
-	ActiveBeginTime   int64          `gorm:"comment:轮播图上架时间" json:"active_begin_time"`
-	ActiveEndTime     int64          `gorm:"comment:轮播图下架时间" json:"active_end_time"`
-	IsHide            bool           `gorm:"comment:是否隐藏" json:"is_hide"`
-	Remark            string         `gorm:"comment:备注" json:"remark"`
-	CreatedAt         time.Time      `json:"created_time"`
-	UpdatedAt         time.Time      `json:"updated_time"`
-	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
+	ID              uint           `gorm:"primarykey" json:"id"`
+	Title           string         `gorm:"comment:title" json:"title"`
+	AdvPic          string         `gorm:"comment:图片" json:"advPic"`
+	FanId           uint           `gorm:"comment:蕃id" json:"fanId"`
+	FanTitle        string         `gorm:"comment:蕃的名字" json:"fanTitle"`
+	RedirectUrl     string         `gorm:"comment:轮播图对应跳转连接" json:"redirectUrl"`
+	RedirectType    string         `gorm:"comment:轮播图对应跳转连接类型" json:"redirectType"`
+	TipsAfterBanner string         `gorm:"comment:轮播图下面的文字提示" json:"tips_afterBanner"`
+	ActiveBeginTime int64          `gorm:"comment:轮播图上架时间" json:"activeBeginTime"`
+	ActiveEndTime   int64          `gorm:"comment:轮播图下架时间" json:"activeEndTime"`
+	IsHide          bool           `gorm:"comment:是否隐藏" json:"is_hide"`
+	Remark          string         `gorm:"comment:备注" json:"remark"`
+	CreatedAt       time.Time      `json:"created_time"`
+	UpdatedAt       time.Time      `json:"updated_time"`
+	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
 }
 type AdverTab struct {
 	ID        uint           `gorm:"primarykey" json:"id"`

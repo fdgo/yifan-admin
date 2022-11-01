@@ -36,15 +36,16 @@ func (s *AdverServiceImpl) DelBannerPic(req param.ReqDelBannerPic) error {
 func (s *AdverServiceImpl) SetBannerPic(req param.ReqSetBannerPic) error {
 	for _, one := range req.Banners {
 		s.db.GetDb().Create(&db.Adver{
-			BannerTitle:       one.BannerTitle,
-			Pic:               one.Pic,
-			Remark:            one.Remark,
-			BannerReleatedUrl: one.BannerReleatedUrl,
-			ReleatedUrlType:   one.ReleatedUrlType,
-			TipsAfterBanner:   one.TipsAfterBanner,
-			ActiveBeginTime:   one.ActiveBeginTime,
-			ActiveEndTime:     one.ActiveEndTime,
-			IsHide:            true,
+			Title:           one.Title,
+			AdvPic:          one.AdvPic,
+			FanId:           one.FanId,
+			FanTitle:        one.FanTitle,
+			RedirectUrl:     one.RedirectUrl,
+			RedirectType:    one.RedirectType,
+			ActiveBeginTime: one.ActiveBeginTime,
+			ActiveEndTime:   one.ActiveEndTime,
+			IsHide:          one.IsHide,
+			Remark:          one.Remark,
 		})
 	}
 	return nil
@@ -59,16 +60,17 @@ func (s *AdverServiceImpl) GetBannerPic(req param.ReqGetBannerPic) (param.RespGe
 	var resp param.RespGetBannerPic
 	for _, one := range adver {
 		resp.Banners = append(resp.Banners, param.Banner{
-			Id:                one.ID,
-			BannerTitle:       one.BannerTitle,
-			Pic:               one.Pic,
-			BannerReleatedUrl: one.BannerReleatedUrl,
-			ReleatedUrlType:   one.ReleatedUrlType,
-			TipsAfterBanner:   one.TipsAfterBanner,
-			ActiveBeginTime:   one.ActiveBeginTime,
-			ActiveEndTime:     one.ActiveEndTime,
-			Remark:            one.Remark,
-			IsHide:            one.IsHide,
+			Id:              one.ID,
+			Title:           one.Title,
+			AdvPic:          one.AdvPic,
+			FanId:           one.FanId,
+			FanTitle:        one.FanTitle,
+			RedirectUrl:     one.RedirectUrl,
+			RedirectType:    one.RedirectType,
+			ActiveBeginTime: one.ActiveBeginTime,
+			ActiveEndTime:   one.ActiveEndTime,
+			IsHide:          one.IsHide,
+			Remark:          one.Remark,
 		})
 	}
 	return resp, nil

@@ -404,7 +404,7 @@ type ReqSetDelId struct {
 	DeleCompany string `json:"deleCompany"`
 }
 type ReqUserList struct {
-	User      uint  `json:"user"`
+	//User      uint  `json:"user"`
 	PageSize  int32 `json:"pageSize"`
 	PageIndex int32 `json:"pageIndex"`
 }
@@ -451,16 +451,17 @@ type ReqSetBannerPic struct {
 	Banners []Banner `json:"banners"`
 }
 type Banner struct {
-	Id                uint   `json:"id"`
-	BannerTitle       string `json:"bannerTitle"`
-	Pic               string `json:"pic"`
-	BannerReleatedUrl string `json:"bannerReleatedUrl"`
-	ReleatedUrlType   string `json:"releatedUrlType"`
-	Remark            string `json:"remark"`
-	IsHide            bool   `json:"isHide"`
-	TipsAfterBanner   string `json:"tipsAfterBanner"`
-	ActiveBeginTime   int64  `json:"activeBeginTime"`
-	ActiveEndTime     int64  `json:"activeEndTime"`
+	Id              uint   `json:"id"`
+	Title           string `json:"title"`
+	FanId           uint   `json:"fanId"`
+	FanTitle        string `json:"fanTitle"`
+	AdvPic          string `json:"advPic"`
+	Remark          string `json:"remark"`
+	RedirectUrl     string `json:"redirectUrl"`
+	RedirectType    string `json:"redirectType"`
+	IsHide          bool   `json:"isHide"`
+	ActiveBeginTime int64  `json:"activeBeginTime"`
+	ActiveEndTime   int64  `json:"activeEndTime"`
 }
 type ReqGetBannerPic struct {
 }

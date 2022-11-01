@@ -475,10 +475,27 @@ func (s *UserServiceImpl) UserList(req param.ReqUserList) (param.RespUserList, e
 	var resp param.RespUserList
 	for _, oneUser := range users {
 		lugs := []db.Luggage{}
-		DB.Model(&db.Luggage{}).Where("user_id=?", oneUser.ID).Find(&lugs)
+		result := DB.Model(&db.Luggage{}).Where("user_id=?", oneUser.ID).Find(&lugs)
+		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+			return param.RespUserList{}, errors.New("服务正忙...")
+		}
+		if len(lugs) == 0 {
+			continue
+		}
 		var u param.User
 		for _, one := range lugs {
+			var deleStatus int
+			deleStatus = one.DeleverStatus
 			u.ConsumptionFee += one.Price
+			orderDetail := db.OrderDeliverDetail{}
+			err = DB.Where("luggage_id=?", one.ID).First(&orderDetail).Error
+			if err == gorm.ErrRecordNotFound {
+				continue
+			}
+			if err != nil {
+				return param.RespUserList{}, errors.New("服务正忙...")
+			}
+			deleStatus = orderDetail.DeleverStatus
 			u.Luggage = append(u.Luggage, param.Luggage{
 				ID:             one.ID,
 				OutTradeNo:     one.OutTradeNo,
@@ -492,6 +509,9 @@ func (s *UserServiceImpl) UserList(req param.ReqUserList) (param.RespUserList, e
 				Price:          one.Price,
 				PrizeIndexName: one.PrizeIndexName,
 				PrizeIndex:     one.PrizeIndex,
+				InLuggageTime:  timex.TimetToInt64(one.CreatedAt),
+				OutLuggageTime: timex.TimetToInt64(orderDetail.CreatedAt),
+				DeleStatus:     deleStatus,
 			})
 		}
 		u.LuggageNum = int64(len(lugs))
@@ -532,7 +552,18 @@ func (s *UserServiceImpl) UserListCondition(req param.ReqUserListCondition) (par
 		s.db.GetDb().Model(&db.Luggage{}).Where("user_id=?", oneUser.ID).Find(&lugs)
 		var u param.User
 		for _, one := range lugs {
+			var deleStatus int
+			deleStatus = one.DeleverStatus
 			u.ConsumptionFee += one.Price
+			orderDetail := db.OrderDeliverDetail{}
+			err = s.db.GetDb().Where("luggage_id=?", one.ID).First(&orderDetail).Error
+			if err == gorm.ErrRecordNotFound {
+				continue
+			}
+			if err != nil {
+				return param.RespUserListCondition{}, errors.New("服务正忙...")
+			}
+			deleStatus = orderDetail.DeleverStatus
 			u.Luggage = append(u.Luggage, param.Luggage{
 				ID:             one.ID,
 				OutTradeNo:     one.OutTradeNo,
@@ -546,6 +577,9 @@ func (s *UserServiceImpl) UserListCondition(req param.ReqUserListCondition) (par
 				Price:          one.Price,
 				PrizeIndexName: one.PrizeIndexName,
 				PrizeIndex:     one.PrizeIndex,
+				InLuggageTime:  timex.TimetToInt64(one.CreatedAt),
+				OutLuggageTime: timex.TimetToInt64(orderDetail.CreatedAt),
+				DeleStatus:     deleStatus,
 			})
 		}
 		u.LuggageNum = int64(len(lugs))
