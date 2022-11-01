@@ -174,6 +174,7 @@ type OrderDeliverDetail struct {
 	ID             uint           `gorm:"primarykey" json:"id"`
 	AddressId      uint           `gorm:"comment:地址id;index" json:"addressId"`
 	LuggageId      uint           `gorm:"comment:提货柜商品id;index" json:"luggageId"`
+	ActiveSureTime int64          `gorm:"comment:自动确认时间;index" json:"activeSureTime"`
 	OutTradeNo     string         `gorm:"comment:订单编号;index" json:"orderId"`
 	UserName       string         `gorm:"comment:用户名" json:"userName"`
 	FanId          uint           `gorm:"comment:蕃id" json:"fanId"`
@@ -196,8 +197,9 @@ type OrderDeliverDetail struct {
 	FinishTime     int64          `gorm:"comment:完成时间" json:"finishTime"`
 	OrderType      string         `gorm:"comment:订单类型" json:"orderType"`
 	PayStyle       string         `gorm:"comment:支付方式 " json:"payStyle"`
+	Price          float64        `gorm:"comment:价格 " json:"price"`
 	DeleverStatus  int            `gorm:"comment:1.待提货,2.待发货,3.已经收货;index" json:"deleverStatus"`
-	Status         string         `gorm:"comment:首付款;index" json:"status"`
+	Status         string         `gorm:"comment:支付状态;index" json:"status"`
 	Remark         string         `gorm:"comment:备注" json:"remark"`
 	Detail         string         `gorm:"comment:详情" json:"detail"`
 	Operator       string         `gorm:"comment:操作" json:"operator"`
@@ -448,3 +450,17 @@ type Config struct {
 	UpdatedAt   time.Time      `json:"updated_time"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 }
+
+//type Urls struct {
+//	ID        string `gorm:"primarykey" json:"id"`
+//	FanId     uint
+//	FanName   string
+//	FanUrl    string
+//	BoxId     uint
+//	GoodsId   uint
+//	GoodsName string
+//	GoodsUrl  string
+//	CreatedAt time.Time      `json:"created_time"`
+//	UpdatedAt time.Time      `json:"updated_time"`
+//	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+//}

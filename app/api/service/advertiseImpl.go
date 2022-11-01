@@ -220,6 +220,42 @@ func (s *AdverServiceImpl) ShowOrHideSecondTab(req param.ReqShowOrHideSecondTab)
 			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide5", false)
 		}
 	}
+
+	if req.IsHide6 == 1 || req.IsHide6 == 2 {
+		if req.IsHide6 == 1 {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide6", true)
+		} else {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide6", false)
+		}
+	}
+	if req.IsHide7 == 1 || req.IsHide7 == 2 {
+		if req.IsHide7 == 1 {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide7", true)
+		} else {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide7", false)
+		}
+	}
+	if req.IsHide8 == 1 || req.IsHide8 == 2 {
+		if req.IsHide8 == 1 {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide8", true)
+		} else {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide8", false)
+		}
+	}
+	if req.IsHide9 == 1 || req.IsHide9 == 2 {
+		if req.IsHide9 == 1 {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide9", true)
+		} else {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide9", false)
+		}
+	}
+	if req.IsHide10 == 1 || req.IsHide10 == 2 {
+		if req.IsHide10 == 1 {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide10", true)
+		} else {
+			s.db.GetDb().Model(&db.AdverTab{}).Where("tab_tag=?", req.TabTag).Update("is_hide10", false)
+		}
+	}
 	return nil
 }
 

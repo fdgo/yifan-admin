@@ -43,6 +43,7 @@ func (s *OrderServiceImpl) PageOfOrder(req param.ReqPageOfOrder) (param.RespPage
 		}
 		copier.Copy(&o, oneOrder)
 		o.CreateTime = TimetToInt64(oneOrder.CreatedAt)
+		o.PrizeNum = len(lugg)
 		resp.Orders = append(resp.Orders, o)
 	}
 	resp.Num = len(resp.Orders)
@@ -95,6 +96,7 @@ func (s *OrderServiceImpl) PageOfOrderCondition(req param.ReqPageOfOrderConditio
 		}
 		copier.Copy(&o, oneOrder)
 		o.CreateTime = TimetToInt64(oneOrder.CreatedAt)
+		o.PrizeNum = len(lugg)
 		resp.Orders = append(resp.Orders, o)
 	}
 	resp.Num = len(resp.Orders)
@@ -131,7 +133,7 @@ func (s *OrderServiceImpl) PageOfOrderDetail(req param.ReqPageOfOrderDetail) (pa
 	resp.Orders.UserMobile = orderSrc.UserMobile
 	resp.Orders.UserId = orderSrc.UserId
 	resp.Orders.UserName = orderSrc.UserName
-	resp.Orders.PrizeNum = orderSrc.PrizeNum
+	resp.Orders.PrizeNum = len(lugSrc)
 	resp.Orders.OutTradeNo = orderSrc.OutTradeNo
 	resp.Orders.Price = orderSrc.Price
 	resp.Orders.PayStyle = orderSrc.PayStyle

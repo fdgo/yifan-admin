@@ -283,7 +283,35 @@ func (s *UserServiceImpl) OneDel(dele db.OrderDeliver) (param.OneDelever, error)
 }
 
 func (s *UserServiceImpl) SetDelId(req param.ReqSetDelId) error {
-	err := s.db.GetDb().Model(&db.OrderDeliver{}).Where("id=?", req.Id).Update("dele_order_id", req.DeleOrderId).Update("dele_company", req.DeleCompany).Error
+	var od db.OrderDeliver
+	err := s.db.GetDb().Model(&db.OrderDeliver{}).Where("id=?", req.Id).First(&od).Error
+	if err == gorm.ErrRecordNotFound {
+		return errors.New("该提货单不存在...")
+	}
+	if err != nil {
+		return errors.New("服务正忙...")
+	}
+	tx := s.db.GetDb().Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	err = tx.Model(&db.OrderDeliver{}).Where("id=?", req.Id).
+		Update("dele_order_id", req.DeleOrderId).Update("dele_company", req.DeleCompany).
+		Update("delever_status", req.DeleverStatus).Update("active_sure_time", time.Now().Unix()+10*3600*24).Error
+	if err != nil {
+		tx.Rollback()
+		return errors.New("服务正忙...")
+	}
+
+	err = tx.Model(&db.OrderDeliverDetail{}).Where("out_trade_no=?", od.OutTradeNo).Update("delever_status", req.DeleverStatus).
+		Update("active_sure_time", time.Now().Unix()+10*3600*24).Error
+	if err != nil {
+		tx.Rollback()
+		return errors.New("服务正忙...")
+	}
+	tx.Commit()
 	return err
 }
 
@@ -434,6 +462,8 @@ func (s *UserServiceImpl) DeleverDetail(req param.ReqDeleverDetail) (param.RespD
 			PkgStatus:      oneDelDetail.PkgStatus,
 			PrizeIndexName: oneDelDetail.PrizeIndexName,
 			GoodId:         oneDelDetail.GoodId,
+			DeleStatus:     oneDelDetail.DeleverStatus,
+			Price:          oneDelDetail.Price,
 		})
 	}
 	address := db.Address{}

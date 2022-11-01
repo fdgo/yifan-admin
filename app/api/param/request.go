@@ -399,9 +399,10 @@ type ReqDeleverDetail struct {
 }
 
 type ReqSetDelId struct {
-	Id          uint   `json:"id"`
-	DeleOrderId uint   `json:"deleOrderId"`
-	DeleCompany string `json:"deleCompany"`
+	Id            uint   `json:"id"`
+	DeleOrderId   uint   `json:"deleOrderId"`
+	DeleCompany   string `json:"deleCompany"`
+	DeleverStatus int    `json:"deleverStatus"`
 }
 type ReqUserList struct {
 	//User      uint  `json:"user"`
@@ -516,12 +517,17 @@ type ReqShowOrHideBanner struct {
 	IsHide   bool `json:"isHide"`
 }
 type ReqShowOrHideSecondTab struct {
-	TabTag  string `json:"tabTag"`
-	IsHide1 int    `json:"isHide1"`
-	IsHide2 int    `json:"isHide2"`
-	IsHide3 int    `json:"isHide3"`
-	IsHide4 int    `json:"isHide4"`
-	IsHide5 int    `json:"isHide5"`
+	TabTag   string `json:"tabTag"`
+	IsHide1  int    `json:"isHide1"`
+	IsHide2  int    `json:"isHide2"`
+	IsHide3  int    `json:"isHide3"`
+	IsHide4  int    `json:"isHide4"`
+	IsHide5  int    `json:"isHide5"`
+	IsHide6  int    `json:"isHide6"`
+	IsHide7  int    `json:"isHide7"`
+	IsHide8  int    `json:"isHide8"`
+	IsHide9  int    `json:"isHide9"`
+	IsHide10 int    `json:"isHide10"`
 }
 type ReqShowOrHideSecondTabSon struct {
 	TabTag string `json:"tabTag"`

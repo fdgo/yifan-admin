@@ -47,7 +47,7 @@ const (
 
 	//YfSoldStatus        = 0
 	YfSoldStatusPreSell = 1 //预售
-	YfSoldStatusExist   = 2 //库存
+	YfSoldStatusExist   = 2 //现货
 
 	//奖品状态
 	YfPrizeStatusSoldOut    = 1 //奖品售罄
@@ -83,7 +83,7 @@ const (
 	OrderStatusToReceive   = 3 // 3.等收货
 	OrderStatusFinish      = 4 // 4.已完成
 	OrderStatusAll         = 5 //全部
-	
+
 	PrizeIndexNameA = "A"
 	PrizeIndexNameB = "B"
 	PrizeIndexNameC = "C"

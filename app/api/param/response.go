@@ -489,14 +489,16 @@ type DeleverUserInfo struct {
 	UserId   uint   `json:"userId"`
 }
 type DeleverGood struct {
-	Pic            string `json:"pic"`
-	GoodName       string `json:"goodName"`
-	IpName         string `json:"ipName"`
-	SeriesName     string `json:"seriesName"`
-	PkgStatus      int    `json:"pkgStatus"`
-	PrizeIndexName string `json:"prizeIndexName"`
-	GoodId         uint   `json:"goodId"`
-	PrizeId        uint   `json:"prizeId"`
+	Pic            string  `json:"pic"`
+	GoodName       string  `json:"goodName"`
+	IpName         string  `json:"ipName"`
+	SeriesName     string  `json:"seriesName"`
+	PkgStatus      int     `json:"pkgStatus"`
+	PrizeIndexName string  `json:"prizeIndexName"`
+	GoodId         uint    `json:"goodId"`
+	PrizeId        uint    `json:"prizeId"`
+	DeleStatus     int     `json:"deleStatus"`
+	Price          float64 `json:"price"`
 }
 type RespPageOfOrder struct {
 	AllPages float64 `json:"allPages,omitempty"`

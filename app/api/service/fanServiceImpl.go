@@ -340,6 +340,7 @@ func (s *FanServiceImpl) EachBox(box *param.Box, fanId uint, fanName string) ([]
 			Price:             prizeEle.Price,
 			MultiIds:          prizeEle.MultiIds,
 			PkgStatus:         prizeEle.PkgStatus,
+			PreStore:          prizeEle.PreStore,
 			Remark:            prizeEle.Remark,
 			TimeForSoldStatus: prizeEle.TimeForSoldStatus,
 			SoldStatus:        define.YfPrizeStatusNotSoldOut,
@@ -350,6 +351,7 @@ func (s *FanServiceImpl) EachBox(box *param.Box, fanId uint, fanName string) ([]
 func (s *FanServiceImpl) PkgBoxes(tx *gorm.DB, fanId uint, req param.ReqModifySaveFan, boxIndex int32, prizeNum int32) (*db.Box, error) {
 	box := &db.Box{
 		ID:            define.GetRandBoxId(),
+		FanID:         &fanId,
 		FanName:       req.Title,
 		BoxIndex:      boxIndex,
 		PriczeNum:     prizeNum,
@@ -817,7 +819,7 @@ func (s *FanServiceImpl) DeliverDownLoad(context *gin.Context) {
 			}
 			if ci == 3 {
 				c = r.AddCell()
-				c.SetInt64(int64(delevers[ri].UserId))
+				c.SetString(strconv.Itoa(int(delevers[ri].UserId)))
 			}
 			if ci == 4 {
 				c = r.AddCell()
