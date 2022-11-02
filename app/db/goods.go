@@ -115,7 +115,7 @@ type Prize struct {
 }
 type Order struct {
 	ID            uint           `gorm:"primarykey" json:"id"`
-	OutTradeNo    string         `gorm:"comment:订单编号;index" json:"orderId"`
+	OutTradeNo    string         `gorm:"comment:订单编号;unique" json:"orderId"`
 	PrizeNum      int            `gorm:"comment:奖品数量（抽奖次数，不包括特殊赏）" json:"prizeNum"`
 	Price         float64        `gorm:"comment:金额" json:"price"`
 	UserName      string         `gorm:"comment:用户名" json:"userName"`
@@ -148,7 +148,7 @@ type OrderDeliver struct {
 	DeleOrderId    uint           `gorm:"comment:快递单号;index" json:"deleOrderId"`
 	ActiveSureTime int64          `gorm:"comment:自动确认时间;index" json:"activeSureTime"`
 	AddressId      uint           `gorm:"comment:地址id;index" json:"addressId"`
-	OutTradeNo     string         `gorm:"comment:订单编号;index" json:"orderId"`
+	OutTradeNo     string         `gorm:"comment:订单编号;unique" json:"orderId"`
 	PrizeNum       int            `gorm:"comment:奖品数量（抽奖次数，不包括特殊赏）" json:"prizeNum"`
 	Price          float32        `gorm:"comment:金额" json:"price"`
 	UserName       string         `gorm:"comment:用户名" json:"userName"`
@@ -175,7 +175,7 @@ type OrderDeliverDetail struct {
 	AddressId      uint           `gorm:"comment:地址id;index" json:"addressId"`
 	LuggageId      uint           `gorm:"comment:提货柜商品id;index" json:"luggageId"`
 	ActiveSureTime int64          `gorm:"comment:自动确认时间;index" json:"activeSureTime"`
-	OutTradeNo     string         `gorm:"comment:订单编号;index" json:"orderId"`
+	OutTradeNo     string         `gorm:"comment:订单编号" json:"orderId"`
 	UserName       string         `gorm:"comment:用户名" json:"userName"`
 	FanId          uint           `gorm:"comment:蕃id" json:"fanId"`
 	GoodId         uint           `gorm:"comment:商品id" json:"goodId"`
@@ -450,17 +450,3 @@ type Config struct {
 	UpdatedAt   time.Time      `json:"updated_time"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 }
-
-//type Urls struct {
-//	ID        string `gorm:"primarykey" json:"id"`
-//	FanId     uint
-//	FanName   string
-//	FanUrl    string
-//	BoxId     uint
-//	GoodsId   uint
-//	GoodsName string
-//	GoodsUrl  string
-//	CreatedAt time.Time      `json:"created_time"`
-//	UpdatedAt time.Time      `json:"updated_time"`
-//	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-//}
