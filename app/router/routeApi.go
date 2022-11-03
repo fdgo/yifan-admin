@@ -104,6 +104,7 @@ func setApiRouter(r *resource) { //Use(cors.New(config))
 	file := r.mux.Group("/v1/admin/file").Use(r.middles.Cors())
 	{
 		file.GET("/download/goods", handler.GoodsDownLoad())
+		file.GET("/download/goods-mould", handler.GoodsDownLoadEmpty())
 		file.GET("/download/prize", handler.PrizesDownLoad())
 		file.GET("/download/order", handler.OrderDownLoad())
 		file.GET("/download/luggage", handler.LuggageDownLoad())

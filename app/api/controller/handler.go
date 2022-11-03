@@ -73,6 +73,7 @@ type Handler interface {
 	DeleteTabSon() gin.HandlerFunc
 	ModifyAndSaveSecondTab() gin.HandlerFunc
 	GoodsDownLoad() gin.HandlerFunc
+	GoodsDownLoadEmpty() gin.HandlerFunc
 	PrizesDownLoad() gin.HandlerFunc
 	OrderDownLoad() gin.HandlerFunc
 	LuggageDownLoad() gin.HandlerFunc

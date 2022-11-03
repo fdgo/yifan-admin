@@ -234,7 +234,7 @@ func (s *GoodsServiceImpl) UpLoadGoods(req param.ReqUpLoadGoods) (param.RespUpLo
 		isOk := true
 		for _, oneGood := range goods {
 			if (*oneGood.IpID == ip.ID) && (*oneGood.SeriesID == series.ID) &&
-				(oneGood.Name == ele.GoodsName) {
+				(oneGood.Name == ele.GoodsName) && (oneGood.PkgStatus == ele.PkgStatus) {
 				ret.IpIdSerId = append(ret.IpIdSerId, param.IpIdSerId{
 					IpName:   ele.IpName,
 					SerName:  ele.SeriesName,

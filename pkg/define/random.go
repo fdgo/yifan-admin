@@ -1,32 +1,47 @@
 package define
 
 import (
+	gonanoid "github.com/matoous/go-nanoid"
 	"math/rand"
+	"strconv"
 	"time"
-	"yifan/pkg/randId"
 )
 
 func GetRandIpId() uint {
-	return randId.RandID()
+	idStr, _ := gonanoid.Generate("123456789", 9)
+	id, _ := strconv.Atoi(idStr)
+	return uint(id)
 }
 func GetRandSeriesId() uint {
-	return randId.RandID()
+	idStr, _ := gonanoid.Generate("123456789", 9)
+	id, _ := strconv.Atoi(idStr)
+	return uint(id)
 }
 
 func GetRandFanId() uint {
-	return randId.RandID()
+	idStr, _ := gonanoid.Generate("123456789", 9)
+	id, _ := strconv.Atoi(idStr)
+	return uint(id)
 }
 func GetRandGoodId() uint {
-	return randId.RandID()
+	idStr, _ := gonanoid.Generate("123456789", 9)
+	id, _ := strconv.Atoi(idStr)
+	return uint(id)
 }
 func GetRandBoxId() uint {
-	return randId.RandID()
+	idStr, _ := gonanoid.Generate("123456789", 9)
+	id, _ := strconv.Atoi(idStr)
+	return uint(id)
 }
 func GetRandPrizeId() uint {
-	return randId.RandID()
+	idStr, _ := gonanoid.Generate("123456789", 9)
+	id, _ := strconv.Atoi(idStr)
+	return uint(id)
 }
 func GetRandUserId() uint {
-	return randId.RandID()
+	idStr, _ := gonanoid.Generate("123456789", 9)
+	id, _ := strconv.Atoi(idStr)
+	return uint(id)
 }
 
 func RandPrizeIndex(size int64) int64 {

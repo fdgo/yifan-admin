@@ -1443,6 +1443,11 @@ func (h *handler) GoodsDownLoad() gin.HandlerFunc {
 		h.fanService.GoodsDownLoad(context)
 	}
 }
+func (h *handler) GoodsDownLoadEmpty() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		h.fanService.GoodsDownLoadEmpty(context)
+	}
+}
 
 func (h *handler) PrizesDownLoad() gin.HandlerFunc {
 	return func(context *gin.Context) {

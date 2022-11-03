@@ -19,6 +19,7 @@ type FanService interface {
 	ModifyGoodsPosition(req param.ReqModifyGoodsPosition) (param.RespModifyGoodsPosition, error)
 
 	GoodsDownLoad(c *gin.Context)
+	GoodsDownLoadEmpty(c *gin.Context)
 	PrizesDownLoad(c *gin.Context)
 	OrderDownLoad(c *gin.Context)
 	LuggageDownLoad(c *gin.Context)

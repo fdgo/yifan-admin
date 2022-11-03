@@ -423,6 +423,13 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 			return param.RespModifySaveFan{}, errors.New("服务正忙...")
 		}
 	}
+	tx.Commit()
+	tx = s.db.GetDb().Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 	var (
 		fanIndex = 0
 		fan      = &db.Fan{}
@@ -487,6 +494,29 @@ func (s *FanServiceImpl) ModifySaveFan(req param.ReqModifySaveFan) (param.RespMo
 				req.Boxes.Prizes[nindex].Position = []int{-1, -1}
 				rate, _ := decimal.NewFromFloat32(float32(ele.PriczeLeftNum)).Div(decimal.NewFromFloat32(float32(allPrizeNum))).Float64()
 				prizes[nindex].PrizeRate = fmt.Sprintf("%.2f", 100*rate) + "%"
+			}
+			if ele.PrizeIndexName == define.PrizeIndexNameGlobal {
+				req.Boxes.Prizes[nindex].Position = []int{-1, -1}
+			}
+			if ele.PrizeIndexName == define.PrizeIndexNameFirst {
+				if len(ele.Position) != 2 {
+					tx.Rollback()
+					return param.RespModifySaveFan{}, errors.New("First赏位置有误...")
+				}
+				if ele.Position[0] > ele.Position[1] {
+					tx.Rollback()
+					return param.RespModifySaveFan{}, errors.New("First赏位置范围有误...")
+				}
+			}
+			if ele.PrizeIndexName == define.PrizeIndexNameLast {
+				if len(ele.Position) != 2 {
+					tx.Rollback()
+					return param.RespModifySaveFan{}, errors.New("Last赏位置有误...")
+				}
+				if ele.Position[0] > ele.Position[1] {
+					tx.Rollback()
+					return param.RespModifySaveFan{}, errors.New("First赏位置范围有误...")
+				}
 			}
 		}
 		if err = tx.Model(&box).Association("Prizes").Append(&prizes); err != nil {
@@ -1180,6 +1210,33 @@ func (s *FanServiceImpl) OrderDownLoad(context *gin.Context) {
 	f.Save(path)
 	context.File(path)
 }
+
+func (s *FanServiceImpl) GoodsDownLoadEmpty(context *gin.Context) {
+	path := filepath.Join("./", "goods-mould.xlsx")
+	f := xlsx.NewFile()
+	sk, _ := f.AddSheet("商品")
+	r := sk.AddRow()
+	c := r.AddCell()
+	c.SetString("IP")
+	c = r.AddCell()
+	c.SetString("系列")
+	c = r.AddCell()
+	c.SetString("商品名")
+	c = r.AddCell()
+	c.SetString("品相")
+	c = r.AddCell()
+	c.SetString("状态")
+	c = r.AddCell()
+	c.SetString("兑换积分")
+	c = r.AddCell()
+	c.SetString("图片地址")
+	c = r.AddCell()
+	c.SetString("建议售价")
+	c = r.AddCell()
+	c.SetString("商品id")
+	f.Save(path)
+	context.File(path)
+}
 func (s *FanServiceImpl) GoodsDownLoad(context *gin.Context) {
 	var goods []db.Goods
 	s.db.GetDb().Find(&goods)
@@ -1203,9 +1260,11 @@ func (s *FanServiceImpl) GoodsDownLoad(context *gin.Context) {
 	c.SetString("图片地址")
 	c = r.AddCell()
 	c.SetString("建议售价")
+	c = r.AddCell()
+	c.SetString("商品id")
 	for ri := 0; ri < len(goods); ri++ {
 		r = sk.AddRow()
-		for ci := 0; ci < 8; ci++ {
+		for ci := 0; ci < 9; ci++ {
 			if ci == 0 {
 				c = r.AddCell()
 				c.SetString(goods[ri].IpName)
@@ -1245,6 +1304,10 @@ func (s *FanServiceImpl) GoodsDownLoad(context *gin.Context) {
 			if ci == 7 {
 				c = r.AddCell()
 				c.SetFloat(goods[ri].Price)
+			}
+			if ci == 8 {
+				c = r.AddCell()
+				c.SetString(strconv.Itoa(int(goods[ri].ID)))
 			}
 		}
 	}

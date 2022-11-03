@@ -392,6 +392,29 @@ func (s *BoxServiceImpl) AddBox(req param.ReqAddBox) (param.RespAddBox, error) {
 				rate, _ := decimal.NewFromFloat32(float32(ele.PriczeLeftNum)).Div(decimal.NewFromFloat32(float32(allPrizeNum))).Float64()
 				prizes[nindex].PrizeRate = fmt.Sprintf("%.2f", 100*rate) + "%"
 			}
+			if ele.PrizeIndexName == define.PrizeIndexNameGlobal {
+				req.Boxes.Prizes[nindex].Position = []int{-1, -1}
+			}
+			if ele.PrizeIndexName == define.PrizeIndexNameFirst {
+				if len(ele.Position) != 2 {
+					tx.Rollback()
+					return ret, errors.New("First赏位置有误...")
+				}
+				if ele.Position[0]>ele.Position[1]{
+					tx.Rollback()
+					return ret, errors.New("First赏位置范围有误...")
+				}
+			}
+			if ele.PrizeIndexName == define.PrizeIndexNameLast {
+				if len(ele.Position) != 2 {
+					tx.Rollback()
+					return ret, errors.New("Last赏位置有误...")
+				}
+				if ele.Position[0]>ele.Position[1]{
+					tx.Rollback()
+					return ret, errors.New("First赏位置范围有误...")
+				}
+			}
 		}
 		if err = tx.Model(&box).Association("Prizes").Append(&prizes); err != nil {
 			tx.Rollback()
